@@ -24,18 +24,23 @@ export async function submitComplaint(args: {
   name: string;
   contactInfo: string;
   details: string;
+  bookingReference?: string;
 }) {
   const normalized = {
     name: args.name.trim(),
     contactInfo: args.contactInfo.trim(),
     details: args.details.trim(),
+    bookingReference: args.bookingReference?.trim() || undefined,
   };
   if (!normalized.name || !normalized.contactInfo || !normalized.details) {
     throw new Error("Name, contact info, and complaint details are required.");
   }
+  const now = Date.now();
   const ref = await addDoc(collection(db, "complaints"), {
     ...normalized,
-    createdAt: Date.now(),
+    status: "new",
+    createdAt: now,
+    updatedAt: now,
   });
   return { id: ref.id };
 }
