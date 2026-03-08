@@ -1,12 +1,24 @@
 import AdminPageShell from "../../components/admin/AdminPageShell";
+import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
 import { useAuth } from "../../lib/auth-context";
 import {
   listInbox,
   updateLeadStatus,
   updateComplaintStatus,
+  unsubscribeNewsletter,
 } from "../../lib/firestore-admin";
 import { useFirestoreQuery } from "../../lib/useFirestoreQuery";
+
+function exportCsv(rows: string[][], filename: string) {
+  const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
 
 export default function AdminInbox() {
   const { adminUser, loading: authLoading } = useAuth();
