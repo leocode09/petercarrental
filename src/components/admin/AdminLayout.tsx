@@ -52,6 +52,36 @@ const navigationItems = [
     roles: ["superAdmin", "manager"],
   },
   {
+    to: "/admin/services",
+    label: "Services",
+    icon: Megaphone,
+    roles: ["superAdmin", "manager", "operations", "contentEditor"],
+  },
+  {
+    to: "/admin/destinations",
+    label: "Destinations",
+    icon: MapPin,
+    roles: ["superAdmin", "manager", "operations", "contentEditor"],
+  },
+  {
+    to: "/admin/blog",
+    label: "Blog",
+    icon: BookOpen,
+    roles: ["superAdmin", "manager", "operations", "contentEditor"],
+  },
+  {
+    to: "/admin/testimonials",
+    label: "Testimonials",
+    icon: MessageSquareQuote,
+    roles: ["superAdmin", "manager", "operations", "contentEditor"],
+  },
+  {
+    to: "/admin/site-settings",
+    label: "Site Settings",
+    icon: Settings,
+    roles: ["superAdmin", "manager"],
+  },
+  {
     to: "/admin/inbox",
     label: "Inbox",
     icon: Inbox,
