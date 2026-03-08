@@ -114,14 +114,28 @@ export default function AdminInbox() {
         </Card>
 
         <Card className="p-6">
-          <h2 className="text-xl font-black text-slate-950">Newsletter</h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-xl font-black text-slate-950">Newsletter</h2>
+            <Button onClick={handleExportNewsletter} type="button" variant="outline">
+              Export CSV
+            </Button>
+          </div>
           <div className="mt-6 space-y-3">
             {inbox.newsletterSubscribers.map((subscriber) => (
-              <div className="rounded-2xl border border-slate-200 px-4 py-4 text-sm text-slate-700" key={subscriber.id}>
-                <div className="font-semibold text-slate-950">{subscriber.email}</div>
-                <div className="mt-1 text-xs text-slate-500">
-                  Updated {new Date(subscriber.updatedAt).toLocaleString()}
+              <div className="flex items-start justify-between gap-3 rounded-2xl border border-slate-200 px-4 py-4 text-sm text-slate-700" key={subscriber.id}>
+                <div>
+                  <div className="font-semibold text-slate-950">{subscriber.email}</div>
+                  <div className="mt-1 text-xs text-slate-500">
+                    Updated {new Date(subscriber.updatedAt).toLocaleString()}
+                  </div>
                 </div>
+                <button
+                  className="shrink-0 rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-red-300 hover:bg-red-50 hover:text-red-700"
+                  onClick={() => void handleUnsubscribeNewsletter(subscriber.id)}
+                  type="button"
+                >
+                  Unsubscribe
+                </button>
               </div>
             ))}
           </div>
