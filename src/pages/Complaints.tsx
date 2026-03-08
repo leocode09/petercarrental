@@ -13,6 +13,7 @@ export default function Complaints() {
   const [name, setName] = useState("");
   const [contactInfo, setContactInfo] = useState("");
   const [details, setDetails] = useState("");
+  const [bookingReference, setBookingReference] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   return (
