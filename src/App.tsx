@@ -65,6 +65,11 @@ function AppRoutes() {
               <Route element={<AdminReservations />} path="reservations" />
               <Route element={<AdminCustomers />} path="customers" />
               <Route element={<AdminPricing />} path="pricing" />
+              <Route element={<AdminServices />} path="services" />
+              <Route element={<AdminDestinations />} path="destinations" />
+              <Route element={<AdminBlog />} path="blog" />
+              <Route element={<AdminTestimonials />} path="testimonials" />
+              <Route element={<AdminSiteSettings />} path="site-settings" />
               <Route element={<AdminInbox />} path="inbox" />
               <Route element={<AdminUsers />} path="users" />
               <Route element={<AdminReports />} path="reports" />
