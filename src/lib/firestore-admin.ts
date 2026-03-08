@@ -588,7 +588,11 @@ export async function listInbox(): Promise<{
     complaints: complaintsSnap.docs.map((d) => ({ id: d.id, ...d.data() } as ComplaintDoc)),
     newsletterSubscribers: newsletterSnap.docs.map((d) => {
       const data = d.data();
-      return { id: d.id, email: data.email, updatedAt: toNum(data.updatedAt) } as NewsletterDoc;
+      return {
+        id: d.id,
+        email: data.email,
+        updatedAt: toNum(data.updatedAt) ?? toNum(data.createdAt) ?? 0,
+      } as NewsletterDoc;
     }),
   };
 }
