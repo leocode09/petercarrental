@@ -35,19 +35,20 @@ export default function Complaints() {
                 event.preventDefault();
                 setSubmitting(true);
                 try {
-                  await submitComplaint({ name, contactInfo, details });
+                  await submitComplaint({ name, contactInfo, details, bookingReference: bookingReference || undefined });
                   openWhatsApp(
                     [
                       "Hello Peter Car Rental, I want to report a complaint.",
                       `Name: ${name}`,
                       `Contact: ${contactInfo}`,
+                      ...(bookingReference ? [`Booking ref: ${bookingReference}`] : []),
                       `Complaint details: ${details}`,
                     ].join("\n"),
                     whatsappNumber,
                   );
                 } catch {
                   openWhatsApp(
-                    `Hello Peter Car Rental, complaint. Name: ${name}, Contact: ${contactInfo}, Details: ${details}`,
+                    `Hello Peter Car Rental, complaint. Name: ${name}, Contact: ${contactInfo}${bookingReference ? `, Ref: ${bookingReference}` : ""}, Details: ${details}`,
                     whatsappNumber,
                   );
                 } finally {
