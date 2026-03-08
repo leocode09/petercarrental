@@ -10,9 +10,12 @@ export async function submitLead(args: { name: string; email: string; message: s
   if (!normalized.name || !normalized.email || !normalized.message) {
     throw new Error("Name, email, and message are required.");
   }
+  const now = Date.now();
   const ref = await addDoc(collection(db, "contactLeads"), {
     ...normalized,
-    createdAt: Date.now(),
+    status: "new",
+    createdAt: now,
+    updatedAt: now,
   });
   return { id: ref.id };
 }
