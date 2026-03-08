@@ -34,7 +34,7 @@ const emptyForm = {
 export default function AdminServices() {
   const { adminUser, loading: authLoading } = useAuth();
   const { data: services, refetch } = useFirestoreQuery(listServices);
-  const { vehicles } = usePublicSiteData();
+  const { vehicles = [] } = usePublicSiteData();
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
 
