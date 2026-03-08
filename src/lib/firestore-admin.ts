@@ -578,7 +578,7 @@ export async function listInbox(): Promise<{
   const [leadsSnap, complaintsSnap, newsletterSnap] = await Promise.all([
     getDocs(query(collection(db, "contactLeads"), orderBy("updatedAt", "desc"))),
     getDocs(query(collection(db, "complaints"), orderBy("updatedAt", "desc"))),
-    getDocs(query(collection(db, "newsletterSubscribers"), orderBy("updatedAt", "desc"))),
+    getDocs(query(collection(db, "newsletterSubscribers"), orderBy("createdAt", "desc"))),
   ]);
 
   const toNum = (v: unknown) => (typeof v === "object" && v !== null && "toMillis" in v ? (v as { toMillis: () => number }).toMillis() : (v as number));
