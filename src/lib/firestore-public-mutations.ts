@@ -50,9 +50,11 @@ export async function subscribeNewsletter(email: string) {
   if (!normalized) {
     throw new Error("Email is required.");
   }
+  const now = Date.now();
   const ref = await addDoc(collection(db, "newsletterSubscribers"), {
     email: normalized,
-    createdAt: Date.now(),
+    createdAt: now,
+    updatedAt: now,
   });
   return { id: ref.id };
 }
