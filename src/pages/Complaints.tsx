@@ -81,10 +81,17 @@ export default function Complaints() {
                 type="text"
                 value={contactInfo}
               />
+              <input
+                className={inputClassName}
+                onChange={(event) => setBookingReference(event.target.value)}
+                placeholder="Booking reference (optional)"
+                type="text"
+                value={bookingReference}
+              />
               <textarea
                 className={textareaClassName}
                 onChange={(event) => setDetails(event.target.value)}
-                placeholder="Describe the issue and any booking reference if available."
+                placeholder="Describe the issue in detail."
                 required
                 value={details}
               />
