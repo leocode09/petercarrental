@@ -21,7 +21,7 @@ export default function Blog() {
         <div className="container-shell grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
           {blogPosts.map((post) => (
             <Card className="overflow-hidden" key={post.slug}>
-              <img alt={post.title} className="h-52 w-full object-cover sm:h-56" src={post.image} />
+              <img alt={post.title} className="h-52 w-full object-cover sm:h-56" src={(post as { image?: string }).image ?? "https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=1600&q=80"} />
               <div className="space-y-4 p-5 sm:p-6">
                 <div className="flex flex-wrap gap-2 text-xs font-bold uppercase tracking-[0.16em] text-orange-500">
                   <span>{(post as { category?: string }).category ?? "Article"}</span>
