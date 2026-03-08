@@ -39,6 +39,17 @@ export default function AdminInbox() {
     await refetch();
   };
 
+  const handleUnsubscribeNewsletter = async (subscriberId: string) => {
+    if (!adminUser) return;
+    await unsubscribeNewsletter(adminUser._id, subscriberId);
+    await refetch();
+  };
+
+  const handleExportNewsletter = () => {
+    const rows = [["email", "updatedAt"], ...inbox.newsletterSubscribers.map((s) => [s.email, new Date(s.updatedAt).toISOString()])];
+    exportCsv(rows, `newsletter-subscribers-${new Date().toISOString().slice(0, 10)}.csv`);
+  };
+
   if (authLoading || !inbox) {
     return <div className="text-sm text-slate-500">Loading inbox...</div>;
   }
