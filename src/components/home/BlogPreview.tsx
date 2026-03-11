@@ -36,9 +36,9 @@ export default function BlogPreview() {
                 </div>
                 <Link
                   className="inline-flex items-center gap-2 text-sm font-semibold text-orange-600 transition hover:text-orange-700"
-                  to="/blog"
+                  to={`/blog/${post.slug}`}
                 >
-                  Read
+                  Read Article
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>

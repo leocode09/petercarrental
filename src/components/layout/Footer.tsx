@@ -1,4 +1,4 @@
-import { Facebook, Instagram, Mail, MapPin, Phone, Twitter, Youtube } from "lucide-react";
+import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -7,18 +7,24 @@ import {
   legalLinks,
   quickLinks,
 } from "../../data/site";
+import { openWhatsApp } from "../../lib/utils";
+import { saveNewsletterSignup } from "../../lib/siteStorage";
 import Button from "../ui/Button";
 
-const socialLinks = [
-  { label: "Facebook", href: companyInfo.liveUrl, icon: Facebook },
-  { label: "Instagram", href: companyInfo.liveUrl, icon: Instagram },
-  { label: "X", href: companyInfo.liveUrl, icon: Twitter },
-  { label: "YouTube", href: companyInfo.liveUrl, icon: Youtube },
+const quickActionLinks = [
+  { label: "Call Peter Car Rental", href: companyInfo.telHref, icon: Phone },
+  { label: "Email Peter Car Rental", href: companyInfo.mailtoHref, icon: Mail },
+  { label: "Chat on WhatsApp", href: companyInfo.whatsappShareHref, icon: MessageCircle },
+  {
+    label: "View office location",
+    href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(companyInfo.locationFull)}`,
+    icon: MapPin,
+  },
 ];
 
 export default function Footer() {
   const [email, setEmail] = useState("");
-  const [joined, setJoined] = useState(false);
+  const [newsletterMessage, setNewsletterMessage] = useState("");
 
   return (
     <footer className="bg-slate-950 text-slate-200">
@@ -39,14 +45,14 @@ export default function Footer() {
           <p className="max-w-sm text-sm leading-7 text-slate-400">{companyInfo.shortDescription}</p>
 
           <div className="flex items-center gap-3">
-            {socialLinks.map(({ label, href, icon: Icon }) => (
+            {quickActionLinks.map(({ label, href, icon: Icon }) => (
               <a
                 aria-label={label}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-slate-300 transition hover:border-orange-400 hover:text-white"
                 href={href}
                 key={label}
-                target="_blank"
-                rel="noopener noreferrer"
+                rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
+                target={href.startsWith("http") ? "_blank" : undefined}
               >
                 <Icon className="h-4 w-4" />
               </a>
@@ -107,8 +113,21 @@ export default function Footer() {
               className="space-y-3"
               onSubmit={(event) => {
                 event.preventDefault();
-                if (!email.trim()) return;
-                setJoined(true);
+                const trimmedEmail = email.trim();
+
+                if (!trimmedEmail) return;
+
+                const { created } = saveNewsletterSignup(trimmedEmail);
+
+                openWhatsApp(
+                  `Hello Peter Car Rental, please ${created ? "add" : "keep"} ${trimmedEmail} on the newsletter list.`,
+                );
+
+                setNewsletterMessage(
+                  created
+                    ? "Thanks. We saved your email and opened WhatsApp to confirm the subscription."
+                    : "This email is already saved. We opened WhatsApp so you can reconfirm the subscription.",
+                );
                 setEmail("");
               }}
             >
@@ -123,7 +142,7 @@ export default function Footer() {
                 Join
               </Button>
             </form>
-            {joined ? <p className="text-xs text-emerald-400">Thanks for joining our newsletter.</p> : null}
+            {newsletterMessage ? <p className="text-xs text-emerald-400">{newsletterMessage}</p> : null}
           </div>
         </div>
       </div>

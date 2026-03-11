@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-route
 import Layout from "./components/layout/Layout";
 import About from "./pages/About";
 import Blog from "./pages/Blog";
+import BlogPostDetail from "./pages/BlogPostDetail";
 import Booking from "./pages/Booking";
 import Complaints from "./pages/Complaints";
 import Contact from "./pages/Contact";
@@ -46,6 +47,7 @@ function AppRoutes() {
           <Route element={<About />} path="about" />
           <Route element={<Leadership />} path="leadership" />
           <Route element={<Blog />} path="blog" />
+          <Route element={<BlogPostDetail />} path="blog/:slug" />
           <Route element={<FAQ />} path="faq" />
           <Route element={<Gallery />} path="gallery" />
           <Route element={<Reviews />} path="reviews" />

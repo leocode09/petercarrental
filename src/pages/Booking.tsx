@@ -1,6 +1,6 @@
 import { addDays, format } from "date-fns";
 import { ShieldCheck, TimerReset, WalletCards } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import Seo from "../components/seo/Seo";
 import PageHero from "../components/shared/PageHero";
@@ -8,8 +8,9 @@ import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import Select from "../components/ui/Select";
 import { bookingLocations, serviceTypes } from "../data/site";
-import { vehicleCategories } from "../data/vehicles";
-import { inputClassName, openWhatsApp, textareaClassName } from "../lib/utils";
+import { getVehicleByQueryValue, vehicleCategories, vehicles } from "../data/vehicles";
+import { saveBooking, type StoredBooking } from "../lib/siteStorage";
+import { buildWhatsAppLink, inputClassName, openWhatsApp, textareaClassName } from "../lib/utils";
 
 const today = new Date();
 
@@ -33,16 +34,49 @@ const reasons = [
 
 export default function Booking() {
   const [searchParams] = useSearchParams();
+  const initialVehicle = getVehicleByQueryValue(searchParams.get("vehicle"));
+  const initialReference = searchParams.get("reference") ?? "";
   const [pickupLocation, setPickupLocation] = useState(searchParams.get("pickupLocation") ?? "Kigali Airport");
   const [dropoffLocation, setDropoffLocation] = useState(searchParams.get("dropoffLocation") ?? "Same as pickup");
   const [pickupDate, setPickupDate] = useState(searchParams.get("pickupDate") ?? format(addDays(today, 1), "yyyy-MM-dd"));
   const [returnDate, setReturnDate] = useState(searchParams.get("returnDate") ?? format(addDays(today, 4), "yyyy-MM-dd"));
   const [pickupTime, setPickupTime] = useState(searchParams.get("pickupTime") ?? "09:00");
-  const [vehicleCategory, setVehicleCategory] = useState(searchParams.get("category") ?? "Any Category");
+  const [vehicleCategory, setVehicleCategory] = useState(
+    initialVehicle?.category ?? searchParams.get("category") ?? "Any Category",
+  );
+  const [selectedVehicleId, setSelectedVehicleId] = useState(initialVehicle?.id ?? "");
   const [serviceType, setServiceType] = useState(searchParams.get("serviceType") ?? "Self-Drive");
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [notes, setNotes] = useState("");
+  const [promoCode, setPromoCode] = useState(searchParams.get("promoCode") ?? "");
+  const [airportTransfer, setAirportTransfer] = useState(searchParams.get("airport") === "true");
+  const [fullName, setFullName] = useState(searchParams.get("fullName") ?? "");
+  const [email, setEmail] = useState(searchParams.get("email") ?? "");
+  const [notes, setNotes] = useState(searchParams.get("notes") ?? "");
+  const [submittedBooking, setSubmittedBooking] = useState<StoredBooking | null>(null);
+
+  const selectedVehicle = useMemo(
+    () => vehicles.find((vehicle) => vehicle.id === selectedVehicleId),
+    [selectedVehicleId],
+  );
+  const bookingIntent = initialReference ? "update" : "book";
+  const latestWhatsAppMessage = submittedBooking
+    ? [
+        `Hello Peter Car Rental, I would like to ${bookingIntent} a vehicle request.`,
+        `Reference: ${submittedBooking.reference}`,
+        `Name: ${submittedBooking.fullName || "Not provided"}`,
+        `Email: ${submittedBooking.email || "Not provided"}`,
+        `Pickup location: ${submittedBooking.pickupLocation}`,
+        `Drop-off location: ${submittedBooking.dropoffLocation}`,
+        `Pickup date: ${submittedBooking.pickupDate}`,
+        `Return date: ${submittedBooking.returnDate}`,
+        `Pickup time: ${submittedBooking.pickupTime}`,
+        `Specific vehicle: ${selectedVehicle?.name || "Any available vehicle"}`,
+        `Vehicle category: ${submittedBooking.vehicleCategory}`,
+        `Service type: ${submittedBooking.serviceType}`,
+        `Promo code: ${submittedBooking.promoCode || "None"}`,
+        `Airport transfer: ${submittedBooking.airportTransfer ? "Yes" : "No"}`,
+        `Notes: ${submittedBooking.notes || "None"}`,
+      ].join("\n")
+    : "";
 
   return (
     <>
@@ -63,29 +97,86 @@ export default function Booking() {
                   Booking Request
                 </p>
                 <h2 className="mt-2 text-3xl font-black tracking-[-0.03em] text-slate-950">
-                  Tell us about your trip
+                  {initialReference ? "Update your saved booking request" : "Tell us about your trip"}
                 </h2>
+                {initialReference ? (
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    Reference <span className="font-semibold text-slate-950">{initialReference}</span> is loaded from
+                    your browser so you can update the request and resend it quickly.
+                  </p>
+                ) : null}
               </div>
+
+              {submittedBooking ? (
+                <Card className="border border-emerald-100 bg-emerald-50/80 p-5 shadow-none">
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-sm font-bold uppercase tracking-[0.18em] text-emerald-600">
+                        Request Saved
+                      </p>
+                      <h3 className="mt-2 text-xl font-black text-slate-950">
+                        Reference {submittedBooking.reference}
+                      </h3>
+                    </div>
+                    <p className="text-sm leading-6 text-slate-600">
+                      Your request is now saved in this browser and the WhatsApp draft has been opened for confirmation.
+                    </p>
+                    <div className="flex flex-wrap gap-3">
+                      <Button
+                        to={`/manage-booking?reference=${encodeURIComponent(submittedBooking.reference)}&contact=${encodeURIComponent(submittedBooking.email)}`}
+                        variant="secondary"
+                      >
+                        Manage This Booking
+                      </Button>
+                      <Button href={buildWhatsAppLink(latestWhatsAppMessage)} target="_blank" variant="outline">
+                        Open WhatsApp Again
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ) : null}
 
               <form
                 className="grid gap-4 md:grid-cols-2"
                 onSubmit={(event) => {
                   event.preventDefault();
-                  openWhatsApp(
-                    [
-                      "Hello Peter Car Rental, I would like to book a vehicle.",
-                      `Name: ${fullName || "Not provided"}`,
-                      `Email: ${email || "Not provided"}`,
-                      `Pickup location: ${pickupLocation}`,
-                      `Drop-off location: ${dropoffLocation}`,
-                      `Pickup date: ${pickupDate}`,
-                      `Return date: ${returnDate}`,
-                      `Pickup time: ${pickupTime}`,
-                      `Vehicle category: ${vehicleCategory}`,
-                      `Service type: ${serviceType}`,
-                      `Notes: ${notes || "None"}`,
-                    ].join("\n"),
-                  );
+                  const savedBooking = saveBooking({
+                    reference: initialReference || undefined,
+                    fullName,
+                    email,
+                    pickupLocation,
+                    dropoffLocation,
+                    pickupDate,
+                    returnDate,
+                    pickupTime,
+                    vehicleCategory: selectedVehicle?.category ?? vehicleCategory,
+                    serviceType,
+                    selectedVehicleId,
+                    promoCode,
+                    airportTransfer,
+                    notes,
+                  });
+
+                  const whatsappMessage = [
+                    `Hello Peter Car Rental, I would like to ${bookingIntent} a vehicle request.`,
+                    `Reference: ${savedBooking.reference}`,
+                    `Name: ${fullName || "Not provided"}`,
+                    `Email: ${email || "Not provided"}`,
+                    `Pickup location: ${pickupLocation}`,
+                    `Drop-off location: ${dropoffLocation}`,
+                    `Pickup date: ${pickupDate}`,
+                    `Return date: ${returnDate}`,
+                    `Pickup time: ${pickupTime}`,
+                    `Specific vehicle: ${selectedVehicle?.name || "Any available vehicle"}`,
+                    `Vehicle category: ${selectedVehicle?.category ?? vehicleCategory}`,
+                    `Service type: ${serviceType}`,
+                    `Promo code: ${promoCode || "None"}`,
+                    `Airport transfer: ${airportTransfer ? "Yes" : "No"}`,
+                    `Notes: ${notes || "None"}`,
+                  ].join("\n");
+
+                  setSubmittedBooking(savedBooking);
+                  openWhatsApp(whatsappMessage);
                 }}
               >
                 <label className="flex flex-col gap-2">
@@ -158,12 +249,41 @@ export default function Booking() {
                 </label>
 
                 <Select
+                  hint="Choose a specific car if you already know the exact vehicle you want."
+                  label="Specific Vehicle"
+                  onChange={(event) => {
+                    const nextVehicleId = event.target.value;
+                    const nextVehicle = vehicles.find((vehicle) => vehicle.id === nextVehicleId);
+
+                    setSelectedVehicleId(nextVehicleId);
+
+                    if (nextVehicle) {
+                      setVehicleCategory(nextVehicle.category);
+                    }
+                  }}
+                  options={[
+                    { label: "Any available vehicle", value: "" },
+                    ...vehicles.map((vehicle) => ({
+                      label: `${vehicle.name} (${vehicle.category})`,
+                      value: vehicle.id,
+                    })),
+                  ]}
+                  value={selectedVehicleId}
+                />
+
+                <Select
+                  disabled={Boolean(selectedVehicle)}
                   label="Vehicle Category"
                   onChange={(event) => setVehicleCategory(event.target.value)}
                   options={["Any Category", ...vehicleCategories].map((option) => ({
                     label: option,
                     value: option,
                   }))}
+                  hint={
+                    selectedVehicle
+                      ? "Category is locked to match the selected vehicle."
+                      : "Choose a category if you are still comparing options."
+                  }
                   value={vehicleCategory}
                 />
 
@@ -173,6 +293,44 @@ export default function Booking() {
                   options={serviceTypes.map((option) => ({ label: option, value: option }))}
                   value={serviceType}
                 />
+
+                <label className="flex flex-col gap-2">
+                  <span className="text-sm font-semibold text-slate-700">Promo Code</span>
+                  <input
+                    className={inputClassName}
+                    onChange={(event) => setPromoCode(event.target.value)}
+                    placeholder="Apply a promo code if you have one"
+                    type="text"
+                    value={promoCode}
+                  />
+                </label>
+
+                {selectedVehicle ? (
+                  <div className="md:col-span-2 rounded-2xl border border-orange-100 bg-orange-50 px-4 py-4">
+                    <p className="text-sm font-bold uppercase tracking-[0.18em] text-orange-500">
+                      Selected vehicle
+                    </p>
+                    <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <h3 className="text-lg font-bold text-slate-950">{selectedVehicle.name}</h3>
+                        <p className="text-sm text-slate-600">
+                          {selectedVehicle.category} · {selectedVehicle.transmission} · {selectedVehicle.seats} seats
+                        </p>
+                      </div>
+                      <p className="text-sm font-semibold text-orange-600">${selectedVehicle.pricePerDay}/day</p>
+                    </div>
+                  </div>
+                ) : null}
+
+                <label className="md:col-span-2 inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-medium text-slate-700">
+                  <input
+                    checked={airportTransfer}
+                    className="h-4 w-4 rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+                    onChange={(event) => setAirportTransfer(event.target.checked)}
+                    type="checkbox"
+                  />
+                  <span>Airport pickup or drop-off needed</span>
+                </label>
 
                 <label className="md:col-span-2 flex flex-col gap-2">
                   <span className="text-sm font-semibold text-slate-700">Additional Notes</span>
@@ -186,7 +344,7 @@ export default function Booking() {
 
                 <div className="md:col-span-2 flex flex-wrap gap-3">
                   <Button size="lg" type="submit">
-                    Send Booking Request
+                    {initialReference ? "Update Booking Request" : "Send Booking Request"}
                   </Button>
                   <Button size="lg" to="/fleet" variant="outline">
                     Browse Fleet

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Seo from "../components/seo/Seo";
 import PageHero from "../components/shared/PageHero";
 import Card from "../components/ui/Card";
@@ -30,6 +31,12 @@ export default function Blog() {
                 </h2>
                 <p className="text-sm leading-6 text-slate-600">{post.excerpt}</p>
                 <p className="text-sm font-semibold text-slate-500">{post.readingTime}</p>
+                <Link
+                  className="inline-flex text-sm font-semibold text-orange-600 transition hover:text-orange-700"
+                  to={`/blog/${post.slug}`}
+                >
+                  Read article
+                </Link>
               </div>
             </Card>
           ))}
