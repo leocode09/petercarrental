@@ -106,8 +106,15 @@ export default function Button(props: AppButtonProps) {
     );
   }
 
-  const { children, className: _className, variant, size, fullWidth, type = "button", ...rest } =
-    props;
+  const {
+    children,
+    className: _className,
+    variant,
+    size,
+    fullWidth,
+    type = "button",
+    ...rest
+  } = props as ButtonProps;
 
   return (
     <button className={className} type={type} {...rest}>
