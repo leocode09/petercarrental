@@ -22,7 +22,7 @@ export default function Testimonials() {
                 <p className="text-lg leading-8 text-slate-100">&quot; {testimonial.quote} &quot;</p>
                 <div>
                   <p className="font-bold text-white">{testimonial.author}</p>
-                  <p className="mt-1 text-sm text-slate-400">{testimonial.summary.replace(/\?/g, "-")}</p>
+                  <p className="mt-1 text-sm text-slate-400">{testimonial.summary}</p>
                 </div>
               </div>
             </div>

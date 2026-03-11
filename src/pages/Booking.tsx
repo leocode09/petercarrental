@@ -188,7 +188,7 @@ export default function Booking() {
                   <Button size="lg" type="submit">
                     Send Booking Request
                   </Button>
-                  <Button href="/fleet" size="lg" variant="outline">
+                  <Button size="lg" to="/fleet" variant="outline">
                     Browse Fleet
                   </Button>
                 </div>

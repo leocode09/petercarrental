@@ -36,9 +36,7 @@ export default function Footer() {
             </div>
           </Link>
 
-          <p className="max-w-sm text-sm leading-7 text-slate-400">
-            {companyInfo.shortDescription.replace("?", "-")}
-          </p>
+          <p className="max-w-sm text-sm leading-7 text-slate-400">{companyInfo.shortDescription}</p>
 
           <div className="flex items-center gap-3">
             {socialLinks.map(({ label, href, icon: Icon }) => (

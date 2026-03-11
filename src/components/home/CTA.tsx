@@ -17,7 +17,7 @@ export default function CTA() {
                 Book your vehicle today and experience Rwanda like never before. Fast, easy, and
                 reliable.
               </p>
-              <p className="max-w-2xl text-sm leading-7 text-slate-400">{companyInfo.shortDescription.replace("?", "-")}</p>
+              <p className="max-w-2xl text-sm leading-7 text-slate-400">{companyInfo.shortDescription}</p>
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">

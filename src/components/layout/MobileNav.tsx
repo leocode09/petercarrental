@@ -11,13 +11,12 @@ interface MobileNavProps {
 }
 
 export default function MobileNav({ open, links, onClose }: MobileNavProps) {
+  if (!open) {
+    return null;
+  }
+
   return (
-    <div
-      className={cn(
-        "fixed inset-0 z-50 transition",
-        open ? "pointer-events-auto bg-slate-950/50 opacity-100" : "pointer-events-none opacity-0",
-      )}
-    >
+    <div className={cn("fixed inset-0 z-50 bg-slate-950/50 transition", open ? "opacity-100" : "opacity-0")}>
       <div
         className={cn(
           "absolute inset-y-0 right-0 flex w-full max-w-sm flex-col bg-white shadow-2xl transition-transform duration-300",
