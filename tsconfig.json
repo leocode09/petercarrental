@@ -16,5 +16,5 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["src", "vite.config.ts", "tailwind.config.js", "postcss.config.js"]
+  "include": ["src", "convex", "vite.config.ts", "tailwind.config.js", "postcss.config.js"]
 }

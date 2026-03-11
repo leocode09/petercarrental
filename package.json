@@ -5,10 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:backend": "convex dev --local",
+    "convex:codegen": "convex dev --local --once --typecheck disable",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@auth/core": "^0.37.4",
     "@convex-dev/auth": "^0.0.91",
     "convex": "^1.32.0",
     "date-fns": "^4.1.0",

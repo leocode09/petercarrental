@@ -115,15 +115,28 @@ export const vehicles: Vehicle[] = [
 
 export const featuredVehicles = vehicles.filter((vehicle) => vehicle.featured);
 
+function normalizeVehicleQueryValue(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 export function getVehicleByQueryValue(value: string | undefined | null) {
   if (!value) {
     return undefined;
   }
 
-  const normalizedValue = decodeURIComponent(value).trim().toLowerCase();
+  const decodedValue = decodeURIComponent(value);
+  const normalizedValue = decodedValue.trim().toLowerCase();
+  const normalizedSlug = normalizeVehicleQueryValue(decodedValue);
 
   return vehicles.find(
     (vehicle) =>
-      vehicle.id.toLowerCase() === normalizedValue || vehicle.name.trim().toLowerCase() === normalizedValue,
+      vehicle.id.toLowerCase() === normalizedValue ||
+      vehicle.name.trim().toLowerCase() === normalizedValue ||
+      normalizeVehicleQueryValue(vehicle.id) === normalizedSlug ||
+      normalizeVehicleQueryValue(vehicle.name) === normalizedSlug,
   );
 }
