@@ -108,7 +108,7 @@ export const vehicles: Vehicle[] = [
     drive: "RWD",
     fuel: "Diesel",
     description: "Comfortable people-mover for airport transfers, team travel, tours, and event logistics.",
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80",
+    image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=1200&q=80",
     featured: true,
   },
 ];
