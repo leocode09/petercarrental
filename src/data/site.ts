@@ -23,7 +23,7 @@ export const companyInfo = {
   locationFull: "Kigali, Kicukiro, Rwanda",
   canonicalUrl: "https://petercarrental.rw",
   liveUrl: "https://petercarrental.lovable.app",
-  heroImage: "https://petercarrental.lovable.app/assets/hero-bg-BgM7iK53.jpg",
+  heroImage: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1920&q=80",
   ogImage:
     "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/423ff39b-d1ce-4a0d-ab41-b4b0dd992e47/id-preview-a843ce9c--81b7c23b-efba-42ee-9bae-9f8f513d5311.lovable.app-1773009722381.png",
   telHref: "tel:+250788237438",
