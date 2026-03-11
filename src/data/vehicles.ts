@@ -79,7 +79,7 @@ export const vehicles: Vehicle[] = [
     drive: "RWD",
     fuel: "Petrol",
     description: "Executive luxury for VIP arrivals, weddings, diplomatic travel, and special event transfers.",
-    image: "https://images.unsplash.com/photo-1559416523-140ddc3d238c?w=1200&q=80",
+    image: "https://images.unsplash.com/photo-1619767886558-efdc259cde1a?w=1200&q=80",
     featured: true,
     badge: "Executive",
   },
@@ -94,7 +94,7 @@ export const vehicles: Vehicle[] = [
     drive: "4x4",
     fuel: "Diesel",
     description: "Rugged, dependable, and well suited for field work, long-term NGO needs, and rougher terrain.",
-    image: "https://images.unsplash.com/photo-1621007690695-dd831af3ea95?w=1200&q=80",
+    image: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=1200&q=80",
     featured: true,
   },
   {
@@ -108,7 +108,7 @@ export const vehicles: Vehicle[] = [
     drive: "RWD",
     fuel: "Diesel",
     description: "Comfortable people-mover for airport transfers, team travel, tours, and event logistics.",
-    image: "https://images.unsplash.com/photo-1568844293986-8d0400f3a7b4?w=1200&q=80",
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80",
     featured: true,
   },
 ];
