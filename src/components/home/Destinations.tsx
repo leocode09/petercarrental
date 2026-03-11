@@ -1,0 +1,54 @@
+import { ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import { destinations } from "../../data/destinations";
+import Button from "../ui/Button";
+import Card from "../ui/Card";
+
+export default function Destinations() {
+  return (
+    <section className="section-space">
+      <div className="container-shell space-y-10">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl space-y-3">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-orange-500">
+              Destinations
+            </p>
+            <h2 className="page-section-title text-slate-950">Popular Destinations</h2>
+            <p className="text-base leading-7 text-slate-600 md:text-lg">
+              Rent a car and discover Rwanda&apos;s breathtaking landscapes and vibrant culture.
+            </p>
+          </div>
+          <Button to="/destinations" variant="outline">
+            Explore Destinations
+          </Button>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+          {destinations.map((destination) => (
+            <Link key={destination.slug} to={destination.route}>
+              <Card className="group h-full overflow-hidden">
+                <img
+                  alt={destination.name}
+                  className="h-56 w-full object-cover transition duration-500 group-hover:scale-105"
+                  loading="lazy"
+                  src={destination.image}
+                />
+                <div className="space-y-3 p-6">
+                  <div className="space-y-1">
+                    <h3 className="text-xl font-bold text-slate-950">{destination.name}</h3>
+                    <p className="text-sm font-semibold text-orange-600">{destination.tagline}</p>
+                  </div>
+                  <p className="text-sm leading-6 text-slate-600">{destination.shortDescription}</p>
+                  <div className="inline-flex items-center gap-2 text-sm font-semibold text-orange-600">
+                    <span>Plan this trip</span>
+                    <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                  </div>
+                </div>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
