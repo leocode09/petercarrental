@@ -15,6 +15,7 @@ export default function ManageBooking() {
   const [contactValue, setContactValue] = useState(searchParams.get("contact") ?? "");
   const [lookupAttempted, setLookupAttempted] = useState(Boolean(searchParams.get("reference") || searchParams.get("contact")));
   const [matchedBooking, setMatchedBooking] = useState<StoredBooking | null>(null);
+  const [supportFallbackUsed, setSupportFallbackUsed] = useState(false);
 
   const supportMessage = useMemo(
     () =>
@@ -61,6 +62,7 @@ export default function ManageBooking() {
 
                 setMatchedBooking(storedBooking);
                 setLookupAttempted(true);
+                setSupportFallbackUsed(!storedBooking);
 
                 if (!storedBooking) {
                   openWhatsApp(supportMessage);
@@ -79,16 +81,23 @@ export default function ManageBooking() {
 
               <input
                 className={inputClassName}
-                onChange={(event) => setReference(event.target.value)}
+                onChange={(event) => {
+                  setReference(event.target.value);
+                  setSupportFallbackUsed(false);
+                }}
                 placeholder="Booking reference"
-                required
+                required={!contactValue}
                 type="text"
                 value={reference}
               />
               <input
                 className={inputClassName}
-                onChange={(event) => setContactValue(event.target.value)}
+                onChange={(event) => {
+                  setContactValue(event.target.value);
+                  setSupportFallbackUsed(false);
+                }}
                 placeholder="Email used during booking"
+                required={!reference}
                 type="text"
                 value={contactValue}
               />
@@ -181,8 +190,9 @@ export default function ManageBooking() {
 
             {lookupAttempted && !matchedBooking ? (
               <p className="mt-6 text-sm leading-6 text-slate-600">
-                No saved booking was found in this browser. A WhatsApp draft has been opened so you can continue with
-                support manually.
+                {supportFallbackUsed
+                  ? "No saved booking was found in this browser. A WhatsApp draft has been opened so you can continue with support manually."
+                  : "No saved booking was found in this browser yet. Use Contact Support if you need help with a reservation created elsewhere."}
               </p>
             ) : null}
           </Card>

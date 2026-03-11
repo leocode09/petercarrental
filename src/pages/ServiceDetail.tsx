@@ -9,6 +9,7 @@ import Card from "../components/ui/Card";
 import { companyInfo } from "../data/site";
 import { getServiceBySlug } from "../data/services";
 import { vehicles } from "../data/vehicles";
+import { buildWhatsAppLink } from "../lib/utils";
 
 export default function ServiceDetail() {
   const { slug } = useParams();
@@ -17,6 +18,54 @@ export default function ServiceDetail() {
   const recommendedVehicles = useMemo(() => {
     if (!service) return [];
     return vehicles.filter((vehicle) => service.recommendedVehicleIds.includes(vehicle.id));
+  }, [service]);
+  const bookingLink = useMemo(() => {
+    if (!service) return "/booking";
+
+    const params = new URLSearchParams();
+
+    if (service.slug === "self-drive") {
+      params.set("serviceType", "Self-Drive");
+    }
+
+    if (service.slug === "chauffeur" || service.slug === "airport-transfers" || service.slug === "wedding-events") {
+      params.set("serviceType", "With Chauffeur");
+    }
+
+    if (service.slug === "airport-transfers") {
+      params.set("pickupLocation", "Kigali Airport");
+      params.set("airport", "true");
+      params.set("notes", "Interested in airport pickup or drop-off support.");
+    }
+
+    if (service.slug === "safari") {
+      params.set("category", "4x4 Safari");
+    }
+
+    if (service.slug === "corporate") {
+      params.set("notes", "Interested in corporate or NGO transport support.");
+    }
+
+    if (service.slug === "long-term") {
+      params.set("notes", "Interested in a long-term rental package.");
+    }
+
+    if (service.slug === "wedding-events") {
+      params.set("notes", "Interested in wedding or event transport.");
+    }
+
+    const search = params.toString();
+
+    return search ? `/booking?${search}` : "/booking";
+  }, [service]);
+  const serviceWhatsAppLink = useMemo(() => {
+    if (!service) {
+      return companyInfo.whatsappShareHref;
+    }
+
+    return buildWhatsAppLink(
+      `Hello Peter Car Rental, I would like to learn more about the ${service.name} service.`,
+    );
   }, [service]);
 
   if (!service) {
@@ -44,10 +93,10 @@ export default function ServiceDetail() {
         image={service.heroImage}
         title={service.name}
       >
-        <Button href={companyInfo.whatsappShareHref} target="_blank" variant="whatsapp">
+        <Button href={serviceWhatsAppLink} target="_blank" variant="whatsapp">
           Inquire on WhatsApp
         </Button>
-        <Button to="/booking" variant="light">
+        <Button to={bookingLink} variant="light">
           Book Now
         </Button>
       </PageHero>

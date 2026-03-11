@@ -21,6 +21,28 @@ export default function DestinationDetail() {
     () => getServiceBySlug(destination?.serviceSlug),
     [destination?.serviceSlug],
   );
+  const bookingLink = useMemo(() => {
+    if (!destination) {
+      return "/booking";
+    }
+
+    const params = new URLSearchParams({
+      notes: `Interested in planning a trip to ${destination.name}.`,
+    });
+
+    if (bestVehicle) {
+      params.set("vehicle", bestVehicle.id);
+      params.set("category", bestVehicle.category);
+    }
+
+    if (linkedService?.slug === "chauffeur") {
+      params.set("serviceType", "With Chauffeur");
+    }
+
+    const search = params.toString();
+
+    return search ? `/booking?${search}` : "/booking";
+  }, [bestVehicle, destination, linkedService?.slug]);
 
   if (!destination) {
     return (
@@ -46,7 +68,7 @@ export default function DestinationDetail() {
         image={destination.image}
         title={destination.name}
       >
-        <Button to="/booking">Book This Trip</Button>
+        <Button to={bookingLink}>Book This Trip</Button>
       </PageHero>
 
       <section className="section-space">

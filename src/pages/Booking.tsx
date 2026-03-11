@@ -57,6 +57,10 @@ export default function Booking() {
     () => vehicles.find((vehicle) => vehicle.id === selectedVehicleId),
     [selectedVehicleId],
   );
+  const submittedVehicle = useMemo(
+    () => (submittedBooking ? vehicles.find((vehicle) => vehicle.id === submittedBooking.selectedVehicleId) : undefined),
+    [submittedBooking],
+  );
   const bookingIntent = initialReference ? "update" : "book";
   const latestWhatsAppMessage = submittedBooking
     ? [
@@ -69,7 +73,7 @@ export default function Booking() {
         `Pickup date: ${submittedBooking.pickupDate}`,
         `Return date: ${submittedBooking.returnDate}`,
         `Pickup time: ${submittedBooking.pickupTime}`,
-        `Specific vehicle: ${selectedVehicle?.name || "Any available vehicle"}`,
+        `Specific vehicle: ${submittedVehicle?.name || "Any available vehicle"}`,
         `Vehicle category: ${submittedBooking.vehicleCategory}`,
         `Service type: ${submittedBooking.serviceType}`,
         `Promo code: ${submittedBooking.promoCode || "None"}`,

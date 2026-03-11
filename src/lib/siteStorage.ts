@@ -32,10 +32,12 @@ interface StoredPayload {
 
 const STORAGE_KEY = "peter-car-rental-site-data";
 
-const defaultPayload: StoredPayload = {
-  bookings: [],
-  newsletter: [],
-};
+function createDefaultPayload(): StoredPayload {
+  return {
+    bookings: [],
+    newsletter: [],
+  };
+}
 
 function canUseBrowserStorage() {
   return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
@@ -43,14 +45,14 @@ function canUseBrowserStorage() {
 
 function readPayload() {
   if (!canUseBrowserStorage()) {
-    return defaultPayload;
+    return createDefaultPayload();
   }
 
   try {
     const storedValue = window.localStorage.getItem(STORAGE_KEY);
 
     if (!storedValue) {
-      return defaultPayload;
+      return createDefaultPayload();
     }
 
     const parsedValue = JSON.parse(storedValue) as Partial<StoredPayload>;
@@ -60,7 +62,7 @@ function readPayload() {
       newsletter: Array.isArray(parsedValue.newsletter) ? parsedValue.newsletter : [],
     };
   } catch {
-    return defaultPayload;
+    return createDefaultPayload();
   }
 }
 
@@ -86,6 +88,10 @@ export function getStoredBookings() {
 export function findStoredBooking(reference?: string | null, contactValue?: string | null) {
   const normalizedReference = reference?.trim().toUpperCase();
   const normalizedContact = contactValue?.trim().toLowerCase();
+
+  if (!normalizedReference && !normalizedContact) {
+    return null;
+  }
 
   return (
     getStoredBookings().find((booking) => {
