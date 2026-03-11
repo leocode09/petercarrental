@@ -68,7 +68,11 @@ export default function VehicleCard({
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <Button to={`/booking?vehicle=${encodeURIComponent(vehicle.name)}`}>Book Now</Button>
+          <Button
+            to={`/booking?vehicle=${encodeURIComponent(vehicle.id)}&category=${encodeURIComponent(vehicle.category)}`}
+          >
+            Book Now
+          </Button>
           <Button href={buildWhatsAppLink(whatsappMessage)} target="_blank" variant="outline">
             Ask on WhatsApp
           </Button>

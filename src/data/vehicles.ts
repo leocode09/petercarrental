@@ -114,3 +114,16 @@ export const vehicles: Vehicle[] = [
 ];
 
 export const featuredVehicles = vehicles.filter((vehicle) => vehicle.featured);
+
+export function getVehicleByQueryValue(value: string | undefined | null) {
+  if (!value) {
+    return undefined;
+  }
+
+  const normalizedValue = decodeURIComponent(value).trim().toLowerCase();
+
+  return vehicles.find(
+    (vehicle) =>
+      vehicle.id.toLowerCase() === normalizedValue || vehicle.name.trim().toLowerCase() === normalizedValue,
+  );
+}
