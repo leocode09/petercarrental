@@ -1,4 +1,4 @@
-import { Facebook, Instagram, Mail, MapPin, Phone, Youtube } from "lucide-react";
+import { Facebook, Instagram, Mail, MapPin, Phone, Twitter, Youtube } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -12,7 +12,7 @@ import Button from "../ui/Button";
 const socialLinks = [
   { label: "Facebook", href: companyInfo.liveUrl, icon: Facebook },
   { label: "Instagram", href: companyInfo.liveUrl, icon: Instagram },
-  { label: "X", href: companyInfo.liveUrl, icon: Facebook },
+  { label: "X", href: companyInfo.liveUrl, icon: Twitter },
   { label: "YouTube", href: companyInfo.liveUrl, icon: Youtube },
 ];
 

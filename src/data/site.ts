@@ -12,7 +12,7 @@ export const companyInfo = {
   name: "Peter Car Rental",
   defaultTitle: "Peter Car Rental | Premium Car Hire in Kigali, Rwanda",
   shortDescription:
-    "Rwanda's trusted premium car rental service. Self-drive, chauffeur, airport transfers, and safari vehicles ? all backed by professional support.",
+    "Rwanda's trusted premium car rental service. Self-drive, chauffeur, airport transfers, and safari vehicles - all backed by professional support.",
   metaDescription:
     "Peter Car Rental offers premium self-drive and chauffeur car rental services in Rwanda. Airport transfers, corporate rentals. Book now!",
   phoneDisplay: "+250 788 237 438",
