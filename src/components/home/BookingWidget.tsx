@@ -42,20 +42,20 @@ export default function BookingWidget() {
   );
 
   return (
-    <section className="relative z-20 -mt-16 pb-10">
+    <section className="relative z-20 -mt-12 pb-8 sm:-mt-16 sm:pb-10">
       <div className="container-shell">
-        <Card className="rounded-[32px] p-6 md:p-8">
-          <div className="mb-6 space-y-2">
+        <Card className="rounded-[28px] p-5 sm:p-6 md:rounded-[32px] md:p-8">
+          <div className="mb-5 space-y-2 sm:mb-6">
             <p className="text-sm font-bold uppercase tracking-[0.18em] text-orange-500">
               Booking Widget
             </p>
-            <h2 className="text-2xl font-black tracking-[-0.03em] text-slate-950 md:text-3xl">
+            <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950 sm:text-2xl md:text-3xl">
               Find Your Perfect Ride
             </h2>
           </div>
 
           <form
-            className="grid gap-4 md:grid-cols-2 xl:grid-cols-4"
+            className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
             onSubmit={(event) => {
               event.preventDefault();
 
@@ -150,8 +150,8 @@ export default function BookingWidget() {
               />
             </label>
 
-            <div className="md:col-span-2 xl:col-span-4 flex flex-col gap-4 pt-2 md:flex-row md:items-center md:justify-between">
-              <label className="inline-flex items-center gap-3 text-sm font-medium text-slate-700">
+            <div className="flex flex-col gap-4 pt-2 sm:col-span-2 sm:flex-row sm:items-center sm:justify-between xl:col-span-4">
+              <label className="inline-flex items-start gap-3 text-sm font-medium text-slate-700 sm:items-center">
                 <input
                   checked={airportTransfer}
                   className="h-4 w-4 rounded border-slate-300 text-orange-500 focus:ring-orange-500"
@@ -161,7 +161,7 @@ export default function BookingWidget() {
                 <span>Airport pickup/drop-off</span>
               </label>
 
-              <Button size="lg" type="submit">
+              <Button className="w-full sm:w-auto" size="lg" type="submit">
                 Check Availability
               </Button>
             </div>

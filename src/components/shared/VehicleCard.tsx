@@ -22,7 +22,7 @@ export default function VehicleCard({
       <div className="relative">
         <img
           alt={vehicle.name}
-          className="h-64 w-full object-cover"
+          className="h-56 w-full object-cover sm:h-64"
           loading="lazy"
           src={vehicle.image}
         />
@@ -38,17 +38,17 @@ export default function VehicleCard({
         </div>
       </div>
 
-      <div className="space-y-5 p-6">
+      <div className="space-y-5 p-5 sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-xl font-bold text-slate-950">{vehicle.name}</h3>
+            <h3 className="text-lg font-bold text-slate-950 sm:text-xl">{vehicle.name}</h3>
             <p className="mt-1 text-sm font-medium text-orange-600">{formatPricePerDay(vehicle.pricePerDay)}</p>
           </div>
         </div>
 
         {showDescription ? <p className="text-sm leading-6 text-slate-600">{vehicle.description}</p> : null}
 
-        <div className="grid grid-cols-2 gap-3 text-sm text-slate-600">
+        <div className="grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
           <div className="flex items-center gap-2 rounded-2xl bg-slate-50 px-3 py-2">
             <Users className="h-4 w-4 text-orange-500" />
             <span>{vehicle.seats} seats</span>
@@ -67,7 +67,7 @@ export default function VehicleCard({
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap [&>*]:w-full sm:[&>*]:w-auto">
           <Button
             to={`/booking?vehicle=${encodeURIComponent(vehicle.id)}&category=${encodeURIComponent(vehicle.category)}`}
           >

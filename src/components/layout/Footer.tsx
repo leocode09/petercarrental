@@ -28,7 +28,7 @@ export default function Footer() {
 
   return (
     <footer className="bg-slate-950 text-slate-200">
-      <div className="container-shell grid gap-10 py-16 lg:grid-cols-[1.3fr_0.9fr_1fr_1.2fr]">
+      <div className="container-shell grid gap-8 py-14 md:grid-cols-2 md:gap-10 md:py-16 xl:grid-cols-[1.3fr_0.9fr_1fr_1.2fr]">
         <div className="space-y-6">
           <Link className="inline-flex items-center gap-3" to="/">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-500 text-2xl font-black text-white">
@@ -44,7 +44,7 @@ export default function Footer() {
 
           <p className="max-w-sm text-sm leading-7 text-slate-400">{companyInfo.shortDescription}</p>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             {quickActionLinks.map(({ label, href, icon: Icon }) => (
               <a
                 aria-label={label}
@@ -95,7 +95,7 @@ export default function Footer() {
             </a>
             <a className="flex items-center gap-3 hover:text-orange-400" href={companyInfo.mailtoHref}>
               <Mail className="h-4 w-4 text-orange-400" />
-              <span>{companyInfo.email}</span>
+              <span className="break-all">{companyInfo.email}</span>
             </a>
             <a
               className="text-sm font-semibold text-emerald-400 transition hover:text-emerald-300"
@@ -110,7 +110,7 @@ export default function Footer() {
           <div className="mt-6 space-y-3">
             <p className="font-semibold text-white">Newsletter</p>
             <form
-              className="space-y-3"
+              className="max-w-md space-y-3"
               onSubmit={(event) => {
                 event.preventDefault();
                 const trimmedEmail = email.trim();
@@ -150,7 +150,7 @@ export default function Footer() {
       <div className="border-t border-white/10">
         <div className="container-shell flex flex-col gap-3 py-5 text-sm text-slate-500 md:flex-row md:items-center md:justify-between">
           <p>© 2026 Peter Car Rental. All rights reserved.</p>
-          <div className="flex flex-wrap gap-x-4 gap-y-2">
+          <div className="flex flex-wrap gap-x-4 gap-y-2 md:justify-end">
             {legalLinks.map((link) => (
               <Link className="transition hover:text-orange-400" key={link.to} to={link.to}>
                 {link.label}

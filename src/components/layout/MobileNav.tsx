@@ -19,11 +19,11 @@ export default function MobileNav({ open, links, onClose }: MobileNavProps) {
     <div className={cn("fixed inset-0 z-50 bg-slate-950/50 transition", open ? "opacity-100" : "opacity-0")}>
       <div
         className={cn(
-          "absolute inset-y-0 right-0 flex w-full max-w-sm flex-col bg-white shadow-2xl transition-transform duration-300",
+          "absolute inset-y-0 right-0 flex w-full flex-col bg-white shadow-2xl transition-transform duration-300 sm:max-w-sm",
           open ? "translate-x-0" : "translate-x-full",
         )}
       >
-        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+        <div className="flex items-center justify-between border-b border-slate-200 px-4 py-4 sm:px-5">
           <div>
             <p className="text-lg font-bold text-slate-950">Peter Car Rental</p>
             <p className="text-sm text-slate-500">Premium travel across Rwanda</p>
@@ -38,7 +38,7 @@ export default function MobileNav({ open, links, onClose }: MobileNavProps) {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 py-6">
+        <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-5 sm:py-6">
           <div className="space-y-4">
             {links.map((link) => (
               <div className="rounded-3xl border border-slate-200 p-4" key={link.label}>
@@ -70,7 +70,7 @@ export default function MobileNav({ open, links, onClose }: MobileNavProps) {
           </div>
         </div>
 
-        <div className="border-t border-slate-200 p-5">
+        <div className="border-t border-slate-200 p-4 sm:p-5">
           <Button fullWidth onClick={onClose} to="/booking">
             Book Now
           </Button>

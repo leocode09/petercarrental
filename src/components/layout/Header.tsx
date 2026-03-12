@@ -1,5 +1,5 @@
 import { ChevronDown, Menu } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, NavLink as RouterNavLink, useLocation } from "react-router-dom";
 import { companyInfo, navLinks } from "../../data/site";
 import { cn, routeIsActive } from "../../lib/utils";
@@ -10,17 +10,29 @@ export default function Header() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
+
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
-        <div className="container-shell flex h-20 items-center justify-between gap-4">
-          <Link className="flex items-center gap-3" to="/">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-500 text-2xl font-black text-white">
+        <div className="container-shell flex h-16 items-center justify-between gap-3 sm:h-20 sm:gap-4">
+          <Link className="flex min-w-0 items-center gap-2 sm:gap-3" to="/">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-500 text-xl font-black text-white sm:h-12 sm:w-12 sm:rounded-2xl sm:text-2xl">
               P
             </div>
-            <div>
-              <div className="text-xl font-black leading-none text-slate-950">Peter</div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.34em] text-slate-400">
+            <div className="min-w-0">
+              <div className="truncate text-lg font-black leading-none text-slate-950 sm:text-xl">Peter</div>
+              <div className="truncate text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-400 sm:text-[11px] sm:tracking-[0.34em]">
                 Car Rental
               </div>
             </div>
@@ -84,8 +96,9 @@ export default function Header() {
               Book Now
             </Button>
             <button
+              aria-expanded={mobileOpen}
               aria-label="Open menu"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-slate-700 lg:hidden"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-700 lg:hidden sm:h-11 sm:w-11"
               onClick={() => setMobileOpen(true)}
               type="button"
             >

@@ -42,8 +42,8 @@ export default function Fleet() {
 
       <section className="section-space">
         <div className="container-shell space-y-8">
-          <div className="surface-card rounded-[28px] p-6">
-            <div className="grid gap-4 md:grid-cols-2">
+          <div className="surface-card rounded-[28px] p-5 sm:p-6">
+            <div className="grid gap-4 sm:grid-cols-2">
               <Select
                 label="Filter by category"
                 onChange={(event) => {
@@ -74,9 +74,9 @@ export default function Fleet() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-2xl font-black tracking-[-0.03em] text-slate-950">
+              <h2 className="text-2xl font-black tracking-[-0.03em] text-slate-950 sm:text-3xl">
                 Available vehicles
               </h2>
               <p className="mt-2 text-sm text-slate-600">
@@ -86,7 +86,7 @@ export default function Fleet() {
             </div>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {filteredVehicles.map((vehicle) => (
               <VehicleCard key={vehicle.id} vehicle={vehicle} />
             ))}

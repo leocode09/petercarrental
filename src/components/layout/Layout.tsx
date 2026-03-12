@@ -10,19 +10,19 @@ export default function Layout() {
     <div className="min-h-screen bg-white text-slate-900">
       <TopBar />
       <Header />
-      <main>
+      <main className="overflow-x-clip">
         <Outlet />
       </main>
       <Footer />
 
       <a
         aria-label="Chat on WhatsApp"
-        className="fixed bottom-6 right-6 z-30 inline-flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-2xl shadow-emerald-500/30 transition hover:bg-emerald-600"
+        className="fixed bottom-4 right-4 z-30 inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500 text-white shadow-2xl shadow-emerald-500/30 transition hover:bg-emerald-600 sm:bottom-6 sm:right-6 sm:h-14 sm:w-14"
         href={companyInfo.whatsappShareHref}
         rel="noopener noreferrer"
         target="_blank"
       >
-        <MessageCircle className="h-6 w-6" />
+        <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6" />
       </a>
     </div>
   );
