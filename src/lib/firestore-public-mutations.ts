@@ -1,7 +1,5 @@
-import { getFunctions, httpsCallable } from "firebase/functions";
-import app from "./firebase";
-
-const functions = getFunctions(app, "us-central1");
+import { httpsCallable } from "firebase/functions";
+import { functions } from "./firebase";
 
 export async function submitLead(args: { name: string; email: string; message: string }) {
   const fn = httpsCallable<

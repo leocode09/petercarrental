@@ -8,8 +8,8 @@ import {
   type ReactNode,
 } from "react";
 import { onIdTokenChanged, signInWithCustomToken, signOut, type User } from "firebase/auth";
-import { getFunctions, httpsCallable } from "firebase/functions";
-import { auth, default as app } from "./firebase";
+import { httpsCallable } from "firebase/functions";
+import { auth, functions } from "./firebase";
 import type { UserRole } from "./validators";
 
 export type AdminUser = {
@@ -81,7 +81,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    const functions = getFunctions(app, "us-central1");
     const loginFn = httpsCallable<{ email: string; password: string }, { token: string }>(functions, "loginAdmin");
     const res = await loginFn({ email: email.trim().toLowerCase(), password });
     const token = res.data.token;
@@ -113,8 +112,6 @@ export function useAuth() {
 
 export function useCallable<TReq, TRes>(name: string) {
   return useMemo(() => {
-    // Use explicit app and us-central1 region to match Firebase Functions deployment
-    const functions = getFunctions(app, "us-central1");
     return httpsCallable<TReq, TRes>(functions, name);
   }, [name]);
 }
