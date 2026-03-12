@@ -30,10 +30,16 @@ function upsertLink(selector: string, attributes: Record<string, string>) {
 }
 
 export default function Seo({
-  title = companyInfo.defaultTitle,
-  description = companyInfo.metaDescription,
+  title,
+  description,
   canonicalPath = "",
 }: SeoProps) {
+  const { data } = usePublicData();
+  const ci = data?.companyInfo;
+
+  const resolvedTitle = title ?? ci?.defaultTitle ?? "Peter Car Rental";
+  const resolvedDescription = description ?? ci?.metaDescription ?? "";
+
   useEffect(() => {
     document.title = resolvedTitle;
 
@@ -48,12 +54,12 @@ export default function Seo({
       name: "twitter:description",
       content: resolvedDescription,
     });
-    const baseUrl = companyInfo?.canonicalUrl ?? "https://petercarrental.rw";
+    const baseUrl = ci?.canonicalUrl ?? "https://petercarrental.rw";
     upsertLink('link[rel="canonical"]', {
       rel: "canonical",
       href: `${baseUrl}${canonicalPath}`,
     });
-  }, [canonicalPath, resolvedDescription, resolvedTitle, companyInfo?.canonicalUrl]);
+  }, [canonicalPath, resolvedDescription, resolvedTitle, ci?.canonicalUrl]);
 
   return null;
 }
