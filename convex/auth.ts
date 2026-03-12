@@ -7,6 +7,13 @@ import authConfig from "./auth.config";
 import { normalizeEmail } from "./lib/bookings";
 
 const siteUrl = process.env.SITE_URL ?? "http://127.0.0.1:4173";
+const trustedOrigins = [
+  siteUrl,
+  "http://127.0.0.1:4173",
+  "http://127.0.0.1:5173",
+  "http://localhost:4173",
+  "http://localhost:5173",
+].filter((v, i, a) => a.indexOf(v) === i);
 const authFunctions: AuthFunctions = internal.auth;
 
 async function syncAppUserFromAuthUser(
@@ -107,7 +114,7 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
   return betterAuth({
     database: authComponent.adapter(ctx),
     secret: process.env.BETTER_AUTH_SECRET,
-    trustedOrigins: [siteUrl],
+    trustedOrigins,
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false,

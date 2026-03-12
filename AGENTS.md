@@ -4,6 +4,7 @@
 - Public booking, manage-booking, contact, and complaint flows are frontend-only and WhatsApp-driven unless they are explicitly migrated to a backend.
 - Git remote origin is https://github.com/leocode09/petercarrental.git.
 - Admin portal is at /admin/login; first-time setup at /admin/setup creates the initial super admin.
+- Auth uses Better Auth (Convex component). Set in Convex dashboard: `SITE_URL` (frontend origin, e.g. http://localhost:5173) and `BETTER_AUTH_SECRET`.
 
 - User preferences:
 - Prefer fully functional, end-to-end implementations over placeholder scaffolding when the task scope allows.

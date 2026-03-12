@@ -9,7 +9,8 @@ import {
   Users,
   WalletCards,
 } from "lucide-react";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
+import { useEffect } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { api } from "../../../convex/_generated/api";
 import { authClient } from "../../lib/auth-client";
@@ -71,6 +72,13 @@ const navigationItems = [
 export default function AdminLayout() {
   const { companyInfo } = usePublicSiteData();
   const viewer = useQuery(api.adminUsers.currentAdmin, {});
+  const bootstrapFirstAdminRole = useMutation(api.adminUsers.bootstrapFirstAdminRole);
+
+  useEffect(() => {
+    if (viewer?.authUserId && !viewer.role) {
+      void bootstrapFirstAdminRole();
+    }
+  }, [viewer?.authUserId, viewer?.role, bootstrapFirstAdminRole]);
 
   const allowedItems = navigationItems.filter((item) => item.roles.includes((viewer?.role ?? "") as never));
 

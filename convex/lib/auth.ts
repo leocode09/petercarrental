@@ -32,15 +32,11 @@ export async function getViewer(ctx: ConvexFunctionCtx) {
 
 export async function requireViewer(ctx: ConvexFunctionCtx) {
   const user = await getViewer(ctx);
-  if (user) return user;
-
-  // Bypass: use first admin user when unauthenticated (for dev/local access)
-  const firstAdmin = (await ctx.db.query("users").collect()).find((u) => u.role);
-  if (firstAdmin) {
-    return firstAdmin as AdminUserDoc;
+  if (!user) {
+    throw new ConvexError("You must be signed in to access the admin portal.");
   }
 
-  throw new ConvexError("You must be signed in to access the admin portal.");
+  return user;
 }
 
 export async function requireRole(ctx: ConvexFunctionCtx, allowedRoles: readonly UserRole[]) {

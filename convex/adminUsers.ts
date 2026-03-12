@@ -19,6 +19,32 @@ export const authState = query({
   },
 });
 
+/** Bootstrap role for first admin when trigger didn't assign one (e.g. migration edge case). */
+export const bootstrapFirstAdminRole = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const viewer = await getViewer(ctx);
+    if (!viewer) {
+      throw new ConvexError("You must be signed in.");
+    }
+    if (viewer.role) {
+      return; // Already has role
+    }
+    if (!viewer.authUserId) {
+      throw new ConvexError("Only linked auth users can be bootstrapped.");
+    }
+    const allUsers = await ctx.db.query("users").collect();
+    const someoneHasRole = allUsers.some((u) => Boolean(u.authUserId && u.role));
+    if (someoneHasRole) {
+      throw new ConvexError("An admin with a role already exists. Use Users & Roles to assign yours.");
+    }
+    await ctx.db.patch(viewer._id, {
+      role: "superAdmin",
+      updatedAt: Date.now(),
+    });
+  },
+});
+
 export const currentAdmin = query({
   args: {},
   handler: async (ctx) => {
