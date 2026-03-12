@@ -109,28 +109,34 @@ export default function ManageBooking() {
                 </p>
               </div>
 
-              <input
-                className={inputClassName}
-                onChange={(event) => {
-                  setReference(event.target.value);
-                  setSupportFallbackUsed(false);
-                }}
-                placeholder="Booking reference"
-                required={!contactValue}
-                type="text"
-                value={reference}
-              />
-              <input
-                className={inputClassName}
-                onChange={(event) => {
-                  setContactValue(event.target.value);
-                  setSupportFallbackUsed(false);
-                }}
-                placeholder="Email used during booking"
-                required={!reference}
-                type="text"
-                value={contactValue}
-              />
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Booking reference</span>
+                <input
+                  className={inputClassName}
+                  onChange={(event) => {
+                    setReference(event.target.value);
+                    setSupportFallbackUsed(false);
+                  }}
+                  placeholder="Booking reference"
+                  required={!contactValue}
+                  type="text"
+                  value={reference}
+                />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Email used during booking</span>
+                <input
+                  className={inputClassName}
+                  onChange={(event) => {
+                    setContactValue(event.target.value);
+                    setSupportFallbackUsed(false);
+                  }}
+                  placeholder="Email used during booking"
+                  required={!reference}
+                  type="text"
+                  value={contactValue}
+                />
+              </label>
 
               <div className="flex flex-col gap-3 sm:flex-row [&>*]:w-full sm:[&>*]:w-auto">
                 <Button disabled={lookupLoading} type="submit">

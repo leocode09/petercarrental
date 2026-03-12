@@ -91,38 +91,53 @@ export default function AdminTestimonials() {
           <h2 className="text-xl font-black text-slate-950">{form.testimonialId ? "Edit testimonial" : "Create testimonial"}</h2>
           <form className="mt-6 grid gap-4" onSubmit={handleSubmit}>
             <div className="grid gap-4 md:grid-cols-2">
-              <input
-                className={inputClassName}
-                onChange={(e) => setForm((c) => ({ ...c, publicId: e.target.value }))}
-                placeholder="Public ID (e.g. sarah-johnson)"
-                value={form.publicId}
-              />
-              <input
-                className={inputClassName}
-                onChange={(e) => setForm((c) => ({ ...c, author: e.target.value }))}
-                placeholder="Author name"
-                value={form.author}
-              />
-              <input
-                className={inputClassName}
-                onChange={(e) => setForm((c) => ({ ...c, sortOrder: Number(e.target.value) }))}
-                placeholder="Sort order"
-                type="number"
-                value={form.sortOrder}
-              />
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Public ID</span>
+                <input
+                  className={inputClassName}
+                  onChange={(e) => setForm((c) => ({ ...c, publicId: e.target.value }))}
+                  placeholder="Public ID (e.g. sarah-johnson)"
+                  value={form.publicId}
+                />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Author name</span>
+                <input
+                  className={inputClassName}
+                  onChange={(e) => setForm((c) => ({ ...c, author: e.target.value }))}
+                  placeholder="Author name"
+                  value={form.author}
+                />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Sort order</span>
+                <input
+                  className={inputClassName}
+                  onChange={(e) => setForm((c) => ({ ...c, sortOrder: Number(e.target.value) }))}
+                  placeholder="Sort order"
+                  type="number"
+                  value={form.sortOrder}
+                />
+              </label>
             </div>
-            <textarea
-              className={textareaClassName}
-              onChange={(e) => setForm((c) => ({ ...c, quote: e.target.value }))}
-              placeholder="Quote"
-              value={form.quote}
-            />
-            <input
-              className={inputClassName}
-              onChange={(e) => setForm((c) => ({ ...c, summary: e.target.value }))}
-              placeholder="Summary (e.g. USA - Safari Trip - Land Cruiser Prado)"
-              value={form.summary}
-            />
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Quote</span>
+              <textarea
+                className={textareaClassName}
+                onChange={(e) => setForm((c) => ({ ...c, quote: e.target.value }))}
+                placeholder="Quote"
+                value={form.quote}
+              />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Summary</span>
+              <input
+                className={inputClassName}
+                onChange={(e) => setForm((c) => ({ ...c, summary: e.target.value }))}
+                placeholder="Summary (e.g. USA - Safari Trip - Land Cruiser Prado)"
+                value={form.summary}
+              />
+            </label>
 
             <div className="flex flex-wrap gap-3">
               <Button disabled={saving} type="submit">

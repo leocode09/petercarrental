@@ -110,24 +110,36 @@ export default function AdminUsers() {
               }
             }}
           >
-            <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} placeholder="Display name" value={form.name} />
-            <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} placeholder="Admin email" type="email" value={form.email} />
-            <input className={inputClassName} minLength={8} onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))} placeholder="Temporary password" type="password" value={form.password} />
-            <select
-              className={inputClassName}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  role: event.target.value as typeof current.role,
-                }))
-              }
-              value={form.role}
-            >
-              <option value="operations">operations</option>
-              <option value="contentEditor">contentEditor</option>
-              <option value="manager">manager</option>
-              <option value="superAdmin">superAdmin</option>
-            </select>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Display name</span>
+              <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} placeholder="Display name" value={form.name} />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Admin email</span>
+              <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} placeholder="Admin email" type="email" value={form.email} />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Temporary password</span>
+              <input className={inputClassName} minLength={8} onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))} placeholder="Temporary password" type="password" value={form.password} />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Role</span>
+              <select
+                className={inputClassName}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    role: event.target.value as typeof current.role,
+                  }))
+                }
+                value={form.role}
+              >
+                <option value="operations">operations</option>
+                <option value="contentEditor">contentEditor</option>
+                <option value="manager">manager</option>
+                <option value="superAdmin">superAdmin</option>
+              </select>
+            </label>
             {errorMessage ? <p className="text-sm text-rose-600">{errorMessage}</p> : null}
             <div className="flex flex-wrap gap-3">
               <Button disabled={saving} type="submit">

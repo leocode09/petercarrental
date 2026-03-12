@@ -65,36 +65,48 @@ export default function Complaints() {
                 </p>
               </div>
 
-              <input
-                className={inputClassName}
-                onChange={(event) => setName(event.target.value)}
-                placeholder="Your name"
-                required
-                type="text"
-                value={name}
-              />
-              <input
-                className={inputClassName}
-                onChange={(event) => setContactInfo(event.target.value)}
-                placeholder="Email or phone"
-                required
-                type="text"
-                value={contactInfo}
-              />
-              <input
-                className={inputClassName}
-                onChange={(event) => setBookingReference(event.target.value)}
-                placeholder="Booking reference (optional)"
-                type="text"
-                value={bookingReference}
-              />
-              <textarea
-                className={textareaClassName}
-                onChange={(event) => setDetails(event.target.value)}
-                placeholder="Describe the issue in detail."
-                required
-                value={details}
-              />
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Your name</span>
+                <input
+                  className={inputClassName}
+                  onChange={(event) => setName(event.target.value)}
+                  placeholder="Your name"
+                  required
+                  type="text"
+                  value={name}
+                />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Email or phone</span>
+                <input
+                  className={inputClassName}
+                  onChange={(event) => setContactInfo(event.target.value)}
+                  placeholder="Email or phone"
+                  required
+                  type="text"
+                  value={contactInfo}
+                />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Booking reference (optional)</span>
+                <input
+                  className={inputClassName}
+                  onChange={(event) => setBookingReference(event.target.value)}
+                  placeholder="Booking reference (optional)"
+                  type="text"
+                  value={bookingReference}
+                />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Complaint details</span>
+                <textarea
+                  className={textareaClassName}
+                  onChange={(event) => setDetails(event.target.value)}
+                  placeholder="Describe the issue in detail."
+                  required
+                  value={details}
+                />
+              </label>
               <Button disabled={submitting} type="submit">
                 {submitting ? "Submitting…" : "Submit Complaint"}
               </Button>

@@ -119,20 +119,21 @@ export default function AdminLayout() {
         )}
 
         <div className="flex min-h-screen flex-1 flex-col">
-          <header className="border-b border-slate-200 bg-white px-4 py-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-3 sm:justify-between">
-              <button
-                className="rounded-xl border border-slate-200 p-2 text-slate-600 transition hover:bg-slate-50 lg:hidden"
-                onClick={() => setMobileOpen(true)}
-                type="button"
-              >
-                <Menu className="h-5 w-5" />
-              </button>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-slate-500">Operations, content, and reporting</p>
-                <h1 className="text-lg font-black text-slate-950">Peter Car Rental Admin</h1>
+          <header className="border-b border-slate-200 bg-white px-4 sm:px-6 lg:px-8">
+            <div className="flex h-16 items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <button
+                  className="rounded-xl border border-slate-200 p-2 text-slate-600 transition hover:bg-slate-50 lg:hidden"
+                  onClick={() => setMobileOpen(true)}
+                  type="button"
+                >
+                  <Menu className="h-5 w-5" />
+                </button>
+                <div className="lg:hidden">
+                  <h1 className="text-lg font-black leading-tight text-slate-950">{companyName} Admin</h1>
+                </div>
               </div>
-              <Button className="hidden sm:inline-flex" to="/" variant="outline">
+              <Button className="shrink-0" size="sm" to="/" variant="outline">
                 View Website
               </Button>
             </div>

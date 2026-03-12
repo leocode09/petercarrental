@@ -152,67 +152,118 @@ export default function AdminReservations() {
           <h2 className="text-xl font-black text-slate-950">{form.bookingId ? "Edit booking" : "Create booking"}</h2>
           <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
             <div className="grid gap-4 md:grid-cols-2">
-              <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, reference: event.target.value }))} placeholder="Reference (optional)" value={form.reference} />
-              <select className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, status: event.target.value as typeof current.status }))} value={form.status}>
-                <option value="new">new</option>
-                <option value="confirmed">confirmed</option>
-                <option value="change_requested">change_requested</option>
-                <option value="in_progress">in_progress</option>
-                <option value="completed">completed</option>
-                <option value="cancelled">cancelled</option>
-                <option value="refunded">refunded</option>
-              </select>
-              <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, fullName: event.target.value }))} placeholder="Customer name" value={form.fullName} />
-              <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} placeholder="Customer email" type="email" value={form.email} />
-              <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, phone: event.target.value }))} placeholder="Phone" value={form.phone} />
-              <select className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, source: event.target.value }))} value={form.source}>
-                <option value="website">website</option>
-                <option value="admin">admin</option>
-                <option value="phone">phone</option>
-                <option value="whatsapp">whatsapp</option>
-              </select>
-              <select className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, pickupLocation: event.target.value }))} value={form.pickupLocation}>
-                {bookingLocations.map((location) => (
-                  <option key={location} value={location}>
-                    {location}
-                  </option>
-                ))}
-              </select>
-              <select className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, dropoffLocation: event.target.value }))} value={form.dropoffLocation}>
-                {bookingLocations.map((location) => (
-                  <option key={location} value={location}>
-                    {location}
-                  </option>
-                ))}
-              </select>
-              <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, pickupDate: event.target.value }))} type="date" value={form.pickupDate} />
-              <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, returnDate: event.target.value }))} type="date" value={form.returnDate} />
-              <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, pickupTime: event.target.value }))} type="time" value={form.pickupTime} />
-              <select className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, serviceType: event.target.value }))} value={form.serviceType}>
-                {serviceTypes.map((st) => (
-                  <option key={st} value={st}>
-                    {st}
-                  </option>
-                ))}
-              </select>
-              <select className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, vehicleCategory: event.target.value }))} value={form.vehicleCategory}>
-                {vehicleCategories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-              <select className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, selectedVehicleId: event.target.value }))} value={form.selectedVehicleId}>
-                <option value="">Any vehicle</option>
-                {vehicles.map((vehicle) => (
-                  <option key={(vehicle as { id?: string }).id ?? (vehicle as { publicId?: string }).publicId} value={(vehicle as { publicId?: string }).publicId ?? (vehicle as { id?: string }).id}>
-                    {vehicle.name}
-                  </option>
-                ))}
-              </select>
-              <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, totalEstimate: Number(event.target.value) }))} placeholder="Total estimate" type="number" value={form.totalEstimate} />
-              <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, pricingRuleLabel: event.target.value }))} placeholder="Pricing rule label" value={form.pricingRuleLabel} />
-              <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, promoCode: event.target.value }))} placeholder="Promo code" value={form.promoCode} />
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Reference</span>
+                <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, reference: event.target.value }))} placeholder="Reference (optional)" value={form.reference} />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Status</span>
+                <select className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, status: event.target.value as typeof current.status }))} value={form.status}>
+                  <option value="new">new</option>
+                  <option value="confirmed">confirmed</option>
+                  <option value="change_requested">change_requested</option>
+                  <option value="in_progress">in_progress</option>
+                  <option value="completed">completed</option>
+                  <option value="cancelled">cancelled</option>
+                  <option value="refunded">refunded</option>
+                </select>
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Customer name</span>
+                <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, fullName: event.target.value }))} placeholder="Customer name" value={form.fullName} />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Customer email</span>
+                <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} placeholder="Customer email" type="email" value={form.email} />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Phone</span>
+                <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, phone: event.target.value }))} placeholder="Phone" value={form.phone} />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Source</span>
+                <select className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, source: event.target.value }))} value={form.source}>
+                  <option value="website">website</option>
+                  <option value="admin">admin</option>
+                  <option value="phone">phone</option>
+                  <option value="whatsapp">whatsapp</option>
+                </select>
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Pickup location</span>
+                <select className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, pickupLocation: event.target.value }))} value={form.pickupLocation}>
+                  {bookingLocations.map((location) => (
+                    <option key={location} value={location}>
+                      {location}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Drop-off location</span>
+                <select className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, dropoffLocation: event.target.value }))} value={form.dropoffLocation}>
+                  {bookingLocations.map((location) => (
+                    <option key={location} value={location}>
+                      {location}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Pickup date</span>
+                <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, pickupDate: event.target.value }))} type="date" value={form.pickupDate} />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Return date</span>
+                <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, returnDate: event.target.value }))} type="date" value={form.returnDate} />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Pickup time</span>
+                <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, pickupTime: event.target.value }))} type="time" value={form.pickupTime} />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Service type</span>
+                <select className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, serviceType: event.target.value }))} value={form.serviceType}>
+                  {serviceTypes.map((st) => (
+                    <option key={st} value={st}>
+                      {st}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Vehicle category</span>
+                <select className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, vehicleCategory: event.target.value }))} value={form.vehicleCategory}>
+                  {vehicleCategories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Specific vehicle</span>
+                <select className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, selectedVehicleId: event.target.value }))} value={form.selectedVehicleId}>
+                  <option value="">Any vehicle</option>
+                  {vehicles.map((vehicle) => (
+                    <option key={(vehicle as { id?: string }).id ?? (vehicle as { publicId?: string }).publicId} value={(vehicle as { publicId?: string }).publicId ?? (vehicle as { id?: string }).id}>
+                      {vehicle.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Total estimate</span>
+                <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, totalEstimate: Number(event.target.value) }))} placeholder="Total estimate" type="number" value={form.totalEstimate} />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Pricing rule label</span>
+                <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, pricingRuleLabel: event.target.value }))} placeholder="Pricing rule label" value={form.pricingRuleLabel} />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Promo code</span>
+                <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, promoCode: event.target.value }))} placeholder="Promo code" value={form.promoCode} />
+              </label>
             </div>
 
             <label className="inline-flex items-center gap-3 text-sm font-medium text-slate-700">
@@ -225,8 +276,14 @@ export default function AdminReservations() {
               Airport support required
             </label>
 
-            <textarea className={textareaClassName} onChange={(event) => setForm((current) => ({ ...current, notes: event.target.value }))} placeholder="Customer notes" value={form.notes} />
-            <textarea className={textareaClassName} onChange={(event) => setForm((current) => ({ ...current, adminNotes: event.target.value }))} placeholder="Internal admin notes" value={form.adminNotes} />
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Customer notes</span>
+              <textarea className={textareaClassName} onChange={(event) => setForm((current) => ({ ...current, notes: event.target.value }))} placeholder="Customer notes" value={form.notes} />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Internal admin notes</span>
+              <textarea className={textareaClassName} onChange={(event) => setForm((current) => ({ ...current, adminNotes: event.target.value }))} placeholder="Internal admin notes" value={form.adminNotes} />
+            </label>
 
             <div className="flex flex-wrap gap-3">
               <Button disabled={saving} type="submit">

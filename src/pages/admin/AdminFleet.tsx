@@ -137,42 +137,90 @@ export default function AdminFleet() {
           <h2 className="text-xl font-black text-slate-950">{form.vehicleId ? "Edit vehicle" : "Create vehicle"}</h2>
           <form className="mt-6 grid gap-4" onSubmit={handleSubmit}>
             <div className="grid gap-4 md:grid-cols-2">
-              <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, publicId: event.target.value }))} placeholder="Public ID" value={form.publicId} />
-              <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} placeholder="Vehicle name" value={form.name} />
-              <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))} placeholder="Category" value={form.category} />
-              <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, pricePerDay: Number(event.target.value) }))} placeholder="Price per day" type="number" value={form.pricePerDay} />
-              <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, transmission: event.target.value }))} placeholder="Transmission" value={form.transmission} />
-              <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, drive: event.target.value }))} placeholder="Drive" value={form.drive} />
-              <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, fuel: event.target.value }))} placeholder="Fuel" value={form.fuel} />
-              <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, badge: event.target.value }))} placeholder="Badge" value={form.badge} />
-              <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, seats: Number(event.target.value) }))} placeholder="Seats" type="number" value={form.seats} />
-              <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, luggage: Number(event.target.value) }))} placeholder="Luggage" type="number" value={form.luggage} />
-              <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, sortOrder: Number(event.target.value) }))} placeholder="Sort order" type="number" value={form.sortOrder} />
-              <select
-                className={inputClassName}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    availabilityStatus: event.target.value as typeof form.availabilityStatus,
-                  }))
-                }
-                value={form.availabilityStatus}
-              >
-                <option value="available">available</option>
-                <option value="reserved">reserved</option>
-                <option value="maintenance">maintenance</option>
-              </select>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Public ID</span>
+                <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, publicId: event.target.value }))} placeholder="Public ID" value={form.publicId} />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Vehicle name</span>
+                <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} placeholder="Vehicle name" value={form.name} />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Category</span>
+                <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))} placeholder="Category" value={form.category} />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Price per day</span>
+                <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, pricePerDay: Number(event.target.value) }))} placeholder="Price per day" type="number" value={form.pricePerDay} />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Transmission</span>
+                <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, transmission: event.target.value }))} placeholder="Transmission" value={form.transmission} />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Drive</span>
+                <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, drive: event.target.value }))} placeholder="Drive" value={form.drive} />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Fuel</span>
+                <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, fuel: event.target.value }))} placeholder="Fuel" value={form.fuel} />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Badge</span>
+                <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, badge: event.target.value }))} placeholder="Badge" value={form.badge} />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Seats</span>
+                <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, seats: Number(event.target.value) }))} placeholder="Seats" type="number" value={form.seats} />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Luggage</span>
+                <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, luggage: Number(event.target.value) }))} placeholder="Luggage" type="number" value={form.luggage} />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Sort order</span>
+                <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, sortOrder: Number(event.target.value) }))} placeholder="Sort order" type="number" value={form.sortOrder} />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Availability status</span>
+                <select
+                  className={inputClassName}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      availabilityStatus: event.target.value as typeof form.availabilityStatus,
+                    }))
+                  }
+                  value={form.availabilityStatus}
+                >
+                  <option value="available">available</option>
+                  <option value="reserved">reserved</option>
+                  <option value="maintenance">maintenance</option>
+                </select>
+              </label>
             </div>
 
-            <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, image: event.target.value }))} placeholder="Image URL" value={form.image} />
-            <textarea className={textareaClassName} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} placeholder="Vehicle description" value={form.description} />
-            <textarea className={textareaClassName} onChange={(event) => setForm((current) => ({ ...current, maintenanceNotes: event.target.value }))} placeholder="Maintenance notes (optional)" value={form.maintenanceNotes} />
-            <textarea
-              className={textareaClassName}
-              onChange={(event) => setForm((current) => ({ ...current, serviceSlugsText: event.target.value }))}
-              placeholder={`Recommended service slugs, one per line\n${services.map((s) => s.slug).join("\n")}`}
-              value={form.serviceSlugsText}
-            />
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Image URL</span>
+              <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, image: event.target.value }))} placeholder="Image URL" value={form.image} />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Description</span>
+              <textarea className={textareaClassName} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} placeholder="Vehicle description" value={form.description} />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Maintenance notes</span>
+              <textarea className={textareaClassName} onChange={(event) => setForm((current) => ({ ...current, maintenanceNotes: event.target.value }))} placeholder="Maintenance notes (optional)" value={form.maintenanceNotes} />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Service slugs</span>
+              <textarea
+                className={textareaClassName}
+                onChange={(event) => setForm((current) => ({ ...current, serviceSlugsText: event.target.value }))}
+                placeholder={`Recommended service slugs, one per line\n${services.map((s) => s.slug).join("\n")}`}
+                value={form.serviceSlugsText}
+              />
+            </label>
 
             <label className="inline-flex items-center gap-3 text-sm font-medium text-slate-700">
               <input

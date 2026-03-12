@@ -129,86 +129,122 @@ export default function AdminServices() {
           <h2 className="text-xl font-black text-slate-950">{form.serviceId ? "Edit service" : "Create service"}</h2>
           <form className="mt-6 grid gap-4" onSubmit={handleSubmit}>
             <div className="grid gap-4 md:grid-cols-2">
-              <input
-                className={inputClassName}
-                onChange={(e) => setForm((c) => ({ ...c, slug: e.target.value }))}
-                placeholder="Slug (e.g. self-drive)"
-                value={form.slug}
-              />
-              <input
-                className={inputClassName}
-                onChange={(e) => setForm((c) => ({ ...c, name: e.target.value }))}
-                placeholder="Name"
-                value={form.name}
-              />
-              <input
-                className={inputClassName}
-                onChange={(e) => setForm((c) => ({ ...c, menuLabel: e.target.value }))}
-                placeholder="Menu label"
-                value={form.menuLabel}
-              />
-              <select
-                className={inputClassName}
-                onChange={(e) => setForm((c) => ({ ...c, iconKey: e.target.value as (typeof iconKeys)[number] }))}
-                value={form.iconKey}
-              >
-                {iconKeys.map((k) => (
-                  <option key={k} value={k}>
-                    {k}
-                  </option>
-                ))}
-              </select>
-              <input
-                className={inputClassName}
-                onChange={(e) => setForm((c) => ({ ...c, sortOrder: Number(e.target.value) }))}
-                placeholder="Sort order"
-                type="number"
-                value={form.sortOrder}
-              />
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Slug</span>
+                <input
+                  className={inputClassName}
+                  onChange={(e) => setForm((c) => ({ ...c, slug: e.target.value }))}
+                  placeholder="Slug (e.g. self-drive)"
+                  value={form.slug}
+                />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Name</span>
+                <input
+                  className={inputClassName}
+                  onChange={(e) => setForm((c) => ({ ...c, name: e.target.value }))}
+                  placeholder="Name"
+                  value={form.name}
+                />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Menu label</span>
+                <input
+                  className={inputClassName}
+                  onChange={(e) => setForm((c) => ({ ...c, menuLabel: e.target.value }))}
+                  placeholder="Menu label"
+                  value={form.menuLabel}
+                />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Icon key</span>
+                <select
+                  className={inputClassName}
+                  onChange={(e) => setForm((c) => ({ ...c, iconKey: e.target.value as (typeof iconKeys)[number] }))}
+                  value={form.iconKey}
+                >
+                  {iconKeys.map((k) => (
+                    <option key={k} value={k}>
+                      {k}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-slate-700">Sort order</span>
+                <input
+                  className={inputClassName}
+                  onChange={(e) => setForm((c) => ({ ...c, sortOrder: Number(e.target.value) }))}
+                  placeholder="Sort order"
+                  type="number"
+                  value={form.sortOrder}
+                />
+              </label>
             </div>
 
-            <input
-              className={inputClassName}
-              onChange={(e) => setForm((c) => ({ ...c, heroImage: e.target.value }))}
-              placeholder="Hero image URL"
-              value={form.heroImage}
-            />
-            <textarea
-              className={textareaClassName}
-              onChange={(e) => setForm((c) => ({ ...c, shortDescription: e.target.value }))}
-              placeholder="Short description"
-              value={form.shortDescription}
-            />
-            <textarea
-              className={textareaClassName}
-              onChange={(e) => setForm((c) => ({ ...c, teaser: e.target.value }))}
-              placeholder="Teaser"
-              value={form.teaser}
-            />
-            <textarea
-              className={textareaClassName}
-              onChange={(e) => setForm((c) => ({ ...c, longDescription: e.target.value }))}
-              placeholder="Long description"
-              value={form.longDescription}
-            />
-            <textarea
-              className={textareaClassName}
-              onChange={(e) => setForm((c) => ({ ...c, idealForText: e.target.value }))}
-              placeholder="Ideal for (one per line)"
-              value={form.idealForText}
-            />
-            <textarea
-              className={textareaClassName}
-              onChange={(e) => setForm((c) => ({ ...c, inclusionsText: e.target.value }))}
-              placeholder="Inclusions (one per line)"
-              value={form.inclusionsText}
-            />
-            <textarea
-              className={textareaClassName}
-              onChange={(e) => setForm((c) => ({ ...c, recommendedVehicleIdsText: e.target.value }))}
-              placeholder={`Recommended vehicle IDs (one per line)\n${vehicles.map((v) => (v as { publicId?: string }).publicId ?? v.id).join("\n")}`}
-              value={form.recommendedVehicleIdsText}
-            />
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Hero image URL</span>
+              <input
+                className={inputClassName}
+                onChange={(e) => setForm((c) => ({ ...c, heroImage: e.target.value }))}
+                placeholder="Hero image URL"
+                value={form.heroImage}
+              />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Short description</span>
+              <textarea
+                className={textareaClassName}
+                onChange={(e) => setForm((c) => ({ ...c, shortDescription: e.target.value }))}
+                placeholder="Short description"
+                value={form.shortDescription}
+              />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Teaser</span>
+              <textarea
+                className={textareaClassName}
+                onChange={(e) => setForm((c) => ({ ...c, teaser: e.target.value }))}
+                placeholder="Teaser"
+                value={form.teaser}
+              />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Long description</span>
+              <textarea
+                className={textareaClassName}
+                onChange={(e) => setForm((c) => ({ ...c, longDescription: e.target.value }))}
+                placeholder="Long description"
+                value={form.longDescription}
+              />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Ideal for</span>
+              <textarea
+                className={textareaClassName}
+                onChange={(e) => setForm((c) => ({ ...c, idealForText: e.target.value }))}
+                placeholder="Ideal for (one per line)"
+                value={form.idealForText}
+              />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Inclusions</span>
+              <textarea
+                className={textareaClassName}
+                onChange={(e) => setForm((c) => ({ ...c, inclusionsText: e.target.value }))}
+                placeholder="Inclusions (one per line)"
+                value={form.inclusionsText}
+              />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Recommended vehicle IDs</span>
+              <textarea
+                className={textareaClassName}
+                onChange={(e) => setForm((c) => ({ ...c, recommendedVehicleIdsText: e.target.value }))}
+                placeholder={`Recommended vehicle IDs (one per line)\n${vehicles.map((v) => (v as { publicId?: string }).publicId ?? v.id).join("\n")}`}
+                value={form.recommendedVehicleIdsText}
+              />
+            </label>
 
             <label className="inline-flex items-center gap-3 text-sm font-medium text-slate-700">
               <input

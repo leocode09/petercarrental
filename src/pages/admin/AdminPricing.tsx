@@ -130,26 +130,44 @@ export default function AdminPricing() {
           </div>
 
           <form className="mt-6 grid gap-4 md:grid-cols-2" onSubmit={handleRuleSubmit}>
-            <input className={inputClassName} onChange={(event) => setRuleForm((current) => ({ ...current, name: event.target.value }))} placeholder="Rule name" value={ruleForm.name} />
-            <input className={inputClassName} onChange={(event) => setRuleForm((current) => ({ ...current, rateMultiplier: Number(event.target.value) }))} placeholder="Rate multiplier" step="0.01" type="number" value={ruleForm.rateMultiplier} />
-            <select className={inputClassName} onChange={(event) => setRuleForm((current) => ({ ...current, category: event.target.value }))} value={ruleForm.category}>
-              <option value="">All categories</option>
-              {vehicleCategories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-            <select className={inputClassName} onChange={(event) => setRuleForm((current) => ({ ...current, serviceType: event.target.value }))} value={ruleForm.serviceType}>
-              <option value="">All service types</option>
-              {serviceTypes.map((st) => (
-                <option key={st} value={st}>
-                  {st}
-                </option>
-              ))}
-            </select>
-            <input className={inputClassName} onChange={(event) => setRuleForm((current) => ({ ...current, startDate: event.target.value }))} type="date" value={ruleForm.startDate} />
-            <input className={inputClassName} onChange={(event) => setRuleForm((current) => ({ ...current, endDate: event.target.value }))} type="date" value={ruleForm.endDate} />
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Rule name</span>
+              <input className={inputClassName} onChange={(event) => setRuleForm((current) => ({ ...current, name: event.target.value }))} placeholder="Rule name" value={ruleForm.name} />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Rate multiplier</span>
+              <input className={inputClassName} onChange={(event) => setRuleForm((current) => ({ ...current, rateMultiplier: Number(event.target.value) }))} placeholder="Rate multiplier" step="0.01" type="number" value={ruleForm.rateMultiplier} />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Category</span>
+              <select className={inputClassName} onChange={(event) => setRuleForm((current) => ({ ...current, category: event.target.value }))} value={ruleForm.category}>
+                <option value="">All categories</option>
+                {vehicleCategories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Service type</span>
+              <select className={inputClassName} onChange={(event) => setRuleForm((current) => ({ ...current, serviceType: event.target.value }))} value={ruleForm.serviceType}>
+                <option value="">All service types</option>
+                {serviceTypes.map((st) => (
+                  <option key={st} value={st}>
+                    {st}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Start date</span>
+              <input className={inputClassName} onChange={(event) => setRuleForm((current) => ({ ...current, startDate: event.target.value }))} type="date" value={ruleForm.startDate} />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">End date</span>
+              <input className={inputClassName} onChange={(event) => setRuleForm((current) => ({ ...current, endDate: event.target.value }))} type="date" value={ruleForm.endDate} />
+            </label>
             <label className="md:col-span-2 inline-flex items-center gap-3 text-sm font-medium text-slate-700">
               <input checked={ruleForm.active} onChange={(event) => setRuleForm((current) => ({ ...current, active: event.target.checked }))} type="checkbox" />
               Rule is active
@@ -208,25 +226,46 @@ export default function AdminPricing() {
           </div>
 
           <form className="mt-6 grid gap-4 md:grid-cols-2" onSubmit={handlePromoSubmit}>
-            <input className={inputClassName} onChange={(event) => setPromoForm((current) => ({ ...current, code: event.target.value }))} placeholder="Promo code" value={promoForm.code} />
-            <input className={inputClassName} onChange={(event) => setPromoForm((current) => ({ ...current, amount: Number(event.target.value) }))} placeholder="Amount" type="number" value={promoForm.amount} />
-            <select
-              className={inputClassName}
-              onChange={(event) =>
-                setPromoForm((current) => ({
-                  ...current,
-                  discountType: event.target.value as typeof current.discountType,
-                }))
-              }
-              value={promoForm.discountType}
-            >
-              <option value="percentage">percentage</option>
-              <option value="fixed">fixed</option>
-            </select>
-            <input className={inputClassName} onChange={(event) => setPromoForm((current) => ({ ...current, usageLimit: event.target.value }))} placeholder="Usage limit" type="number" value={promoForm.usageLimit} />
-            <input className={inputClassName} onChange={(event) => setPromoForm((current) => ({ ...current, startsAt: event.target.value }))} type="date" value={promoForm.startsAt} />
-            <input className={inputClassName} onChange={(event) => setPromoForm((current) => ({ ...current, endsAt: event.target.value }))} type="date" value={promoForm.endsAt} />
-            <input className="md:col-span-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm transition focus:border-orange-500 focus:outline-none focus:ring-4 focus:ring-orange-100" onChange={(event) => setPromoForm((current) => ({ ...current, description: event.target.value }))} placeholder="Promo description" value={promoForm.description} />
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Promo code</span>
+              <input className={inputClassName} onChange={(event) => setPromoForm((current) => ({ ...current, code: event.target.value }))} placeholder="Promo code" value={promoForm.code} />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Amount</span>
+              <input className={inputClassName} onChange={(event) => setPromoForm((current) => ({ ...current, amount: Number(event.target.value) }))} placeholder="Amount" type="number" value={promoForm.amount} />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Discount type</span>
+              <select
+                className={inputClassName}
+                onChange={(event) =>
+                  setPromoForm((current) => ({
+                    ...current,
+                    discountType: event.target.value as typeof current.discountType,
+                  }))
+                }
+                value={promoForm.discountType}
+              >
+                <option value="percentage">percentage</option>
+                <option value="fixed">fixed</option>
+              </select>
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Usage limit</span>
+              <input className={inputClassName} onChange={(event) => setPromoForm((current) => ({ ...current, usageLimit: event.target.value }))} placeholder="Usage limit" type="number" value={promoForm.usageLimit} />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Starts at</span>
+              <input className={inputClassName} onChange={(event) => setPromoForm((current) => ({ ...current, startsAt: event.target.value }))} type="date" value={promoForm.startsAt} />
+            </label>
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Ends at</span>
+              <input className={inputClassName} onChange={(event) => setPromoForm((current) => ({ ...current, endsAt: event.target.value }))} type="date" value={promoForm.endsAt} />
+            </label>
+            <label className="md:col-span-2 flex flex-col gap-2">
+              <span className="text-sm font-semibold text-slate-700">Description</span>
+              <input className={inputClassName} onChange={(event) => setPromoForm((current) => ({ ...current, description: event.target.value }))} placeholder="Promo description" value={promoForm.description} />
+            </label>
             <label className="md:col-span-2 inline-flex items-center gap-3 text-sm font-medium text-slate-700">
               <input checked={promoForm.active} onChange={(event) => setPromoForm((current) => ({ ...current, active: event.target.checked }))} type="checkbox" />
               Promo code is active

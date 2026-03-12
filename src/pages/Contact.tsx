@@ -110,29 +110,38 @@ export default function Contact() {
                   }
                 }}
               >
-                <input
-                  className={inputClassName}
-                  onChange={(event) => setName(event.target.value)}
-                  placeholder="Your full name"
-                  required
-                  type="text"
-                  value={name}
-                />
-                <input
-                  className={inputClassName}
-                  onChange={(event) => setEmail(event.target.value)}
-                  placeholder="Your email"
-                  required
-                  type="email"
-                  value={email}
-                />
-                <textarea
-                  className={textareaClassName}
-                  onChange={(event) => setMessage(event.target.value)}
-                  placeholder="Tell us about your trip or the support you need."
-                  required
-                  value={message}
-                />
+                <label className="flex flex-col gap-2">
+                  <span className="text-sm font-semibold text-slate-700">Full name</span>
+                  <input
+                    className={inputClassName}
+                    onChange={(event) => setName(event.target.value)}
+                    placeholder="Your full name"
+                    required
+                    type="text"
+                    value={name}
+                  />
+                </label>
+                <label className="flex flex-col gap-2">
+                  <span className="text-sm font-semibold text-slate-700">Email</span>
+                  <input
+                    className={inputClassName}
+                    onChange={(event) => setEmail(event.target.value)}
+                    placeholder="Your email"
+                    required
+                    type="email"
+                    value={email}
+                  />
+                </label>
+                <label className="flex flex-col gap-2">
+                  <span className="text-sm font-semibold text-slate-700">Message</span>
+                  <textarea
+                    className={textareaClassName}
+                    onChange={(event) => setMessage(event.target.value)}
+                    placeholder="Tell us about your trip or the support you need."
+                    required
+                    value={message}
+                  />
+                </label>
                 <div className="flex flex-col gap-3 sm:flex-row [&>*]:w-full sm:[&>*]:w-auto">
                   <Button disabled={submitting} type="submit">
                     {submitting ? "Sending…" : "Send via WhatsApp"}

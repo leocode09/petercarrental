@@ -139,13 +139,16 @@ export default function Footer() {
                 }
               }}
             >
-              <input
-                className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none ring-0 placeholder:text-slate-500 focus:border-orange-400"
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="Your email"
-                type="email"
-                value={email}
-              />
+              <label className="flex flex-col gap-2">
+                <span className="sr-only">Email for newsletter</span>
+                <input
+                  className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none ring-0 placeholder:text-slate-500 focus:border-orange-400"
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="Your email"
+                  type="email"
+                  value={email}
+                />
+              </label>
               <Button disabled={newsletterLoading} fullWidth type="submit">
                 {newsletterLoading ? "Joining…" : "Join"}
               </Button>
