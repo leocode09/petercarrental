@@ -82,9 +82,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = useCallback(async (email: string, password: string) => {
     const functions = getFunctions(app, "us-central1");
-    const loginFn = httpsCallable<{ email: string; password: string }, { data: { token: string } }>(functions, "loginAdmin");
+    const loginFn = httpsCallable<{ email: string; password: string }, { token: string }>(functions, "loginAdmin");
     const res = await loginFn({ email: email.trim().toLowerCase(), password });
-    const token = res.data?.token;
+    const token = res.data.token;
     if (!token) throw new Error("No token returned");
     await signInWithCustomToken(auth, token);
   }, []);

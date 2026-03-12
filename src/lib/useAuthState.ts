@@ -10,7 +10,7 @@ type AuthState = {
 
 export function useAuthState(): AuthState {
   const { user, adminUser, loading: authLoading } = useAuth();
-  const checkHasAnyAdmin = useCallable<void, { data: { hasAnyAdmin: boolean } }>("checkHasAnyAdmin");
+  const checkHasAnyAdmin = useCallable<void, { hasAnyAdmin: boolean }>("checkHasAnyAdmin");
   const [hasAnyAdmin, setHasAnyAdmin] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -18,8 +18,8 @@ export function useAuthState(): AuthState {
 
     checkHasAnyAdmin()
       .then((res) => {
-        if (!cancelled && res.data) {
-          setHasAnyAdmin((res.data as { hasAnyAdmin: boolean }).hasAnyAdmin);
+        if (!cancelled) {
+          setHasAnyAdmin(res.data.hasAnyAdmin);
         }
       })
       .catch(() => {

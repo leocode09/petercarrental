@@ -1,91 +1,92 @@
 rules_version = '2';
 
-// Admin roles from custom claims
-function isAdmin() {
-  return request.auth != null && request.auth.token.role in ['superAdmin', 'manager', 'operations', 'contentEditor'];
-}
+service cloud.firestore {
+  match /databases/{database}/documents {
 
-function isSuperAdminOrManager() {
-  return request.auth != null && request.auth.token.role in ['superAdmin', 'manager'];
-}
+    function isAdmin() {
+      return request.auth != null && request.auth.token.role in ['superAdmin', 'manager', 'operations', 'contentEditor'];
+    }
 
-function isSuperAdmin() {
-  return request.auth != null && request.auth.token.role == 'superAdmin';
-}
+    function isSuperAdminOrManager() {
+      return request.auth != null && request.auth.token.role in ['superAdmin', 'manager'];
+    }
 
-// Public read: site content
-match /siteSettings/{docId} {
-  allow read: if true;
-  allow write: if isAdmin();
-}
+    function isSuperAdmin() {
+      return request.auth != null && request.auth.token.role == 'superAdmin';
+    }
 
-match /vehicles/{docId} {
-  allow read: if true;
-  allow write: if isAdmin();
-}
+    // Public read: site content
+    match /siteSettings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
 
-match /services/{docId} {
-  allow read: if true;
-  allow write: if isAdmin();
-}
+    match /vehicles/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
 
-match /destinations/{docId} {
-  allow read: if true;
-  allow write: if isAdmin();
-}
+    match /services/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
 
-match /blogPosts/{docId} {
-  allow read: if true;
-  allow write: if isAdmin();
-}
+    match /destinations/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
 
-match /testimonials/{docId} {
-  allow read: if true;
-  allow write: if isAdmin();
-}
+    match /blogPosts/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
 
-// Admin-only collections
-match /customers/{docId} {
-  allow read, write: if isAdmin();
-}
+    match /testimonials/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
 
-match /bookings/{docId} {
-  allow read, write: if isAdmin();
-}
+    // Admin-only collections
+    match /customers/{docId} {
+      allow read, write: if isAdmin();
+    }
 
-match /pricingRules/{docId} {
-  allow read: if true;
-  allow write: if isAdmin();
-}
+    match /bookings/{docId} {
+      allow read, write: if isAdmin();
+    }
 
-match /promoCodes/{docId} {
-  allow read: if true;
-  allow write: if isAdmin();
-}
+    match /pricingRules/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
 
-match /activityLogs/{docId} {
-  allow read, write: if isAdmin();
-}
+    match /promoCodes/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
 
-// Contact forms: anyone can create, admins can read/update
-match /contactLeads/{docId} {
-  allow create: if true;
-  allow read, update: if isAdmin();
-}
+    match /activityLogs/{docId} {
+      allow read, write: if isAdmin();
+    }
 
-match /complaints/{docId} {
-  allow create: if true;
-  allow read, update: if isAdmin();
-}
+    // Contact forms & newsletter: writes handled by Cloud Functions (admin SDK);
+    // admins can read/update via client.
+    match /contactLeads/{docId} {
+      allow read, update: if isAdmin();
+    }
 
-match /newsletterSubscribers/{docId} {
-  allow create: if true;
-  allow read, update: if isAdmin();
-}
+    match /complaints/{docId} {
+      allow read, update: if isAdmin();
+    }
 
-// Admins collection: stores admin profile (email, name, role). Cloud Functions write on create/update.
-// Authenticated admins can read their own document for profile display.
-match /admins/{docId} {
-  allow read: if request.auth != null && request.auth.uid == docId;
-  allow write: if false;  // Only Cloud Functions can write
+    match /newsletterSubscribers/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Admin profiles: Cloud Functions write; authenticated admins read own doc.
+    match /admins/{docId} {
+      allow read: if request.auth != null && request.auth.uid == docId;
+      allow write: if false;
+    }
+  }
 }
