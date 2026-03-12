@@ -1,17 +1,19 @@
 import { Fuel, Luggage, Settings2, Users } from "lucide-react";
-import type { Vehicle } from "../../data/vehicles";
 import { buildWhatsAppLink, cn, formatPricePerDay } from "../../lib/utils";
+import type { PublicVehicle } from "../../lib/firestore-public";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
 
 interface VehicleCardProps {
-  vehicle: Vehicle;
+  vehicle: PublicVehicle;
+  whatsappNumber: string;
   className?: string;
   showDescription?: boolean;
 }
 
 export default function VehicleCard({
   vehicle,
+  whatsappNumber,
   className,
   showDescription = true,
 }: VehicleCardProps) {
@@ -73,7 +75,7 @@ export default function VehicleCard({
           >
             Book Now
           </Button>
-          <Button href={buildWhatsAppLink(whatsappMessage)} target="_blank" variant="outline">
+          <Button href={buildWhatsAppLink(whatsappMessage, whatsappNumber)} target="_blank" variant="outline">
             Ask on WhatsApp
           </Button>
         </div>

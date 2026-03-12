@@ -1,10 +1,12 @@
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { destinations } from "../../data/destinations";
+import { usePublicData } from "../providers/PublicDataProvider";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
 
 export default function Destinations() {
+  const { data } = usePublicData();
+  const destinations = data?.destinations ?? [];
   return (
     <section className="section-space">
       <div className="container-shell space-y-10">
@@ -25,20 +27,26 @@ export default function Destinations() {
 
         <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
           {destinations.map((destination) => (
-            <Link className="block h-full" key={destination.slug} to={destination.route}>
+            <Link
+              className="block h-full"
+              key={destination.slug ?? destination.id}
+              to={destination.route ?? `/destinations/${destination.slug}`}
+            >
               <Card className="group h-full overflow-hidden">
                 <img
                   alt={destination.name}
                   className="h-52 w-full object-cover transition duration-500 group-hover:scale-105 sm:h-56"
                   loading="lazy"
-                  src={destination.image}
+                  src={destination.image ?? ""}
                 />
                 <div className="space-y-3 p-5 sm:p-6">
                   <div className="space-y-1">
                     <h3 className="text-xl font-bold text-slate-950">{destination.name}</h3>
                     <p className="text-sm font-semibold text-orange-600">{destination.tagline}</p>
                   </div>
-                  <p className="text-sm leading-6 text-slate-600">{destination.shortDescription}</p>
+                  <p className="text-sm leading-6 text-slate-600">
+                    {destination.shortDescription ?? destination.description ?? ""}
+                  </p>
                   <div className="inline-flex items-center gap-2 text-sm font-semibold text-orange-600">
                     <span>Plan this trip</span>
                     <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />

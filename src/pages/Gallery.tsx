@@ -1,23 +1,24 @@
 import Seo from "../components/seo/Seo";
 import PageHero from "../components/shared/PageHero";
-import { companyInfo } from "../data/site";
-import { destinations } from "../data/destinations";
-import { vehicles } from "../data/vehicles";
-
-const galleryImages = [
-  companyInfo.heroImage,
-  ...vehicles.map((vehicle) => vehicle.image),
-  ...destinations.map((destination) => destination.image),
-];
+import { usePublicData } from "../components/providers/PublicDataProvider";
 
 export default function Gallery() {
+  const { data } = usePublicData();
+  const companyInfo = data?.companyInfo;
+  const vehicles = data?.vehicles ?? [];
+  const destinations = data?.destinations ?? [];
+  const galleryImages = [
+    companyInfo?.heroImage ?? "",
+    ...vehicles.map((v) => v.image),
+    ...destinations.map((d) => d.image ?? ""),
+  ].filter(Boolean);
   return (
     <>
       <Seo canonicalPath="/gallery" title="Gallery | Peter Car Rental" />
       <PageHero
         description="A visual look at our fleet, the destinations we serve, and the style of travel we help create across Rwanda."
         eyebrow="Gallery"
-        image={companyInfo.heroImage}
+        image={companyInfo?.heroImage ?? ""}
         title="Explore the Peter Car Rental gallery"
       />
 

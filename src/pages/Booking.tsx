@@ -7,9 +7,15 @@ import PageHero from "../components/shared/PageHero";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import Select from "../components/ui/Select";
-import { bookingLocations, serviceTypes } from "../data/site";
-import { getVehicleByQueryValue, vehicleCategories, vehicles } from "../data/vehicles";
-import { saveBooking, type StoredBooking } from "../lib/siteStorage";
+import { usePublicData } from "../components/providers/PublicDataProvider";
+import {
+  getVehicleByQueryValue,
+  getVehicleCategories,
+} from "../lib/firestore-public";
+import {
+  submitPublicBooking,
+  updatePublicBooking,
+} from "../lib/firestore-public-booking";
 import { buildWhatsAppLink, inputClassName, openWhatsApp, textareaClassName } from "../lib/utils";
 
 const today = new Date();
@@ -32,10 +38,35 @@ const reasons = [
   },
 ];
 
+type SubmittedBooking = {
+  reference: string;
+  fullName: string;
+  email: string;
+  pickupLocation: string;
+  dropoffLocation: string;
+  pickupDate: string;
+  returnDate: string;
+  pickupTime: string;
+  vehicleCategory: string;
+  selectedVehicleId: string;
+  serviceType: string;
+  promoCode: string;
+  airportTransfer: boolean;
+  notes: string;
+};
+
 export default function Booking() {
+  const { data } = usePublicData();
   const [searchParams] = useSearchParams();
-  const initialVehicle = getVehicleByQueryValue(searchParams.get("vehicle"));
+  const vehicles = data?.vehicles ?? [];
+  const bookingLocations = data?.bookingLocations ?? [];
+  const serviceTypes = data?.serviceTypes ?? [];
+  const vehicleCategories = data ? getVehicleCategories(data.vehicles) : [];
+  const whatsappNumber = data?.companyInfo.whatsappNumber ?? "";
+
+  const initialVehicle = getVehicleByQueryValue(vehicles, searchParams.get("vehicle"));
   const initialReference = searchParams.get("reference") ?? "";
+
   const [pickupLocation, setPickupLocation] = useState(searchParams.get("pickupLocation") ?? "Kigali Airport");
   const [dropoffLocation, setDropoffLocation] = useState(searchParams.get("dropoffLocation") ?? "Same as pickup");
   const [pickupDate, setPickupDate] = useState(searchParams.get("pickupDate") ?? format(addDays(today, 1), "yyyy-MM-dd"));
@@ -51,15 +82,20 @@ export default function Booking() {
   const [fullName, setFullName] = useState(searchParams.get("fullName") ?? "");
   const [email, setEmail] = useState(searchParams.get("email") ?? "");
   const [notes, setNotes] = useState(searchParams.get("notes") ?? "");
-  const [submittedBooking, setSubmittedBooking] = useState<StoredBooking | null>(null);
+  const [submittedBooking, setSubmittedBooking] = useState<SubmittedBooking | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const selectedVehicle = useMemo(
-    () => vehicles.find((vehicle) => vehicle.id === selectedVehicleId),
-    [selectedVehicleId],
+    () => vehicles.find((v) => v.id === selectedVehicleId),
+    [vehicles, selectedVehicleId],
   );
   const submittedVehicle = useMemo(
-    () => (submittedBooking ? vehicles.find((vehicle) => vehicle.id === submittedBooking.selectedVehicleId) : undefined),
-    [submittedBooking],
+    () =>
+      submittedBooking
+        ? vehicles.find((v) => v.id === submittedBooking.selectedVehicleId)
+        : undefined,
+    [submittedBooking, vehicles],
   );
   const bookingIntent = initialReference ? "update" : "book";
   const latestWhatsAppMessage = submittedBooking
@@ -81,6 +117,8 @@ export default function Booking() {
         `Notes: ${submittedBooking.notes || "None"}`,
       ].join("\n")
     : "";
+
+  if (!data) return null;
 
   return (
     <>
@@ -105,11 +143,17 @@ export default function Booking() {
                 </h2>
                 {initialReference ? (
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    Reference <span className="font-semibold text-slate-950">{initialReference}</span> is loaded from
-                    your browser so you can update the request and resend it quickly.
+                    Reference <span className="font-semibold text-slate-950">{initialReference}</span> —
+                    enter your email to verify and update the request.
                   </p>
                 ) : null}
               </div>
+
+              {submitError ? (
+                <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+                  {submitError}
+                </div>
+              ) : null}
 
               {submittedBooking ? (
                 <Card className="border border-emerald-100 bg-emerald-50/80 p-5 shadow-none">
@@ -123,7 +167,7 @@ export default function Booking() {
                       </h3>
                     </div>
                     <p className="text-sm leading-6 text-slate-600">
-                      Your request is now saved in this browser and the WhatsApp draft has been opened for confirmation.
+                      Your request has been saved and the WhatsApp draft has been opened for confirmation.
                     </p>
                     <div className="flex flex-col gap-3 sm:flex-row [&>*]:w-full sm:[&>*]:w-auto">
                       <Button
@@ -132,7 +176,11 @@ export default function Booking() {
                       >
                         Manage This Booking
                       </Button>
-                      <Button href={buildWhatsAppLink(latestWhatsAppMessage)} target="_blank" variant="outline">
+                      <Button
+                        href={buildWhatsAppLink(latestWhatsAppMessage, whatsappNumber)}
+                        target="_blank"
+                        variant="outline"
+                      >
                         Open WhatsApp Again
                       </Button>
                     </div>
@@ -142,52 +190,83 @@ export default function Booking() {
 
               <form
                 className="grid gap-4 sm:grid-cols-2"
-                onSubmit={(event) => {
+                onSubmit={async (event) => {
                   event.preventDefault();
-                  const savedBooking = saveBooking({
-                    reference: initialReference || undefined,
-                    fullName,
-                    email,
-                    pickupLocation,
-                    dropoffLocation,
-                    pickupDate,
-                    returnDate,
-                    pickupTime,
-                    vehicleCategory: selectedVehicle?.category ?? vehicleCategory,
-                    serviceType,
-                    selectedVehicleId,
-                    promoCode,
-                    airportTransfer,
-                    notes,
-                  });
-
-                  const whatsappMessage = [
-                    `Hello Peter Car Rental, I would like to ${bookingIntent} a vehicle request.`,
-                    `Reference: ${savedBooking.reference}`,
-                    `Name: ${fullName || "Not provided"}`,
-                    `Email: ${email || "Not provided"}`,
-                    `Pickup location: ${pickupLocation}`,
-                    `Drop-off location: ${dropoffLocation}`,
-                    `Pickup date: ${pickupDate}`,
-                    `Return date: ${returnDate}`,
-                    `Pickup time: ${pickupTime}`,
-                    `Specific vehicle: ${selectedVehicle?.name || "Any available vehicle"}`,
-                    `Vehicle category: ${selectedVehicle?.category ?? vehicleCategory}`,
-                    `Service type: ${serviceType}`,
-                    `Promo code: ${promoCode || "None"}`,
-                    `Airport transfer: ${airportTransfer ? "Yes" : "No"}`,
-                    `Notes: ${notes || "None"}`,
-                  ].join("\n");
-
-                  setSubmittedBooking(savedBooking);
-                  openWhatsApp(whatsappMessage);
+                  setSubmitError(null);
+                  setSubmitting(true);
+                  try {
+                    const payload = {
+                      fullName,
+                      email,
+                      pickupLocation,
+                      dropoffLocation,
+                      pickupDate,
+                      returnDate,
+                      pickupTime,
+                      vehicleCategory: selectedVehicle?.category ?? vehicleCategory,
+                      serviceType,
+                      selectedVehicleId: selectedVehicleId || undefined,
+                      promoCode: promoCode.trim() || undefined,
+                      airportTransfer,
+                      notes: notes.trim() || undefined,
+                    };
+                    let resultRef: string;
+                    if (initialReference) {
+                      const res = await updatePublicBooking({
+                        ...payload,
+                        reference: initialReference,
+                      });
+                      resultRef = res.reference;
+                    } else {
+                      const res = await submitPublicBooking(payload);
+                      resultRef = res.reference;
+                    }
+                    setSubmittedBooking({
+                      reference: resultRef,
+                      fullName,
+                      email,
+                      pickupLocation,
+                      dropoffLocation,
+                      pickupDate,
+                      returnDate,
+                      pickupTime,
+                      vehicleCategory: selectedVehicle?.category ?? vehicleCategory,
+                      selectedVehicleId,
+                      serviceType,
+                      promoCode,
+                      airportTransfer,
+                      notes,
+                    });
+                    const msg = [
+                      `Hello Peter Car Rental, I would like to ${bookingIntent} a vehicle request.`,
+                      `Reference: ${resultRef}`,
+                      `Name: ${fullName || "Not provided"}`,
+                      `Email: ${email || "Not provided"}`,
+                      `Pickup location: ${pickupLocation}`,
+                      `Drop-off location: ${dropoffLocation}`,
+                      `Pickup date: ${pickupDate}`,
+                      `Return date: ${returnDate}`,
+                      `Pickup time: ${pickupTime}`,
+                      `Specific vehicle: ${selectedVehicle?.name || "Any available vehicle"}`,
+                      `Vehicle category: ${selectedVehicle?.category ?? vehicleCategory}`,
+                      `Service type: ${serviceType}`,
+                      `Promo code: ${promoCode || "None"}`,
+                      `Airport transfer: ${airportTransfer ? "Yes" : "No"}`,
+                      `Notes: ${notes || "None"}`,
+                    ].join("\n");
+                    openWhatsApp(msg, whatsappNumber);
+                  } catch (err) {
+                    setSubmitError(err instanceof Error ? err.message : "Failed to save booking. Try WhatsApp directly.");
+                  } finally {
+                    setSubmitting(false);
+                  }
                 }}
               >
                 <label className="flex flex-col gap-2">
                   <span className="text-sm font-semibold text-slate-700">Full name</span>
                   <input
                     className={inputClassName}
-                    onChange={(event) => setFullName(event.target.value)}
+                    onChange={(e) => setFullName(e.target.value)}
                     placeholder="Your full name"
                     required
                     type="text"
@@ -199,7 +278,7 @@ export default function Booking() {
                   <span className="text-sm font-semibold text-slate-700">Email</span>
                   <input
                     className={inputClassName}
-                    onChange={(event) => setEmail(event.target.value)}
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
                     required
                     type="email"
@@ -209,14 +288,14 @@ export default function Booking() {
 
                 <Select
                   label="Pickup Location"
-                  onChange={(event) => setPickupLocation(event.target.value)}
-                  options={bookingLocations.map((option) => ({ label: option, value: option }))}
+                  onChange={(e) => setPickupLocation(e.target.value)}
+                  options={bookingLocations.map((o) => ({ label: o, value: o }))}
                   value={pickupLocation}
                 />
                 <Select
                   label="Drop-off Location"
-                  onChange={(event) => setDropoffLocation(event.target.value)}
-                  options={bookingLocations.map((option) => ({ label: option, value: option }))}
+                  onChange={(e) => setDropoffLocation(e.target.value)}
+                  options={bookingLocations.map((o) => ({ label: o, value: o }))}
                   value={dropoffLocation}
                 />
 
@@ -225,7 +304,7 @@ export default function Booking() {
                   <input
                     className={inputClassName}
                     min={format(today, "yyyy-MM-dd")}
-                    onChange={(event) => setPickupDate(event.target.value)}
+                    onChange={(e) => setPickupDate(e.target.value)}
                     type="date"
                     value={pickupDate}
                   />
@@ -236,7 +315,7 @@ export default function Booking() {
                   <input
                     className={inputClassName}
                     min={pickupDate}
-                    onChange={(event) => setReturnDate(event.target.value)}
+                    onChange={(e) => setReturnDate(e.target.value)}
                     type="date"
                     value={returnDate}
                   />
@@ -246,7 +325,7 @@ export default function Booking() {
                   <span className="text-sm font-semibold text-slate-700">Pickup Time</span>
                   <input
                     className={inputClassName}
-                    onChange={(event) => setPickupTime(event.target.value)}
+                    onChange={(e) => setPickupTime(e.target.value)}
                     type="time"
                     value={pickupTime}
                   />
@@ -255,46 +334,36 @@ export default function Booking() {
                 <Select
                   hint="Choose a specific car if you already know the exact vehicle you want."
                   label="Specific Vehicle"
-                  onChange={(event) => {
-                    const nextVehicleId = event.target.value;
-                    const nextVehicle = vehicles.find((vehicle) => vehicle.id === nextVehicleId);
-
-                    setSelectedVehicleId(nextVehicleId);
-
-                    if (nextVehicle) {
-                      setVehicleCategory(nextVehicle.category);
-                    }
+                  onChange={(e) => {
+                    const nextId = e.target.value;
+                    const next = vehicles.find((v) => v.id === nextId);
+                    setSelectedVehicleId(nextId);
+                    if (next) setVehicleCategory(next.category);
                   }}
                   options={[
                     { label: "Any available vehicle", value: "" },
-                    ...vehicles.map((vehicle) => ({
-                      label: `${vehicle.name} (${vehicle.category})`,
-                      value: vehicle.id,
-                    })),
+                    ...vehicles.map((v) => ({ label: `${v.name} (${v.category})`, value: v.id })),
                   ]}
                   value={selectedVehicleId}
                 />
 
                 <Select
                   disabled={Boolean(selectedVehicle)}
-                  label="Vehicle Category"
-                  onChange={(event) => setVehicleCategory(event.target.value)}
-                  options={["Any Category", ...vehicleCategories].map((option) => ({
-                    label: option,
-                    value: option,
-                  }))}
                   hint={
                     selectedVehicle
                       ? "Category is locked to match the selected vehicle."
                       : "Choose a category if you are still comparing options."
                   }
+                  label="Vehicle Category"
+                  onChange={(e) => setVehicleCategory(e.target.value)}
+                  options={["Any Category", ...vehicleCategories].map((o) => ({ label: o, value: o }))}
                   value={vehicleCategory}
                 />
 
                 <Select
                   label="Service Type"
-                  onChange={(event) => setServiceType(event.target.value)}
-                  options={serviceTypes.map((option) => ({ label: option, value: option }))}
+                  onChange={(e) => setServiceType(e.target.value)}
+                  options={serviceTypes.map((o) => ({ label: o, value: o }))}
                   value={serviceType}
                 />
 
@@ -302,7 +371,7 @@ export default function Booking() {
                   <span className="text-sm font-semibold text-slate-700">Promo Code</span>
                   <input
                     className={inputClassName}
-                    onChange={(event) => setPromoCode(event.target.value)}
+                    onChange={(e) => setPromoCode(e.target.value)}
                     placeholder="Apply a promo code if you have one"
                     type="text"
                     value={promoCode}
@@ -330,7 +399,7 @@ export default function Booking() {
                   <input
                     checked={airportTransfer}
                     className="h-4 w-4 rounded border-slate-300 text-orange-500 focus:ring-orange-500"
-                    onChange={(event) => setAirportTransfer(event.target.checked)}
+                    onChange={(e) => setAirportTransfer(e.target.checked)}
                     type="checkbox"
                   />
                   <span>Airport pickup or drop-off needed</span>
@@ -340,41 +409,18 @@ export default function Booking() {
                   <span className="text-sm font-semibold text-slate-700">Additional Notes</span>
                   <textarea
                     className={textareaClassName}
-                    onChange={(event) => setNotes(event.target.value)}
+                    onChange={(e) => setNotes(e.target.value)}
                     placeholder="Share passenger count, luggage needs, destination details, or special requests."
                     value={notes}
                   />
                 </label>
 
                 <div className="flex flex-col gap-3 sm:col-span-2 sm:flex-row [&>*]:w-full sm:[&>*]:w-auto">
-                  <Button size="lg" type="submit">
-                    {initialReference ? "Update Booking Request" : "Send Booking Request"}
+                  <Button disabled={submitting} size="lg" type="submit">
+                    {submitting ? "Saving…" : initialReference ? "Update Booking Request" : "Send Booking Request"}
                   </Button>
                   <Button size="lg" to="/fleet" variant="outline">
                     Browse Fleet
                   </Button>
                 </div>
               </form>
-            </div>
-          </Card>
-
-          <div className="space-y-4 sm:space-y-6">
-            {reasons.map(({ title, description, icon: Icon }) => (
-              <Card className="p-5 sm:p-6" key={title}>
-                <div className="flex flex-col gap-4 sm:flex-row">
-                  <div className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-orange-600">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-slate-950">{title}</h3>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-    </>
-  );
-}

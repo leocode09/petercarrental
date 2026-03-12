@@ -4,15 +4,21 @@ import Seo from "../components/seo/Seo";
 import PageHero from "../components/shared/PageHero";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
-import { blogPosts, getBlogPostBySlug } from "../data/blog";
+import { usePublicData } from "../components/providers/PublicDataProvider";
+import { getBlogPostBySlug } from "../lib/firestore-public";
 
 export default function BlogPostDetail() {
   const { slug } = useParams();
-  const post = getBlogPostBySlug(slug);
+  const { data } = usePublicData();
+  const blogPosts = data?.blogPosts ?? [];
 
+  const post = useMemo(
+    () => getBlogPostBySlug(blogPosts, slug),
+    [blogPosts, slug],
+  );
   const relatedPosts = useMemo(
-    () => blogPosts.filter((blogPost) => blogPost.slug !== slug).slice(0, 2),
-    [slug],
+    () => blogPosts.filter((p) => (p.slug ?? p.id) !== slug).slice(0, 2),
+    [blogPosts, slug],
   );
 
   if (!post) {
@@ -40,8 +46,8 @@ export default function BlogPostDetail() {
       />
       <PageHero
         description={post.excerpt}
-        eyebrow={post.category}
-        image={post.image}
+        eyebrow={(post as { category?: string }).category ?? "Article"}
+        image={(post as { image?: string }).image ?? ""}
         title={post.title}
       >
         <Button to="/blog" variant="light">
@@ -57,12 +63,12 @@ export default function BlogPostDetail() {
           <Card className="p-5 sm:p-6 md:p-8">
             <div className="space-y-8">
               <div className="flex flex-wrap gap-3 text-sm font-semibold text-slate-500">
-                <span>{post.date}</span>
+                <span>{(post as { date?: string }).date ?? ""}</span>
                 <span className="text-slate-300">|</span>
-                <span>{post.readingTime}</span>
+                <span>{(post as { readingTime?: string }).readingTime ?? "5 min"}</span>
               </div>
 
-              {post.sections.map((section) => (
+              {((post as { sections?: { heading: string; body: string }[] }).sections ?? []).map((section) => (
                 <div className="space-y-3" key={section.heading}>
                   <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950 sm:text-2xl">
                     {section.heading}
@@ -80,7 +86,7 @@ export default function BlogPostDetail() {
                   Key Takeaways
                 </p>
                 <ul className="space-y-3">
-                  {post.highlights.map((highlight) => (
+                  {((post as { highlights?: string[] }).highlights ?? []).map((highlight) => (
                     <li
                       className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700"
                       key={highlight}
@@ -99,12 +105,12 @@ export default function BlogPostDetail() {
                 </p>
                 <div className="space-y-4">
                   {relatedPosts.map((relatedPost) => (
-                    <div className="space-y-2" key={relatedPost.slug}>
+                    <div className="space-y-2" key={relatedPost.slug ?? relatedPost.id}>
                       <h3 className="text-lg font-bold text-slate-950">{relatedPost.title}</h3>
                       <p className="text-sm leading-6 text-slate-600">{relatedPost.excerpt}</p>
                       <Link
                         className="text-sm font-semibold text-orange-600 transition hover:text-orange-700"
-                        to={`/blog/${relatedPost.slug}`}
+                        to={`/blog/${relatedPost.slug ?? relatedPost.id}`}
                       >
                         Read article
                       </Link>

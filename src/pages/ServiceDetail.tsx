@@ -6,67 +6,65 @@ import ServiceIcon from "../components/shared/ServiceIcon";
 import VehicleCard from "../components/shared/VehicleCard";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
-import { companyInfo } from "../data/site";
-import { getServiceBySlug } from "../data/services";
-import { vehicles } from "../data/vehicles";
 import { buildWhatsAppLink } from "../lib/utils";
+import { getServiceBySlug } from "../lib/firestore-public";
+import type { ServiceIconKey } from "../data/services";
+import { usePublicData } from "../components/providers/PublicDataProvider";
 
 export default function ServiceDetail() {
   const { slug } = useParams();
-  const service = getServiceBySlug(slug);
+  const { data } = usePublicData();
+  const services = data?.services ?? [];
+  const vehicles = data?.vehicles ?? [];
+  const companyInfo = data?.companyInfo;
+  const whatsappNumber = companyInfo?.whatsappNumber ?? "";
 
+  const service = useMemo(
+    () => getServiceBySlug(services, slug),
+    [services, slug],
+  );
   const recommendedVehicles = useMemo(() => {
-    if (!service) return [];
-    return vehicles.filter((vehicle) => service.recommendedVehicleIds.includes(vehicle.id));
-  }, [service]);
+    if (!service?.recommendedVehicleIds) return [];
+    return vehicles.filter((v) =>
+      service.recommendedVehicleIds!.includes(v.id),
+    );
+  }, [service, vehicles]);
   const bookingLink = useMemo(() => {
     if (!service) return "/booking";
-
     const params = new URLSearchParams();
-
-    if (service.slug === "self-drive") {
-      params.set("serviceType", "Self-Drive");
-    }
-
-    if (service.slug === "chauffeur" || service.slug === "airport-transfers" || service.slug === "wedding-events") {
+    if (service.slug === "self-drive") params.set("serviceType", "Self-Drive");
+    if (
+      ["chauffeur", "airport-transfers", "wedding-events"].includes(
+        service.slug ?? "",
+      )
+    ) {
       params.set("serviceType", "With Chauffeur");
     }
-
     if (service.slug === "airport-transfers") {
       params.set("pickupLocation", "Kigali Airport");
       params.set("airport", "true");
       params.set("notes", "Interested in airport pickup or drop-off support.");
     }
-
-    if (service.slug === "safari") {
-      params.set("category", "4x4 Safari");
-    }
-
+    if (service.slug === "safari") params.set("category", "4x4 Safari");
     if (service.slug === "corporate") {
       params.set("notes", "Interested in corporate or NGO transport support.");
     }
-
     if (service.slug === "long-term") {
       params.set("notes", "Interested in a long-term rental package.");
     }
-
     if (service.slug === "wedding-events") {
       params.set("notes", "Interested in wedding or event transport.");
     }
-
     const search = params.toString();
-
     return search ? `/booking?${search}` : "/booking";
   }, [service]);
   const serviceWhatsAppLink = useMemo(() => {
-    if (!service) {
-      return companyInfo.whatsappShareHref;
-    }
-
+    if (!service || !whatsappNumber) return companyInfo?.whatsappShareHref ?? "#";
     return buildWhatsAppLink(
       `Hello Peter Car Rental, I would like to learn more about the ${service.name} service.`,
+      whatsappNumber,
     );
-  }, [service]);
+  }, [service, whatsappNumber, companyInfo?.whatsappShareHref]);
 
   if (!service) {
     return (
@@ -84,13 +82,17 @@ export default function ServiceDetail() {
     );
   }
 
+  const route = service.route ?? `/services/${service.slug}`;
+  const heroImage =
+    service.heroImage ?? companyInfo?.heroImage ?? "";
+
   return (
     <>
-      <Seo canonicalPath={service.route} title={`${service.name} | Peter Car Rental`} />
+      <Seo canonicalPath={route} title={`${service.name} | Peter Car Rental`} />
       <PageHero
-        description={service.teaser}
+        description={service.teaser ?? service.shortDescription ?? ""}
         eyebrow="Service Detail"
-        image={service.heroImage}
+        image={heroImage}
         title={service.name}
       >
         <Button href={serviceWhatsAppLink} target="_blank" variant="whatsapp">
@@ -107,16 +109,21 @@ export default function ServiceDetail() {
             <Card className="p-5 sm:p-6 md:p-8">
               <div className="space-y-5">
                 <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-100 text-orange-600">
-                  <ServiceIcon className="h-6 w-6" iconKey={service.iconKey} />
+                  <ServiceIcon
+                    className="h-6 w-6"
+                    iconKey={(service.iconKey as ServiceIconKey) ?? "selfDrive"}
+                  />
                 </div>
                 <div className="space-y-3">
                   <h2 className="text-2xl font-black tracking-[-0.03em] text-slate-950 sm:text-3xl">
                     Key Benefits
                   </h2>
-                  <p className="text-base leading-7 text-slate-600">{service.longDescription}</p>
+                  <p className="text-base leading-7 text-slate-600">
+                    {service.longDescription ?? service.description ?? ""}
+                  </p>
                 </div>
                 <ul className="grid gap-3 sm:grid-cols-2">
-                  {service.inclusions.map((item) => (
+                  {(service.inclusions ?? []).map((item) => (
                     <li
                       className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700"
                       key={item}
@@ -130,13 +137,15 @@ export default function ServiceDetail() {
 
             <Card className="p-5 sm:p-6 md:p-8">
               <div className="space-y-4">
-                <h2 className="text-2xl font-black tracking-[-0.03em] text-slate-950 sm:text-3xl">Ideal For</h2>
+                <h2 className="text-2xl font-black tracking-[-0.03em] text-slate-950 sm:text-3xl">
+                  Ideal For
+                </h2>
                 <p className="text-base leading-7 text-slate-600">
                   This service works especially well for the following travel styles and trip
                   scenarios.
                 </p>
                 <div className="space-y-3">
-                  {service.idealFor.map((item) => (
+                  {(service.idealFor ?? []).map((item) => (
                     <div
                       className="rounded-2xl border border-slate-200 px-4 py-4 text-sm font-medium text-slate-700"
                       key={item}
@@ -154,14 +163,18 @@ export default function ServiceDetail() {
               <p className="text-sm font-bold uppercase tracking-[0.18em] text-orange-500">
                 Recommended Fleet
               </p>
-                <h2 className="text-2xl font-black tracking-[-0.03em] text-slate-950 sm:text-3xl">
+              <h2 className="text-2xl font-black tracking-[-0.03em] text-slate-950 sm:text-3xl">
                 Recommended vehicles for this service
               </h2>
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
               {recommendedVehicles.map((vehicle) => (
-                <VehicleCard key={vehicle.id} vehicle={vehicle} />
+                <VehicleCard
+                  key={vehicle.id}
+                  vehicle={vehicle}
+                  whatsappNumber={whatsappNumber}
+                />
               ))}
             </div>
           </div>

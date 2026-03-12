@@ -1,26 +1,11 @@
 import Seo from "../components/seo/Seo";
 import PageHero from "../components/shared/PageHero";
 import Card from "../components/ui/Card";
-
-const team = [
-  {
-    name: "Peter N.",
-    title: "Founder & Managing Director",
-    bio: "Oversees client experience, fleet standards, and the premium service approach that defines the brand.",
-  },
-  {
-    name: "Aline M.",
-    title: "Reservations Lead",
-    bio: "Coordinates booking details, delivery timing, and traveler support from first inquiry to vehicle handover.",
-  },
-  {
-    name: "Eric H.",
-    title: "Operations & Fleet Coordinator",
-    bio: "Keeps vehicles road-ready, scheduling efficient, and logistics aligned for business, leisure, and safari trips.",
-  },
-];
+import { usePublicData } from "../components/providers/PublicDataProvider";
 
 export default function Leadership() {
+  const { data } = usePublicData();
+  const team = data?.leadershipMembers ?? [];
   return (
     <>
       <Seo canonicalPath="/leadership" title="Leadership | Peter Car Rental" />
@@ -33,7 +18,7 @@ export default function Leadership() {
 
       <section className="section-space">
         <div className="container-shell grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-          {team.map((member) => (
+          {team.length > 0 ? team.map((member) => (
             <Card className="h-full p-6 sm:p-7" key={member.name}>
               <div className="space-y-4">
                 <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-orange-100 text-xl font-black text-orange-600">
@@ -50,7 +35,11 @@ export default function Leadership() {
                 <p className="text-sm leading-7 text-slate-600">{member.bio}</p>
               </div>
             </Card>
-          ))}
+          )) : (
+            <Card className="p-10 text-center">
+              <p className="text-slate-600">Leadership team information is being loaded.</p>
+            </Card>
+          )}
         </div>
       </section>
     </>

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { getFunctions, httpsCallable } from "firebase/functions";
-import { db } from "../../lib/firebase";
+import app, { db } from "../../lib/firebase";
 import { siteSettingKey } from "../../lib/validators";
 
 export default function FirebaseBootstrapper() {
@@ -24,7 +24,7 @@ export default function FirebaseBootstrapper() {
         attemptedRef.current = true;
         if (cancelled) return;
 
-        const functions = getFunctions();
+        const functions = getFunctions(app, "us-central1");
         const seedFn = httpsCallable(functions, "seedPublicData");
         await seedFn();
       } catch (error) {

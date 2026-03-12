@@ -1,10 +1,12 @@
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { blogPosts } from "../../data/blog";
+import { usePublicData } from "../providers/PublicDataProvider";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
 
 export default function BlogPreview() {
+  const { data } = usePublicData();
+  const blogPosts = data?.blogPosts ?? [];
   return (
     <section className="section-space bg-slate-50">
       <div className="container-shell space-y-10">
@@ -21,14 +23,14 @@ export default function BlogPreview() {
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-          {blogPosts.map((post) => (
-            <Card className="overflow-hidden" key={post.slug}>
-              <img alt={post.title} className="h-52 w-full object-cover sm:h-56" loading="lazy" src={post.image} />
+          {blogPosts.slice(0, 6).map((post) => (
+            <Card className="overflow-hidden" key={post.slug ?? post.id}>
+              <img alt={post.title} className="h-52 w-full object-cover sm:h-56" loading="lazy" src={(post as { image?: string }).image ?? ""} />
               <div className="space-y-4 p-5 sm:p-6">
                 <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-orange-500">
-                  <span>{post.category}</span>
+                  <span>{(post as { category?: string }).category ?? "Article"}</span>
                   <span className="text-slate-300">|</span>
-                  <span className="text-slate-400">{post.readingTime}</span>
+                  <span className="text-slate-400">{(post as { readingTime?: string }).readingTime ?? "5 min"}</span>
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-xl font-bold text-slate-950">{post.title}</h3>
@@ -36,7 +38,7 @@ export default function BlogPreview() {
                 </div>
                 <Link
                   className="inline-flex items-center gap-2 text-sm font-semibold text-orange-600 transition hover:text-orange-700"
-                  to={`/blog/${post.slug}`}
+                  to={`/blog/${post.slug ?? post.id}`}
                 >
                   Read Article
                   <ArrowRight className="h-4 w-4" />

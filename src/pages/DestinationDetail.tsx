@@ -5,21 +5,35 @@ import PageHero from "../components/shared/PageHero";
 import VehicleCard from "../components/shared/VehicleCard";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
-import { getDestinationBySlug } from "../data/destinations";
-import { getServiceBySlug } from "../data/services";
-import { vehicles } from "../data/vehicles";
+import { usePublicData } from "../components/providers/PublicDataProvider";
+import {
+  getDestinationBySlug,
+  getServiceBySlug,
+  getVehicleByQueryValue,
+} from "../lib/firestore-public";
 
 export default function DestinationDetail() {
   const { slug } = useParams();
-  const destination = getDestinationBySlug(slug);
+  const { data } = usePublicData();
+  const destinations = data?.destinations ?? [];
+  const services = data?.services ?? [];
+  const vehicles = data?.vehicles ?? [];
+  const whatsappNumber = data?.companyInfo.whatsappNumber ?? "";
 
+  const destination = useMemo(
+    () => getDestinationBySlug(destinations, slug),
+    [destinations, slug],
+  );
   const bestVehicle = useMemo(
-    () => vehicles.find((vehicle) => vehicle.id === destination?.bestVehicleId),
-    [destination],
+    () =>
+      destination?.bestVehicleId
+        ? getVehicleByQueryValue(vehicles, destination.bestVehicleId)
+        : undefined,
+    [destination?.bestVehicleId, vehicles],
   );
   const linkedService = useMemo(
-    () => getServiceBySlug(destination?.serviceSlug),
-    [destination?.serviceSlug],
+    () => getServiceBySlug(services, destination?.serviceSlug),
+    [destination?.serviceSlug, services],
   );
   const bookingLink = useMemo(() => {
     if (!destination) {
@@ -63,9 +77,9 @@ export default function DestinationDetail() {
     <>
       <Seo canonicalPath={destination.route} title={`${destination.name} | Peter Car Rental`} />
       <PageHero
-        description={destination.shortDescription}
+        description={destination.shortDescription ?? destination.description ?? ""}
         eyebrow="Destination Guide"
-        image={destination.image}
+        image={destination.image ?? ""}
         title={destination.name}
       >
         <Button to={bookingLink}>Book This Trip</Button>
@@ -81,9 +95,11 @@ export default function DestinationDetail() {
               <h2 className="text-2xl font-black tracking-[-0.03em] text-slate-950 sm:text-3xl">
                 Plan this route with confidence
               </h2>
-              <p className="text-base leading-7 text-slate-600">{destination.longDescription}</p>
+              <p className="text-base leading-7 text-slate-600">
+                {destination.longDescription ?? destination.description ?? ""}
+              </p>
               <div className="grid gap-3 sm:grid-cols-2">
-                {destination.highlights.map((highlight) => (
+                {(destination.highlights ?? []).map((highlight) => (
                   <div
                     className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700"
                     key={highlight}
@@ -106,9 +122,14 @@ export default function DestinationDetail() {
                     Recommended service
                   </p>
                   <h3 className="mt-2 text-xl font-bold text-slate-950">{linkedService.name}</h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{linkedService.shortDescription}</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    {linkedService.shortDescription ?? linkedService.description ?? ""}
+                  </p>
                   <div className="mt-4">
-                    <Button to={linkedService.route} variant="outline">
+                    <Button
+                      to={linkedService.route ?? `/services/${linkedService.slug}`}
+                      variant="outline"
+                    >
                       View Service
                     </Button>
                   </div>
@@ -116,7 +137,11 @@ export default function DestinationDetail() {
               ) : null}
 
               {bestVehicle ? (
-                <VehicleCard className="shadow-none" vehicle={bestVehicle} />
+                <VehicleCard
+                  className="shadow-none"
+                  vehicle={bestVehicle}
+                  whatsappNumber={whatsappNumber}
+                />
               ) : null}
             </div>
           </Card>

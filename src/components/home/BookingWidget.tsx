@@ -1,8 +1,8 @@
 import { addDays, format } from "date-fns";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { bookingLocations, serviceTypes } from "../../data/site";
-import { vehicleCategories } from "../../data/vehicles";
+import { getVehicleCategories } from "../../lib/firestore-public";
+import { usePublicData } from "../providers/PublicDataProvider";
 import { inputClassName } from "../../lib/utils";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
@@ -11,7 +11,11 @@ import Select from "../ui/Select";
 const today = new Date();
 
 export default function BookingWidget() {
+  const { data } = usePublicData();
   const navigate = useNavigate();
+  const bookingLocations = data?.bookingLocations ?? [];
+  const serviceTypes = data?.serviceTypes ?? [];
+  const vehicleCategories = data ? getVehicleCategories(data.vehicles) : [];
   const [pickupLocation, setPickupLocation] = useState("Kigali Airport");
   const [dropoffLocation, setDropoffLocation] = useState("Same as pickup");
   const [pickupDate, setPickupDate] = useState(format(addDays(today, 1), "yyyy-MM-dd"));
@@ -24,7 +28,7 @@ export default function BookingWidget() {
 
   const locationOptions = useMemo(
     () => bookingLocations.map((option) => ({ label: option, value: option })),
-    [],
+    [bookingLocations],
   );
 
   const categoryOptions = useMemo(
@@ -38,7 +42,7 @@ export default function BookingWidget() {
 
   const serviceOptions = useMemo(
     () => serviceTypes.map((option) => ({ label: option, value: option })),
-    [],
+    [serviceTypes],
   );
 
   return (

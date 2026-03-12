@@ -1,8 +1,12 @@
 import { Mail, MapPin, Phone } from "lucide-react";
-import { companyInfo } from "../../data/site";
+import { usePublicData } from "../providers/PublicDataProvider";
 import Button from "../ui/Button";
 
 export default function TopBar() {
+  const { data } = usePublicData();
+  const companyInfo = data?.companyInfo;
+  if (!companyInfo) return null;
+
   return (
     <div className="bg-slate-950 text-slate-200">
       <div className="container-shell flex flex-col gap-2 py-2.5 text-xs sm:text-sm md:flex-row md:items-center md:justify-between">

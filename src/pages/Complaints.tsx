@@ -3,12 +3,17 @@ import Seo from "../components/seo/Seo";
 import PageHero from "../components/shared/PageHero";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
+import { usePublicData } from "../components/providers/PublicDataProvider";
+import { submitComplaint } from "../lib/firestore-public-mutations";
 import { inputClassName, openWhatsApp, textareaClassName } from "../lib/utils";
 
 export default function Complaints() {
+  const { data } = usePublicData();
+  const whatsappNumber = data?.companyInfo.whatsappNumber ?? "";
   const [name, setName] = useState("");
   const [contactInfo, setContactInfo] = useState("");
   const [details, setDetails] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   return (
     <>
@@ -25,16 +30,28 @@ export default function Complaints() {
           <Card className="mx-auto max-w-3xl p-6 md:p-8">
             <form
               className="space-y-4"
-              onSubmit={(event) => {
+              onSubmit={async (event) => {
                 event.preventDefault();
-                openWhatsApp(
-                  [
-                    "Hello Peter Car Rental, I want to report a complaint.",
-                    `Name: ${name}`,
-                    `Contact: ${contactInfo}`,
-                    `Complaint details: ${details}`,
-                  ].join("\n"),
-                );
+                setSubmitting(true);
+                try {
+                  await submitComplaint({ name, contactInfo, details });
+                  openWhatsApp(
+                    [
+                      "Hello Peter Car Rental, I want to report a complaint.",
+                      `Name: ${name}`,
+                      `Contact: ${contactInfo}`,
+                      `Complaint details: ${details}`,
+                    ].join("\n"),
+                    whatsappNumber,
+                  );
+                } catch {
+                  openWhatsApp(
+                    `Hello Peter Car Rental, complaint. Name: ${name}, Contact: ${contactInfo}, Details: ${details}`,
+                    whatsappNumber,
+                  );
+                } finally {
+                  setSubmitting(false);
+                }
               }}
             >
               <div>
@@ -69,7 +86,9 @@ export default function Complaints() {
                 required
                 value={details}
               />
-              <Button type="submit">Submit Complaint</Button>
+              <Button disabled={submitting} type="submit">
+                {submitting ? "Submitting…" : "Submit Complaint"}
+              </Button>
             </form>
           </Card>
         </div>

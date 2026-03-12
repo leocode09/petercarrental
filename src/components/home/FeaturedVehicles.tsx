@@ -1,9 +1,14 @@
 import { ArrowRight } from "lucide-react";
-import { featuredVehicles } from "../../data/vehicles";
+import { getFeaturedVehicles } from "../../lib/firestore-public";
+import { usePublicData } from "../providers/PublicDataProvider";
 import VehicleCard from "../shared/VehicleCard";
 import Button from "../ui/Button";
 
 export default function FeaturedVehicles() {
+  const { data } = usePublicData();
+  const vehicles = data ? getFeaturedVehicles(data.vehicles) : [];
+  const whatsappNumber = data?.companyInfo.whatsappNumber ?? "";
+
   return (
     <section className="section-space">
       <div className="container-shell space-y-10">
@@ -24,8 +29,12 @@ export default function FeaturedVehicles() {
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-          {featuredVehicles.map((vehicle) => (
-            <VehicleCard key={vehicle.id} vehicle={vehicle} />
+          {vehicles.map((vehicle) => (
+            <VehicleCard
+              key={vehicle.id}
+              vehicle={vehicle}
+              whatsappNumber={whatsappNumber}
+            />
           ))}
         </div>
       </div>

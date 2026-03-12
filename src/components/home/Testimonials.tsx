@@ -1,7 +1,9 @@
 import { Quote } from "lucide-react";
-import { testimonials } from "../../data/testimonials";
+import { usePublicData } from "../providers/PublicDataProvider";
 
 export default function Testimonials() {
+  const { data } = usePublicData();
+  const testimonials = data?.testimonials ?? [];
   return (
     <section className="section-space bg-slate-950 text-white">
       <div className="container-shell space-y-10">
@@ -14,7 +16,7 @@ export default function Testimonials() {
 
         <div className="grid gap-6 sm:grid-cols-2">
           {testimonials.map((testimonial) => (
-            <div className="dark-surface rounded-[28px] p-6 sm:p-7" key={testimonial.id}>
+            <div className="dark-surface rounded-[28px] p-6 sm:p-7" key={testimonial.id ?? testimonial.publicId}>
               <div className="space-y-5">
                 <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-orange-400">
                   <Quote className="h-5 w-5" />

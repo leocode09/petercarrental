@@ -4,13 +4,19 @@ import Seo from "../components/seo/Seo";
 import PageHero from "../components/shared/PageHero";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
-import { companyInfo } from "../data/site";
+import { usePublicData } from "../components/providers/PublicDataProvider";
+import { submitLead } from "../lib/firestore-public-mutations";
 import { inputClassName, openWhatsApp, textareaClassName } from "../lib/utils";
 
 export default function Contact() {
+  const { data } = usePublicData();
+  const companyInfo = data?.companyInfo;
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  if (!companyInfo) return null;
 
   return (
     <>
@@ -80,16 +86,28 @@ export default function Contact() {
 
               <form
                 className="space-y-4"
-                onSubmit={(event) => {
+                onSubmit={async (event) => {
                   event.preventDefault();
-                  openWhatsApp(
-                    [
-                      "Hello Peter Car Rental, I have an inquiry.",
-                      `Name: ${name}`,
-                      `Email: ${email}`,
-                      `Message: ${message}`,
-                    ].join("\n"),
-                  );
+                  setSubmitting(true);
+                  try {
+                    await submitLead({ name, email, message });
+                    openWhatsApp(
+                      [
+                        "Hello Peter Car Rental, I have an inquiry.",
+                        `Name: ${name}`,
+                        `Email: ${email}`,
+                        `Message: ${message}`,
+                      ].join("\n"),
+                      companyInfo.whatsappNumber,
+                    );
+                  } catch {
+                    openWhatsApp(
+                      `Hello Peter Car Rental, I have an inquiry. Name: ${name}, Email: ${email}, Message: ${message}`,
+                      companyInfo.whatsappNumber,
+                    );
+                  } finally {
+                    setSubmitting(false);
+                  }
                 }}
               >
                 <input
@@ -116,7 +134,9 @@ export default function Contact() {
                   value={message}
                 />
                 <div className="flex flex-col gap-3 sm:flex-row [&>*]:w-full sm:[&>*]:w-auto">
-                  <Button type="submit">Send via WhatsApp</Button>
+                  <Button disabled={submitting} type="submit">
+                    {submitting ? "Sending…" : "Send via WhatsApp"}
+                  </Button>
                   <Button href={companyInfo.mailtoHref} variant="outline">
                     Send Email
                   </Button>

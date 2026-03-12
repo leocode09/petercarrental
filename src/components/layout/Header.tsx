@@ -1,13 +1,15 @@
 import { ChevronDown, Menu } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, NavLink as RouterNavLink, useLocation } from "react-router-dom";
-import { companyInfo, navLinks } from "../../data/site";
+import { usePublicData } from "../providers/PublicDataProvider";
 import { cn, routeIsActive } from "../../lib/utils";
 import Button from "../ui/Button";
 import MobileNav from "./MobileNav";
 
 export default function Header() {
+  const { data } = usePublicData();
   const location = useLocation();
+  const navLinks = data?.navLinks ?? [];
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {

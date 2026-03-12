@@ -1,11 +1,14 @@
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { services } from "../../data/services";
+import type { ServiceIconKey } from "../../data/services";
+import { usePublicData } from "../providers/PublicDataProvider";
 import ServiceIcon from "../shared/ServiceIcon";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
 
 export default function ServicesSection() {
+  const { data } = usePublicData();
+  const services = data?.services ?? [];
   return (
     <section className="section-space bg-slate-50">
       <div className="container-shell space-y-10">
@@ -27,16 +30,25 @@ export default function ServicesSection() {
 
         <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
           {services.map((service) => (
-            <Link className="block h-full" key={service.slug} to={service.route}>
+            <Link
+              className="block h-full"
+              key={service.slug ?? service.id}
+              to={service.route ?? `/services/${service.slug}`}
+            >
               <Card className="group h-full p-5 transition duration-200 hover:-translate-y-1 hover:border-orange-200 sm:p-7">
                 <div className="space-y-5">
                   <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-100 text-orange-600">
-                    <ServiceIcon className="h-6 w-6" iconKey={service.iconKey} />
+                    <ServiceIcon
+                      className="h-6 w-6"
+                      iconKey={(service.iconKey as ServiceIconKey) ?? "selfDrive"}
+                    />
                   </div>
 
                   <div className="space-y-2">
                     <h3 className="text-xl font-bold text-slate-950">{service.name}</h3>
-                    <p className="text-sm leading-6 text-slate-600">{service.shortDescription}</p>
+                    <p className="text-sm leading-6 text-slate-600">
+                    {service.shortDescription ?? service.description ?? ""}
+                  </p>
                   </div>
 
                   <div className="inline-flex items-center gap-2 text-sm font-semibold text-orange-600">

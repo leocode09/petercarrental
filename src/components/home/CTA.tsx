@@ -1,8 +1,12 @@
 import { Phone } from "lucide-react";
-import { companyInfo } from "../../data/site";
+import { usePublicData } from "../providers/PublicDataProvider";
 import Button from "../ui/Button";
 
 export default function CTA() {
+  const { data } = usePublicData();
+  const companyInfo = data?.companyInfo;
+  if (!companyInfo) return null;
+
   return (
     <section className="section-space">
       <div className="container-shell">

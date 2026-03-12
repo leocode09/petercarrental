@@ -1,5 +1,5 @@
 import { ShieldCheck, Star, TimerReset } from "lucide-react";
-import { companyInfo } from "../../data/site";
+import { usePublicData } from "../providers/PublicDataProvider";
 import Button from "../ui/Button";
 
 const highlights = [
@@ -9,6 +9,10 @@ const highlights = [
 ];
 
 export default function Hero() {
+  const { data } = usePublicData();
+  const companyInfo = data?.companyInfo;
+  if (!companyInfo) return null;
+
   return (
     <section className="relative overflow-hidden bg-slate-950 text-white">
       <div

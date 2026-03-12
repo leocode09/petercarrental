@@ -1,6 +1,6 @@
 import { ChevronRight, X } from "lucide-react";
 import { Link } from "react-router-dom";
-import type { NavLink } from "../../data/site";
+import type { NavLink } from "../../lib/firestore-public";
 import { cn } from "../../lib/utils";
 import Button from "../ui/Button";
 

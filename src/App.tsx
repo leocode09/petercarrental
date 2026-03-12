@@ -4,6 +4,7 @@ import AdminLayout from "./components/admin/AdminLayout";
 import AdminPortalProvider from "./components/admin/AdminPortalProvider";
 import RequireAdminRoute from "./components/admin/RequireAdminRoute";
 import Layout from "./components/layout/Layout";
+import PublicDataProvider from "./components/providers/PublicDataProvider";
 import About from "./pages/About";
 import Blog from "./pages/Blog";
 import BlogPostDetail from "./pages/BlogPostDetail";
@@ -67,7 +68,7 @@ function AppRoutes() {
           <Route element={<Navigate replace to="/admin" />} path="*" />
         </Route>
 
-        <Route element={<Layout />} path="/">
+        <Route element={<PublicDataProvider><Layout /></PublicDataProvider>} path="/">
           <Route element={<Home />} index />
           <Route element={<Fleet />} path="fleet" />
           <Route element={<Booking />} path="booking" />

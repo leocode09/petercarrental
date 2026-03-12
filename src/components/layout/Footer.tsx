@@ -1,30 +1,37 @@
 import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  companyInfo,
-  footerServiceLinks,
-  legalLinks,
-  quickLinks,
-} from "../../data/site";
+import { subscribeNewsletter } from "../../lib/firestore-public-mutations";
 import { openWhatsApp } from "../../lib/utils";
-import { saveNewsletterSignup } from "../../lib/siteStorage";
+import { usePublicData } from "../providers/PublicDataProvider";
 import Button from "../ui/Button";
 
-const quickActionLinks = [
-  { label: "Call Peter Car Rental", href: companyInfo.telHref, icon: Phone },
-  { label: "Email Peter Car Rental", href: companyInfo.mailtoHref, icon: Mail },
-  { label: "Chat on WhatsApp", href: companyInfo.whatsappShareHref, icon: MessageCircle },
-  {
-    label: "View office location",
-    href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(companyInfo.locationFull)}`,
-    icon: MapPin,
-  },
-];
-
 export default function Footer() {
+  const { data } = usePublicData();
   const [email, setEmail] = useState("");
   const [newsletterMessage, setNewsletterMessage] = useState("");
+  const [newsletterLoading, setNewsletterLoading] = useState(false);
+
+  const companyInfo = data?.companyInfo;
+  const quickLinks = data?.quickLinks ?? [];
+  const footerServiceLinks = data?.footerServiceLinks ?? [];
+  const legalLinks = data?.legalLinks ?? [];
+
+  const quickActionLinks =
+    companyInfo
+      ? [
+        { label: "Call Peter Car Rental", href: companyInfo.telHref, icon: Phone },
+        { label: "Email Peter Car Rental", href: companyInfo.mailtoHref, icon: Mail },
+        { label: "Chat on WhatsApp", href: companyInfo.whatsappShareHref, icon: MessageCircle },
+        {
+          label: "View office location",
+          href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(companyInfo.locationFull)}`,
+          icon: MapPin,
+        },
+      ]
+      : [];
+
+  if (!data) return null;
 
   return (
     <footer className="bg-slate-950 text-slate-200">
@@ -111,24 +118,25 @@ export default function Footer() {
             <p className="font-semibold text-white">Newsletter</p>
             <form
               className="max-w-md space-y-3"
-              onSubmit={(event) => {
+              onSubmit={async (event) => {
                 event.preventDefault();
                 const trimmedEmail = email.trim();
+                if (!trimmedEmail || !companyInfo) return;
 
-                if (!trimmedEmail) return;
-
-                const { created } = saveNewsletterSignup(trimmedEmail);
-
-                openWhatsApp(
-                  `Hello Peter Car Rental, please ${created ? "add" : "keep"} ${trimmedEmail} on the newsletter list.`,
-                );
-
-                setNewsletterMessage(
-                  created
-                    ? "Thanks. We saved your email and opened WhatsApp to confirm the subscription."
-                    : "This email is already saved. We opened WhatsApp so you can reconfirm the subscription.",
-                );
-                setEmail("");
+                setNewsletterLoading(true);
+                try {
+                  await subscribeNewsletter(trimmedEmail);
+                  openWhatsApp(
+                    `Hello Peter Car Rental, please add ${trimmedEmail} to the newsletter list.`,
+                    companyInfo.whatsappNumber,
+                  );
+                  setNewsletterMessage("Thanks. We saved your email and opened WhatsApp to confirm.");
+                  setEmail("");
+                } catch {
+                  setNewsletterMessage("Something went wrong. Try WhatsApp directly.");
+                } finally {
+                  setNewsletterLoading(false);
+                }
               }}
             >
               <input
@@ -138,8 +146,8 @@ export default function Footer() {
                 type="email"
                 value={email}
               />
-              <Button fullWidth type="submit">
-                Join
+              <Button disabled={newsletterLoading} fullWidth type="submit">
+                {newsletterLoading ? "Joining…" : "Join"}
               </Button>
             </form>
             {newsletterMessage ? <p className="text-xs text-emerald-400">{newsletterMessage}</p> : null}

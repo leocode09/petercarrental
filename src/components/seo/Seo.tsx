@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { companyInfo } from "../../data/site";
+import { usePublicData } from "../providers/PublicDataProvider";
 
 interface SeoProps {
   title?: string;
@@ -35,24 +35,25 @@ export default function Seo({
   canonicalPath = "",
 }: SeoProps) {
   useEffect(() => {
-    document.title = title;
+    document.title = resolvedTitle;
 
-    upsertMeta('meta[name="description"]', { name: "description", content: description });
-    upsertMeta('meta[property="og:title"]', { property: "og:title", content: title });
+    upsertMeta('meta[name="description"]', { name: "description", content: resolvedDescription });
+    upsertMeta('meta[property="og:title"]', { property: "og:title", content: resolvedTitle });
     upsertMeta('meta[property="og:description"]', {
       property: "og:description",
-      content: description,
+      content: resolvedDescription,
     });
-    upsertMeta('meta[name="twitter:title"]', { name: "twitter:title", content: title });
+    upsertMeta('meta[name="twitter:title"]', { name: "twitter:title", content: resolvedTitle });
     upsertMeta('meta[name="twitter:description"]', {
       name: "twitter:description",
-      content: description,
+      content: resolvedDescription,
     });
+    const baseUrl = companyInfo?.canonicalUrl ?? "https://petercarrental.rw";
     upsertLink('link[rel="canonical"]', {
       rel: "canonical",
-      href: `${companyInfo.canonicalUrl}${canonicalPath}`,
+      href: `${baseUrl}${canonicalPath}`,
     });
-  }, [canonicalPath, description, title]);
+  }, [canonicalPath, resolvedDescription, resolvedTitle, companyInfo?.canonicalUrl]);
 
   return null;
 }

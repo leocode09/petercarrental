@@ -4,13 +4,19 @@ import Seo from "../components/seo/Seo";
 import PageHero from "../components/shared/PageHero";
 import VehicleCard from "../components/shared/VehicleCard";
 import Select from "../components/ui/Select";
-import { serviceTypes } from "../data/site";
-import { vehicleCategories, vehicles } from "../data/vehicles";
+import { getVehicleCategories } from "../lib/firestore-public";
+import { usePublicData } from "../components/providers/PublicDataProvider";
 
 export default function Fleet() {
+  const { data } = usePublicData();
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedCategory = searchParams.get("category") ?? "All";
   const selectedService = searchParams.get("serviceType") ?? "All";
+
+  const vehicles = data?.vehicles ?? [];
+  const vehicleCategories = data ? getVehicleCategories(data.vehicles) : [];
+  const serviceTypes = data?.serviceTypes ?? [];
+  const whatsappNumber = data?.companyInfo.whatsappNumber ?? "";
 
   const filteredVehicles = useMemo(
     () =>
@@ -27,7 +33,7 @@ export default function Fleet() {
 
         return matchesCategory && matchesService;
       }),
-    [selectedCategory, selectedService],
+    [vehicles, selectedCategory, selectedService],
   );
 
   return (
@@ -88,7 +94,11 @@ export default function Fleet() {
 
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {filteredVehicles.map((vehicle) => (
-              <VehicleCard key={vehicle.id} vehicle={vehicle} />
+              <VehicleCard
+                key={vehicle.id}
+                vehicle={vehicle}
+                whatsappNumber={whatsappNumber}
+              />
             ))}
           </div>
         </div>

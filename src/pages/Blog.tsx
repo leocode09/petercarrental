@@ -2,9 +2,11 @@ import { Link } from "react-router-dom";
 import Seo from "../components/seo/Seo";
 import PageHero from "../components/shared/PageHero";
 import Card from "../components/ui/Card";
-import { blogPosts } from "../data/blog";
+import { usePublicData } from "../components/providers/PublicDataProvider";
 
 export default function Blog() {
+  const { data } = usePublicData();
+  const blogPosts = data?.blogPosts ?? [];
   return (
     <>
       <Seo canonicalPath="/blog" title="Blog | Peter Car Rental" />
@@ -22,18 +24,20 @@ export default function Blog() {
               <img alt={post.title} className="h-52 w-full object-cover sm:h-56" src={post.image} />
               <div className="space-y-4 p-5 sm:p-6">
                 <div className="flex flex-wrap gap-2 text-xs font-bold uppercase tracking-[0.16em] text-orange-500">
-                  <span>{post.category}</span>
+                  <span>{(post as { category?: string }).category ?? "Article"}</span>
                   <span className="text-slate-300">|</span>
-                  <span className="text-slate-500">{post.date}</span>
+                  <span className="text-slate-500">{(post as { date?: string }).date ?? ""}</span>
                 </div>
                 <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950 sm:text-2xl">
                   {post.title}
                 </h2>
                 <p className="text-sm leading-6 text-slate-600">{post.excerpt}</p>
-                <p className="text-sm font-semibold text-slate-500">{post.readingTime}</p>
+                <p className="text-sm font-semibold text-slate-500">
+                  {(post as { readingTime?: string }).readingTime ?? "5 min"}
+                </p>
                 <Link
                   className="inline-flex text-sm font-semibold text-orange-600 transition hover:text-orange-700"
-                  to={`/blog/${post.slug}`}
+                  to={`/blog/${post.slug ?? post.id}`}
                 >
                   Read article
                 </Link>

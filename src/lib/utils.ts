@@ -1,5 +1,3 @@
-import { companyInfo } from "../data/site";
-
 export function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
@@ -16,13 +14,13 @@ export function formatPricePerDay(value: number) {
   return `${formatCurrency(value)}/day`;
 }
 
-export function buildWhatsAppLink(message: string) {
-  return `https://wa.me/${companyInfo.whatsappNumber}?text=${encodeURIComponent(message)}`;
+export function buildWhatsAppLink(message: string, whatsappNumber: string) {
+  return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 }
 
-export function openWhatsApp(message: string) {
+export function openWhatsApp(message: string, whatsappNumber: string) {
   if (typeof window !== "undefined") {
-    window.open(buildWhatsAppLink(message), "_blank", "noopener,noreferrer");
+    window.open(buildWhatsAppLink(message, whatsappNumber), "_blank", "noopener,noreferrer");
   }
 }
 

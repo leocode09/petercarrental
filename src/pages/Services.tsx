@@ -1,12 +1,15 @@
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import type { ServiceIconKey } from "../data/services";
 import Seo from "../components/seo/Seo";
 import PageHero from "../components/shared/PageHero";
 import ServiceIcon from "../components/shared/ServiceIcon";
 import Card from "../components/ui/Card";
-import { services } from "../data/services";
+import { usePublicData } from "../components/providers/PublicDataProvider";
 
 export default function Services() {
+  const { data } = usePublicData();
+  const services = data?.services ?? [];
   return (
     <>
       <Seo canonicalPath="/services" title="Services | Peter Car Rental" />
@@ -21,22 +24,31 @@ export default function Services() {
         <div className="container-shell">
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {services.map((service) => (
-              <Link className="block h-full" key={service.slug} to={service.route}>
+              <Link
+                className="block h-full"
+                key={service.slug ?? service.id}
+                to={service.route ?? `/services/${service.slug}`}
+              >
                 <Card className="group h-full p-5 transition duration-200 hover:-translate-y-1 hover:border-orange-200 sm:p-7">
                   <div className="space-y-5">
                     <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-100 text-orange-600">
-                      <ServiceIcon className="h-6 w-6" iconKey={service.iconKey} />
+                      <ServiceIcon
+                        className="h-6 w-6"
+                        iconKey={(service.iconKey as ServiceIconKey) ?? "selfDrive"}
+                      />
                     </div>
 
                     <div className="space-y-2">
                       <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950 sm:text-2xl">
                         {service.name}
                       </h2>
-                      <p className="text-sm leading-6 text-slate-600">{service.teaser}</p>
+                      <p className="text-sm leading-6 text-slate-600">
+                        {service.teaser ?? service.shortDescription ?? ""}
+                      </p>
                     </div>
 
                     <ul className="space-y-2 text-sm text-slate-600">
-                      {service.inclusions.slice(0, 3).map((item) => (
+                      {(service.inclusions ?? []).slice(0, 3).map((item) => (
                         <li key={item}>- {item}</li>
                       ))}
                     </ul>
