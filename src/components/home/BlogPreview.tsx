@@ -15,16 +15,16 @@ export default function BlogPreview() {
             </p>
             <h2 className="page-section-title text-slate-950">Travel Tips &amp; Guides</h2>
           </div>
-          <Button to="/blog" variant="outline">
+          <Button className="w-full sm:w-auto" to="/blog" variant="outline">
             View Blog
           </Button>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
           {blogPosts.map((post) => (
             <Card className="overflow-hidden" key={post.slug}>
-              <img alt={post.title} className="h-56 w-full object-cover" loading="lazy" src={post.image} />
-              <div className="space-y-4 p-6">
+              <img alt={post.title} className="h-52 w-full object-cover sm:h-56" loading="lazy" src={post.image} />
+              <div className="space-y-4 p-5 sm:p-6">
                 <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-orange-500">
                   <span>{post.category}</span>
                   <span className="text-slate-300">|</span>

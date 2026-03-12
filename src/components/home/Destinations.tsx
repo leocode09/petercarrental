@@ -18,22 +18,22 @@ export default function Destinations() {
               Rent a car and discover Rwanda&apos;s breathtaking landscapes and vibrant culture.
             </p>
           </div>
-          <Button to="/destinations" variant="outline">
+          <Button className="w-full sm:w-auto" to="/destinations" variant="outline">
             Explore Destinations
           </Button>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
           {destinations.map((destination) => (
-            <Link key={destination.slug} to={destination.route}>
+            <Link className="block h-full" key={destination.slug} to={destination.route}>
               <Card className="group h-full overflow-hidden">
                 <img
                   alt={destination.name}
-                  className="h-56 w-full object-cover transition duration-500 group-hover:scale-105"
+                  className="h-52 w-full object-cover transition duration-500 group-hover:scale-105 sm:h-56"
                   loading="lazy"
                   src={destination.image}
                 />
-                <div className="space-y-3 p-6">
+                <div className="space-y-3 p-5 sm:p-6">
                   <div className="space-y-1">
                     <h3 className="text-xl font-bold text-slate-950">{destination.name}</h3>
                     <p className="text-sm font-semibold text-orange-600">{destination.tagline}</p>

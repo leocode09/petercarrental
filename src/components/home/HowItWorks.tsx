@@ -35,9 +35,9 @@ export default function HowItWorks() {
           <h2 className="page-section-title text-slate-950">How It Works</h2>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
           {steps.map(({ title, description, icon: Icon }, index) => (
-            <Card className="h-full p-6" key={title}>
+            <Card className="h-full p-5 sm:p-6" key={title}>
               <div className="space-y-5">
                 <div className="flex items-center justify-between">
                   <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-100 text-orange-600">

@@ -6,8 +6,8 @@ export default function CTA() {
   return (
     <section className="section-space">
       <div className="container-shell">
-        <div className="overflow-hidden rounded-[36px] bg-slate-950 px-6 py-12 text-white shadow-2xl shadow-slate-950/20 md:px-10 lg:px-14">
-          <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+        <div className="overflow-hidden rounded-[28px] bg-slate-950 px-5 py-10 text-white shadow-2xl shadow-slate-950/20 sm:px-6 sm:py-12 md:rounded-[36px] md:px-10 lg:px-14">
+          <div className="grid gap-8 sm:gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
             <div className="space-y-4">
               <p className="text-sm font-bold uppercase tracking-[0.18em] text-orange-400">
                 Ready to Hit the Road?
@@ -20,7 +20,7 @@ export default function CTA() {
               <p className="max-w-2xl text-sm leading-7 text-slate-400">{companyInfo.shortDescription}</p>
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
+            <div className="flex flex-col gap-3 sm:flex-row lg:flex-col [&>*]:w-full sm:[&>*]:w-auto lg:[&>*]:w-full">
               <Button size="lg" to="/booking">
                 Book Your Ride
               </Button>

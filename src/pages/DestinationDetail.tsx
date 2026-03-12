@@ -72,17 +72,17 @@ export default function DestinationDetail() {
       </PageHero>
 
       <section className="section-space">
-        <div className="container-shell grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-          <Card className="p-8">
+        <div className="container-shell grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+          <Card className="p-5 sm:p-6 md:p-8">
             <div className="space-y-4">
               <p className="text-sm font-bold uppercase tracking-[0.18em] text-orange-500">
                 {destination.tagline}
               </p>
-              <h2 className="text-3xl font-black tracking-[-0.03em] text-slate-950">
+              <h2 className="text-2xl font-black tracking-[-0.03em] text-slate-950 sm:text-3xl">
                 Plan this route with confidence
               </h2>
               <p className="text-base leading-7 text-slate-600">{destination.longDescription}</p>
-              <div className="grid gap-3 md:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2">
                 {destination.highlights.map((highlight) => (
                   <div
                     className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700"
@@ -95,9 +95,9 @@ export default function DestinationDetail() {
             </div>
           </Card>
 
-          <Card className="p-8">
+          <Card className="p-5 sm:p-6 md:p-8">
             <div className="space-y-5">
-              <h2 className="text-3xl font-black tracking-[-0.03em] text-slate-950">
+              <h2 className="text-2xl font-black tracking-[-0.03em] text-slate-950 sm:text-3xl">
                 Best fit for this destination
               </h2>
               {linkedService ? (

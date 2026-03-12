@@ -40,9 +40,9 @@ export default function WhyChoose() {
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
           {features.map(({ title, description, icon: Icon }) => (
-            <Card className="h-full p-6" key={title}>
+            <Card className="h-full p-5 sm:p-6" key={title}>
               <div className="space-y-4">
                 <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-100 text-orange-600">
                   <Icon className="h-5 w-5" />

@@ -18,12 +18,12 @@ export default function FeaturedVehicles() {
               adventures across Rwanda.
             </p>
           </div>
-          <Button to="/fleet" variant="outline">
+          <Button className="w-full sm:w-auto" to="/fleet" variant="outline">
             View All Vehicles <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
           {featuredVehicles.map((vehicle) => (
             <VehicleCard key={vehicle.id} vehicle={vehicle} />
           ))}
