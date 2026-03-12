@@ -22,10 +22,10 @@ export default function About() {
       />
 
       <section className="section-space">
-        <div className="container-shell grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <Card className="p-8">
+        <div className="container-shell grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+          <Card className="p-5 sm:p-6 md:p-8">
             <div className="space-y-4">
-              <h2 className="text-3xl font-black tracking-[-0.03em] text-slate-950">
+              <h2 className="text-2xl font-black tracking-[-0.03em] text-slate-950 sm:text-3xl">
                 Built for the way people actually travel in Rwanda
               </h2>
               <p className="text-base leading-7 text-slate-600">
@@ -43,9 +43,9 @@ export default function About() {
 
           <div className="grid gap-6">
             {stats.map((stat) => (
-              <Card className="p-6" key={stat.label}>
+              <Card className="p-5 sm:p-6" key={stat.label}>
                 <div className="space-y-2">
-                  <p className="text-4xl font-black tracking-[-0.04em] text-slate-950">
+                  <p className="text-3xl font-black tracking-[-0.04em] text-slate-950 sm:text-4xl">
                     {stat.value}
                   </p>
                   <p className="text-sm font-medium text-slate-600">{stat.label}</p>

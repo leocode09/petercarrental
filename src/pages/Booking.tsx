@@ -93,14 +93,14 @@ export default function Booking() {
       />
 
       <section className="section-space">
-        <div className="container-shell grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <Card className="p-6 md:p-8">
+        <div className="container-shell grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+          <Card className="p-5 sm:p-6 md:p-8">
             <div className="space-y-6">
               <div>
                 <p className="text-sm font-bold uppercase tracking-[0.18em] text-orange-500">
                   Booking Request
                 </p>
-                <h2 className="mt-2 text-3xl font-black tracking-[-0.03em] text-slate-950">
+                <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] text-slate-950 sm:text-3xl">
                   {initialReference ? "Update your saved booking request" : "Tell us about your trip"}
                 </h2>
                 {initialReference ? (
@@ -125,7 +125,7 @@ export default function Booking() {
                     <p className="text-sm leading-6 text-slate-600">
                       Your request is now saved in this browser and the WhatsApp draft has been opened for confirmation.
                     </p>
-                    <div className="flex flex-wrap gap-3">
+                    <div className="flex flex-col gap-3 sm:flex-row [&>*]:w-full sm:[&>*]:w-auto">
                       <Button
                         to={`/manage-booking?reference=${encodeURIComponent(submittedBooking.reference)}&contact=${encodeURIComponent(submittedBooking.email)}`}
                         variant="secondary"
@@ -141,7 +141,7 @@ export default function Booking() {
               ) : null}
 
               <form
-                className="grid gap-4 md:grid-cols-2"
+                className="grid gap-4 sm:grid-cols-2"
                 onSubmit={(event) => {
                   event.preventDefault();
                   const savedBooking = saveBooking({
@@ -310,11 +310,11 @@ export default function Booking() {
                 </label>
 
                 {selectedVehicle ? (
-                  <div className="md:col-span-2 rounded-2xl border border-orange-100 bg-orange-50 px-4 py-4">
+                  <div className="rounded-2xl border border-orange-100 bg-orange-50 px-4 py-4 sm:col-span-2">
                     <p className="text-sm font-bold uppercase tracking-[0.18em] text-orange-500">
                       Selected vehicle
                     </p>
-                    <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
+                    <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div>
                         <h3 className="text-lg font-bold text-slate-950">{selectedVehicle.name}</h3>
                         <p className="text-sm text-slate-600">
@@ -326,7 +326,7 @@ export default function Booking() {
                   </div>
                 ) : null}
 
-                <label className="md:col-span-2 inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-medium text-slate-700">
+                <label className="inline-flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-medium text-slate-700 sm:col-span-2 sm:items-center">
                   <input
                     checked={airportTransfer}
                     className="h-4 w-4 rounded border-slate-300 text-orange-500 focus:ring-orange-500"
@@ -336,7 +336,7 @@ export default function Booking() {
                   <span>Airport pickup or drop-off needed</span>
                 </label>
 
-                <label className="md:col-span-2 flex flex-col gap-2">
+                <label className="flex flex-col gap-2 sm:col-span-2">
                   <span className="text-sm font-semibold text-slate-700">Additional Notes</span>
                   <textarea
                     className={textareaClassName}
@@ -346,7 +346,7 @@ export default function Booking() {
                   />
                 </label>
 
-                <div className="md:col-span-2 flex flex-wrap gap-3">
+                <div className="flex flex-col gap-3 sm:col-span-2 sm:flex-row [&>*]:w-full sm:[&>*]:w-auto">
                   <Button size="lg" type="submit">
                     {initialReference ? "Update Booking Request" : "Send Booking Request"}
                   </Button>
@@ -358,10 +358,10 @@ export default function Booking() {
             </div>
           </Card>
 
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {reasons.map(({ title, description, icon: Icon }) => (
-              <Card className="p-6" key={title}>
-                <div className="flex gap-4">
+              <Card className="p-5 sm:p-6" key={title}>
+                <div className="flex flex-col gap-4 sm:flex-row">
                   <div className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-orange-600">
                     <Icon className="h-5 w-5" />
                   </div>

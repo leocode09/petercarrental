@@ -53,8 +53,8 @@ export default function BlogPostDetail() {
       </PageHero>
 
       <section className="section-space">
-        <div className="container-shell grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <Card className="p-6 md:p-8">
+        <div className="container-shell grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+          <Card className="p-5 sm:p-6 md:p-8">
             <div className="space-y-8">
               <div className="flex flex-wrap gap-3 text-sm font-semibold text-slate-500">
                 <span>{post.date}</span>
@@ -64,17 +64,17 @@ export default function BlogPostDetail() {
 
               {post.sections.map((section) => (
                 <div className="space-y-3" key={section.heading}>
-                  <h2 className="text-2xl font-black tracking-[-0.03em] text-slate-950">
+                  <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950 sm:text-2xl">
                     {section.heading}
                   </h2>
-                  <p className="text-base leading-8 text-slate-600">{section.body}</p>
+                  <p className="text-base leading-7 text-slate-600 sm:leading-8">{section.body}</p>
                 </div>
               ))}
             </div>
           </Card>
 
-          <div className="space-y-6">
-            <Card className="p-6">
+          <div className="space-y-4 sm:space-y-6">
+            <Card className="p-5 sm:p-6">
               <div className="space-y-4">
                 <p className="text-sm font-bold uppercase tracking-[0.18em] text-orange-500">
                   Key Takeaways
@@ -92,7 +92,7 @@ export default function BlogPostDetail() {
               </div>
             </Card>
 
-            <Card className="p-6">
+            <Card className="p-5 sm:p-6">
               <div className="space-y-4">
                 <p className="text-sm font-bold uppercase tracking-[0.18em] text-orange-500">
                   Related Reads

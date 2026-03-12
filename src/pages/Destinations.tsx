@@ -21,10 +21,10 @@ export default function Destinations() {
       />
       <DestinationsSection />
 
-      <section className="pb-20">
-        <div className="container-shell grid gap-6 md:grid-cols-3">
+      <section className="pb-16 sm:pb-20">
+        <div className="container-shell grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
           {travelTips.map((tip) => (
-            <Card className="p-6" key={tip}>
+            <Card className="p-5 sm:p-6" key={tip}>
               <p className="text-sm font-semibold leading-6 text-slate-700">{tip}</p>
             </Card>
           ))}

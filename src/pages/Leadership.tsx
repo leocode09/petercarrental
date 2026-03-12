@@ -32,15 +32,15 @@ export default function Leadership() {
       />
 
       <section className="section-space">
-        <div className="container-shell grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div className="container-shell grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
           {team.map((member) => (
-            <Card className="h-full p-7" key={member.name}>
+            <Card className="h-full p-6 sm:p-7" key={member.name}>
               <div className="space-y-4">
                 <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-orange-100 text-xl font-black text-orange-600">
                   {member.name.charAt(0)}
                 </div>
                 <div>
-                  <h2 className="text-2xl font-black tracking-[-0.03em] text-slate-950">
+                  <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950 sm:text-2xl">
                     {member.name}
                   </h2>
                   <p className="mt-1 text-sm font-semibold uppercase tracking-[0.14em] text-orange-500">

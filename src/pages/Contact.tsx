@@ -23,10 +23,10 @@ export default function Contact() {
       />
 
       <section className="section-space">
-        <div className="container-shell grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="container-shell grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
           <div className="grid gap-6">
-            <Card className="p-6">
-              <div className="flex gap-4">
+            <Card className="p-5 sm:p-6">
+              <div className="flex flex-col gap-4 sm:flex-row">
                 <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-100 text-orange-600">
                   <MapPin className="h-5 w-5" />
                 </div>
@@ -36,8 +36,8 @@ export default function Contact() {
                 </div>
               </div>
             </Card>
-            <Card className="p-6">
-              <div className="flex gap-4">
+            <Card className="p-5 sm:p-6">
+              <div className="flex flex-col gap-4 sm:flex-row">
                 <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-100 text-orange-600">
                   <Phone className="h-5 w-5" />
                 </div>
@@ -49,14 +49,17 @@ export default function Contact() {
                 </div>
               </div>
             </Card>
-            <Card className="p-6">
-              <div className="flex gap-4">
+            <Card className="p-5 sm:p-6">
+              <div className="flex flex-col gap-4 sm:flex-row">
                 <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-100 text-orange-600">
                   <Mail className="h-5 w-5" />
                 </div>
                 <div>
                   <h2 className="text-lg font-bold text-slate-950">Email</h2>
-                  <a className="mt-2 block text-sm leading-6 text-slate-600 hover:text-orange-600" href={companyInfo.mailtoHref}>
+                  <a
+                    className="mt-2 block break-all text-sm leading-6 text-slate-600 hover:text-orange-600"
+                    href={companyInfo.mailtoHref}
+                  >
                     {companyInfo.email}
                   </a>
                 </div>
@@ -64,13 +67,13 @@ export default function Contact() {
             </Card>
           </div>
 
-          <Card className="p-6 md:p-8">
+          <Card className="p-5 sm:p-6 md:p-8">
             <div className="space-y-6">
               <div>
                 <p className="text-sm font-bold uppercase tracking-[0.18em] text-orange-500">
                   Message Us
                 </p>
-                <h2 className="mt-2 text-3xl font-black tracking-[-0.03em] text-slate-950">
+                <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] text-slate-950 sm:text-3xl">
                   Send a direct inquiry
                 </h2>
               </div>
@@ -112,7 +115,7 @@ export default function Contact() {
                   required
                   value={message}
                 />
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-col gap-3 sm:flex-row [&>*]:w-full sm:[&>*]:w-auto">
                   <Button type="submit">Send via WhatsApp</Button>
                   <Button href={companyInfo.mailtoHref} variant="outline">
                     Send Email

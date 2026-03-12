@@ -20,11 +20,11 @@ export default function Reviews() {
         title="What clients say about our service"
       />
 
-      <section className="py-16">
-        <div className="container-shell grid gap-6 md:grid-cols-3">
+      <section className="py-14 sm:py-16">
+        <div className="container-shell grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {stats.map((stat) => (
-            <Card className="p-6 text-center" key={stat.label}>
-              <p className="text-4xl font-black tracking-[-0.04em] text-slate-950">{stat.value}</p>
+            <Card className="p-5 text-center sm:p-6" key={stat.label}>
+              <p className="text-3xl font-black tracking-[-0.04em] text-slate-950 sm:text-4xl">{stat.value}</p>
               <p className="mt-2 text-sm font-medium text-slate-600">{stat.label}</p>
             </Card>
           ))}

@@ -19,17 +19,17 @@ export default function Services() {
 
       <section className="section-space">
         <div className="container-shell">
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {services.map((service) => (
-              <Link key={service.slug} to={service.route}>
-                <Card className="group h-full p-7 transition duration-200 hover:-translate-y-1 hover:border-orange-200">
+              <Link className="block h-full" key={service.slug} to={service.route}>
+                <Card className="group h-full p-5 transition duration-200 hover:-translate-y-1 hover:border-orange-200 sm:p-7">
                   <div className="space-y-5">
                     <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-100 text-orange-600">
                       <ServiceIcon className="h-6 w-6" iconKey={service.iconKey} />
                     </div>
 
                     <div className="space-y-2">
-                      <h2 className="text-2xl font-black tracking-[-0.03em] text-slate-950">
+                      <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950 sm:text-2xl">
                         {service.name}
                       </h2>
                       <p className="text-sm leading-6 text-slate-600">{service.teaser}</p>

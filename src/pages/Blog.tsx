@@ -16,17 +16,17 @@ export default function Blog() {
       />
 
       <section className="section-space">
-        <div className="container-shell grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div className="container-shell grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
           {blogPosts.map((post) => (
             <Card className="overflow-hidden" key={post.slug}>
-              <img alt={post.title} className="h-56 w-full object-cover" src={post.image} />
-              <div className="space-y-4 p-6">
+              <img alt={post.title} className="h-52 w-full object-cover sm:h-56" src={post.image} />
+              <div className="space-y-4 p-5 sm:p-6">
                 <div className="flex flex-wrap gap-2 text-xs font-bold uppercase tracking-[0.16em] text-orange-500">
                   <span>{post.category}</span>
                   <span className="text-slate-300">|</span>
                   <span className="text-slate-500">{post.date}</span>
                 </div>
-                <h2 className="text-2xl font-black tracking-[-0.03em] text-slate-950">
+                <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950 sm:text-2xl">
                   {post.title}
                 </h2>
                 <p className="text-sm leading-6 text-slate-600">{post.excerpt}</p>

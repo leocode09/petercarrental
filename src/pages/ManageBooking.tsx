@@ -53,7 +53,7 @@ export default function ManageBooking() {
 
       <section className="section-space">
         <div className="container-shell">
-          <Card className="mx-auto max-w-3xl p-6 md:p-8">
+          <Card className="mx-auto max-w-3xl p-5 sm:p-6 md:p-8">
             <form
               className="space-y-4"
               onSubmit={(event) => {
@@ -70,7 +70,7 @@ export default function ManageBooking() {
               }}
             >
               <div>
-                <h2 className="text-3xl font-black tracking-[-0.03em] text-slate-950">
+                <h2 className="text-2xl font-black tracking-[-0.03em] text-slate-950 sm:text-3xl">
                   Booking support
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
@@ -102,7 +102,7 @@ export default function ManageBooking() {
                 value={contactValue}
               />
 
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row [&>*]:w-full sm:[&>*]:w-auto">
                 <Button type="submit">Find Booking</Button>
                 <Button href={buildWhatsAppLink(supportMessage)} target="_blank" variant="outline">
                   Contact Support
@@ -113,7 +113,7 @@ export default function ManageBooking() {
             {matchedBooking ? (
               <Card className="mt-6 border border-emerald-100 bg-emerald-50/80 p-5 shadow-none">
                 <div className="space-y-4">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex flex-col items-start gap-3 sm:flex-row sm:justify-between">
                     <div>
                       <p className="text-sm font-bold uppercase tracking-[0.18em] text-emerald-600">
                         Local Booking Found
@@ -125,7 +125,7 @@ export default function ManageBooking() {
                     </span>
                   </div>
 
-                  <div className="grid gap-3 md:grid-cols-2">
+                  <div className="grid gap-3 sm:grid-cols-2">
                     <div className="rounded-2xl border border-white/80 bg-white px-4 py-3 text-sm text-slate-700">
                       <p className="font-semibold text-slate-950">Traveler</p>
                       <p className="mt-1">{matchedBooking.fullName}</p>
@@ -165,7 +165,7 @@ export default function ManageBooking() {
                     Last updated {format(new Date(matchedBooking.updatedAt), "PPP 'at' p")}
                   </p>
 
-                  <div className="flex flex-wrap gap-3">
+                  <div className="flex flex-col gap-3 sm:flex-row [&>*]:w-full sm:[&>*]:w-auto">
                     <Button to={`/booking?${buildBookingQueryString(matchedBooking)}`} variant="secondary">
                       Edit Booking Details
                     </Button>
