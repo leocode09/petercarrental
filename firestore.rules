@@ -83,7 +83,9 @@ match /newsletterSubscribers/{docId} {
   allow read, update: if isAdmin();
 }
 
-// Admins collection: used to check hasAnyAdmin (read by createFirstAdmin callable)
+// Admins collection: stores admin profile (email, name, role). Cloud Functions write on create/update.
+// Authenticated admins can read their own document for profile display.
 match /admins/{docId} {
-  allow read, write: if false;  // Only Cloud Functions can access
+  allow read: if request.auth != null && request.auth.uid == docId;
+  allow write: if false;  // Only Cloud Functions can write
 }

@@ -9,7 +9,7 @@ import {
 } from "react";
 import { onIdTokenChanged, signInWithEmailAndPassword, signOut, type User } from "firebase/auth";
 import { getFunctions, httpsCallable } from "firebase/functions";
-import { auth } from "./firebase";
+import { auth, default as app } from "./firebase";
 import type { UserRole } from "./validators";
 
 export type AdminUser = {
@@ -105,7 +105,8 @@ export function useAuth() {
 
 export function useCallable<TReq, TRes>(name: string) {
   return useMemo(() => {
-    const functions = getFunctions();
+    // Use explicit app and us-central1 region to match Firebase Functions deployment
+    const functions = getFunctions(app, "us-central1");
     return httpsCallable<TReq, TRes>(functions, name);
   }, [name]);
 }

@@ -67,7 +67,17 @@ export default function AdminSetup() {
 
               navigate("/admin", { replace: true });
             } catch (error) {
-              setErrorMessage(error instanceof Error ? error.message : "Unable to create the admin account.");
+              const msg = error instanceof Error ? error.message : "Unable to create the admin account.";
+              const isNetworkError =
+                msg.includes("404") ||
+                msg.includes("CORS") ||
+                msg.includes("Failed to fetch") ||
+                msg.toLowerCase().includes("network");
+              setErrorMessage(
+                isNetworkError
+                  ? "Could not reach the server. Have you deployed Cloud Functions? Run: npm run firebase:deploy:functions"
+                  : msg
+              );
             } finally {
               setSubmitting(false);
             }

@@ -8,6 +8,9 @@ const auth = admin.auth();
 
 type UserRole = "superAdmin" | "manager" | "operations" | "contentEditor";
 
+// Allow CORS from localhost and production for callable functions
+const callableOptions = { cors: true };
+
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
@@ -17,7 +20,7 @@ export const createFirstAdmin = onCall<{
   name: string;
   email: string;
   password: string;
-}>(async (request) => {
+}>(callableOptions, async (request) => {
   const { name, email, password } = request.data ?? {};
 
   if (!name || !email || !password) {
@@ -71,13 +74,13 @@ export const createFirstAdmin = onCall<{
 });
 
 /** Returns whether any admin exists. Used to decide if setup page should be shown. */
-export const checkHasAnyAdmin = onCall<void>(async () => {
+export const checkHasAnyAdmin = onCall<void>(callableOptions, async () => {
   const adminsSnap = await db.collection("admins").limit(1).get();
   return { hasAnyAdmin: !adminsSnap.empty };
 });
 
 /** Lists admin users. Requires caller to be superAdmin or manager. */
-export const listAdminUsers = onCall<void>(async (request) => {
+export const listAdminUsers = onCall<void>(callableOptions, async (request) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "You must be signed in.");
   }
@@ -102,7 +105,7 @@ export const listAdminUsers = onCall<void>(async (request) => {
 });
 
 /** Seeds public site data when siteSettings/primary does not exist. */
-export const seedPublicData = onCall<void>(async () => {
+export const seedPublicData = onCall<void>(callableOptions, async () => {
   const settingsRef = db.collection("siteSettings").doc("primary");
   const existing = await settingsRef.get();
   if (existing.exists) {
@@ -263,7 +266,7 @@ export const createAdminUser = onCall<{
   email: string;
   password: string;
   role: UserRole;
-}>(async (request) => {
+}>(callableOptions, async (request) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "You must be signed in.");
   }
@@ -318,7 +321,7 @@ export const createAdminUser = onCall<{
 export const setAdminRole = onCall<{
   userId: string;
   role: UserRole;
-}>(async (request) => {
+}>(callableOptions, async (request) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "You must be signed in.");
   }

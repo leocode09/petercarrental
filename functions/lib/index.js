@@ -6,11 +6,13 @@ const https_1 = require("firebase-functions/v2/https");
 admin.initializeApp();
 const db = admin.firestore();
 const auth = admin.auth();
+// Allow CORS from localhost and production for callable functions
+const callableOptions = { cors: true };
 function normalizeEmail(email) {
     return email.trim().toLowerCase();
 }
 /** Creates the first super admin. No auth required; protected by "no existing admin" check. */
-exports.createFirstAdmin = (0, https_1.onCall)(async (request) => {
+exports.createFirstAdmin = (0, https_1.onCall)(callableOptions, async (request) => {
     const { name, email, password } = request.data ?? {};
     if (!name || !email || !password) {
         throw new https_1.HttpsError("invalid-argument", "Name, email, and password are required.");
@@ -56,12 +58,12 @@ exports.createFirstAdmin = (0, https_1.onCall)(async (request) => {
     return { userId: user.uid };
 });
 /** Returns whether any admin exists. Used to decide if setup page should be shown. */
-exports.checkHasAnyAdmin = (0, https_1.onCall)(async () => {
+exports.checkHasAnyAdmin = (0, https_1.onCall)(callableOptions, async () => {
     const adminsSnap = await db.collection("admins").limit(1).get();
     return { hasAnyAdmin: !adminsSnap.empty };
 });
 /** Lists admin users. Requires caller to be superAdmin or manager. */
-exports.listAdminUsers = (0, https_1.onCall)(async (request) => {
+exports.listAdminUsers = (0, https_1.onCall)(callableOptions, async (request) => {
     if (!request.auth) {
         throw new https_1.HttpsError("unauthenticated", "You must be signed in.");
     }
@@ -82,7 +84,7 @@ exports.listAdminUsers = (0, https_1.onCall)(async (request) => {
     return { users };
 });
 /** Seeds public site data when siteSettings/primary does not exist. */
-exports.seedPublicData = (0, https_1.onCall)(async () => {
+exports.seedPublicData = (0, https_1.onCall)(callableOptions, async () => {
     const settingsRef = db.collection("siteSettings").doc("primary");
     const existing = await settingsRef.get();
     if (existing.exists) {
@@ -223,7 +225,7 @@ exports.seedPublicData = (0, https_1.onCall)(async () => {
     return { seeded: true, reason: "seeded" };
 });
 /** Creates an admin user. Requires caller to be superAdmin or manager. */
-exports.createAdminUser = (0, https_1.onCall)(async (request) => {
+exports.createAdminUser = (0, https_1.onCall)(callableOptions, async (request) => {
     if (!request.auth) {
         throw new https_1.HttpsError("unauthenticated", "You must be signed in.");
     }
@@ -266,7 +268,7 @@ exports.createAdminUser = (0, https_1.onCall)(async (request) => {
     }
 });
 /** Updates another user's role. superAdmin only. */
-exports.setAdminRole = (0, https_1.onCall)(async (request) => {
+exports.setAdminRole = (0, https_1.onCall)(callableOptions, async (request) => {
     if (!request.auth) {
         throw new https_1.HttpsError("unauthenticated", "You must be signed in.");
     }
