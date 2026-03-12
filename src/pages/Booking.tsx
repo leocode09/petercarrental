@@ -424,3 +424,26 @@ export default function Booking() {
                   </Button>
                 </div>
               </form>
+            </div>
+          </Card>
+
+          <div className="space-y-4 sm:space-y-6">
+            {reasons.map(({ title, description, icon: Icon }) => (
+              <Card className="p-5 sm:p-6" key={title}>
+                <div className="flex flex-col gap-4 sm:flex-row">
+                  <div className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-orange-600">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-950">{title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}

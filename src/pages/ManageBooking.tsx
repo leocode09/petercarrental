@@ -1,21 +1,45 @@
 import { format } from "date-fns";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import Seo from "../components/seo/Seo";
 import PageHero from "../components/shared/PageHero";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
-import { getVehicleByQueryValue } from "../data/vehicles";
-import { buildBookingQueryString, findStoredBooking, type StoredBooking } from "../lib/siteStorage";
+import { usePublicData } from "../components/providers/PublicDataProvider";
+import { getVehicleByQueryValue } from "../lib/firestore-public";
+import { lookupPublicBooking } from "../lib/firestore-public-booking";
 import { buildWhatsAppLink, inputClassName, openWhatsApp } from "../lib/utils";
 
 export default function ManageBooking() {
+  const { data } = usePublicData();
   const [searchParams] = useSearchParams();
   const [reference, setReference] = useState(searchParams.get("reference") ?? "");
   const [contactValue, setContactValue] = useState(searchParams.get("contact") ?? "");
-  const [lookupAttempted, setLookupAttempted] = useState(Boolean(searchParams.get("reference") || searchParams.get("contact")));
-  const [matchedBooking, setMatchedBooking] = useState<StoredBooking | null>(null);
+  const [lookupAttempted, setLookupAttempted] = useState(
+    Boolean(searchParams.get("reference") || searchParams.get("contact")),
+  );
+  const [matchedBooking, setMatchedBooking] = useState<{
+    reference: string;
+    fullName: string;
+    email: string;
+    pickupLocation: string;
+    dropoffLocation: string;
+    pickupDate: string;
+    returnDate: string;
+    pickupTime: string;
+    vehicleCategory: string;
+    selectedVehicleId?: string;
+    serviceType: string;
+    airportTransfer: boolean;
+    notes?: string;
+    status: string;
+    updatedAt: number;
+  } | null>(null);
   const [supportFallbackUsed, setSupportFallbackUsed] = useState(false);
+  const [lookupLoading, setLookupLoading] = useState(false);
+
+  const vehicles = data?.vehicles ?? [];
+  const whatsappNumber = data?.companyInfo.whatsappNumber ?? "";
 
   const supportMessage = useMemo(
     () =>
@@ -27,19 +51,12 @@ export default function ManageBooking() {
     [contactValue, reference],
   );
   const matchedVehicle = useMemo(
-    () => (matchedBooking ? getVehicleByQueryValue(matchedBooking.selectedVehicleId) : undefined),
-    [matchedBooking],
+    () =>
+      matchedBooking?.selectedVehicleId
+        ? getVehicleByQueryValue(vehicles, matchedBooking.selectedVehicleId)
+        : undefined,
+    [matchedBooking, vehicles],
   );
-
-  useEffect(() => {
-    if (!reference && !contactValue) {
-      setMatchedBooking(null);
-      return;
-    }
-
-    const storedBooking = findStoredBooking(reference, contactValue);
-    setMatchedBooking(storedBooking);
-  }, [contactValue, reference]);
 
   return (
     <>
@@ -56,16 +73,29 @@ export default function ManageBooking() {
           <Card className="mx-auto max-w-3xl p-5 sm:p-6 md:p-8">
             <form
               className="space-y-4"
-              onSubmit={(event) => {
+              onSubmit={async (event) => {
                 event.preventDefault();
-                const storedBooking = findStoredBooking(reference, contactValue);
-
-                setMatchedBooking(storedBooking);
                 setLookupAttempted(true);
-                setSupportFallbackUsed(!storedBooking);
-
-                if (!storedBooking) {
-                  openWhatsApp(supportMessage);
+                setLookupLoading(true);
+                try {
+                  const res = await lookupPublicBooking({
+                    reference: reference || undefined,
+                    email: contactValue || undefined,
+                  });
+                  if (res.found && res.booking) {
+                    setMatchedBooking(res.booking);
+                    setSupportFallbackUsed(false);
+                  } else {
+                    setMatchedBooking(null);
+                    setSupportFallbackUsed(true);
+                    openWhatsApp(supportMessage, whatsappNumber);
+                  }
+                } catch {
+                  setMatchedBooking(null);
+                  setSupportFallbackUsed(true);
+                  openWhatsApp(supportMessage, whatsappNumber);
+                } finally {
+                  setLookupLoading(false);
                 }
               }}
             >
@@ -74,8 +104,8 @@ export default function ManageBooking() {
                   Booking support
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Use your booking reference or the same email used during the reservation. If we cannot find a local
-                  match in this browser, we will open WhatsApp so you can request help directly.
+                  Use your booking reference or the same email used during the reservation. If we cannot find a match,
+                  we will open WhatsApp so you can request help directly.
                 </p>
               </div>
 
@@ -103,8 +133,14 @@ export default function ManageBooking() {
               />
 
               <div className="flex flex-col gap-3 sm:flex-row [&>*]:w-full sm:[&>*]:w-auto">
-                <Button type="submit">Find Booking</Button>
-                <Button href={buildWhatsAppLink(supportMessage)} target="_blank" variant="outline">
+                <Button disabled={lookupLoading} type="submit">
+                  {lookupLoading ? "Finding…" : "Find Booking"}
+                </Button>
+                <Button
+                  href={buildWhatsAppLink(supportMessage, whatsappNumber)}
+                  target="_blank"
+                  variant="outline"
+                >
                   Contact Support
                 </Button>
               </div>
@@ -116,7 +152,7 @@ export default function ManageBooking() {
                   <div className="flex flex-col items-start gap-3 sm:flex-row sm:justify-between">
                     <div>
                       <p className="text-sm font-bold uppercase tracking-[0.18em] text-emerald-600">
-                        Local Booking Found
+                        Booking Found
                       </p>
                       <h3 className="mt-2 text-xl font-black text-slate-950">{matchedBooking.reference}</h3>
                     </div>
@@ -166,7 +202,10 @@ export default function ManageBooking() {
                   </p>
 
                   <div className="flex flex-col gap-3 sm:flex-row [&>*]:w-full sm:[&>*]:w-auto">
-                    <Button to={`/booking?${buildBookingQueryString(matchedBooking)}`} variant="secondary">
+                    <Button
+                      to={`/booking?reference=${encodeURIComponent(matchedBooking.reference)}&fullName=${encodeURIComponent(matchedBooking.fullName)}&email=${encodeURIComponent(matchedBooking.email)}&pickupLocation=${encodeURIComponent(matchedBooking.pickupLocation)}&dropoffLocation=${encodeURIComponent(matchedBooking.dropoffLocation)}&pickupDate=${encodeURIComponent(matchedBooking.pickupDate)}&returnDate=${encodeURIComponent(matchedBooking.returnDate)}&pickupTime=${encodeURIComponent(matchedBooking.pickupTime)}&category=${encodeURIComponent(matchedBooking.vehicleCategory)}&serviceType=${encodeURIComponent(matchedBooking.serviceType)}&notes=${encodeURIComponent(matchedBooking.notes ?? "")}${matchedBooking.airportTransfer ? "&airport=true" : ""}`}
+                      variant="secondary"
+                    >
                       Edit Booking Details
                     </Button>
                     <Button
@@ -177,6 +216,7 @@ export default function ManageBooking() {
                           `Customer: ${matchedBooking.fullName}`,
                           `Email: ${matchedBooking.email}`,
                         ].join("\n"),
+                        whatsappNumber,
                       )}
                       target="_blank"
                       variant="outline"
@@ -191,8 +231,8 @@ export default function ManageBooking() {
             {lookupAttempted && !matchedBooking ? (
               <p className="mt-6 text-sm leading-6 text-slate-600">
                 {supportFallbackUsed
-                  ? "No saved booking was found in this browser. A WhatsApp draft has been opened so you can continue with support manually."
-                  : "No saved booking was found in this browser yet. Use Contact Support if you need help with a reservation created elsewhere."}
+                  ? "No booking was found. A WhatsApp draft has been opened so you can continue with support manually."
+                  : "No booking was found yet. Use Contact Support if you need help with a reservation."}
               </p>
             ) : null}
           </Card>

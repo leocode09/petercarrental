@@ -1,14 +1,17 @@
 import {
-  fallbackPublicData,
   usePublicSiteData as useFirestorePublicData,
   type PublicSiteData,
 } from "./firestore-public";
 
-export { fallbackPublicData };
 export type { PublicSiteData };
 
+/** Returns { data, loading }. For admin compatibility, spreads data so you can use { companyInfo, vehicles, ... }. */
 export function usePublicSiteData() {
-  return useFirestorePublicData();
+  const { data, loading } = useFirestorePublicData();
+  return {
+    ...(data ?? {}),
+    loading,
+  } as PublicSiteData & { loading: boolean };
 }
 
 export function getVehicleByQueryValueFromList(

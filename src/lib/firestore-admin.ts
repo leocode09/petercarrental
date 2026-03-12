@@ -5,6 +5,7 @@ import {
   getDocs,
   addDoc,
   updateDoc,
+  setDoc,
   deleteDoc,
   query,
   orderBy,
@@ -736,6 +737,437 @@ export async function updateComplaintStatus(
     entityType: "complaints",
     entityId: complaintId,
     summary: `Updated complaint status to ${status}.`,
+    createdAt: now,
+  });
+}
+
+// Newsletter
+export async function unsubscribeNewsletter(viewerId: string, subscriberId: string) {
+  const now = Date.now();
+  await deleteDoc(doc(db, "newsletterSubscribers", subscriberId));
+  await addDoc(collection(db, "activityLogs"), {
+    actorUserId: viewerId,
+    action: "newsletter.unsubscribed",
+    entityType: "newsletterSubscribers",
+    entityId: subscriberId,
+    summary: "Removed newsletter subscriber.",
+    createdAt: now,
+  });
+}
+
+// Services
+export type ServiceDoc = {
+  id: string;
+  slug: string;
+  name: string;
+  sortOrder: number;
+  [key: string]: unknown;
+};
+
+export async function listServices(): Promise<ServiceDoc[]> {
+  const snap = await getDocs(
+    query(collection(db, "services"), orderBy("sortOrder", "asc"))
+  );
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as ServiceDoc));
+}
+
+export async function upsertService(
+  viewerId: string,
+  args: {
+    serviceId?: string;
+    slug: string;
+    name: string;
+    description?: string;
+    route?: string;
+    menuLabel?: string;
+    shortDescription?: string;
+    teaser?: string;
+    longDescription?: string;
+    iconKey?: string;
+    heroImage?: string;
+    idealFor?: string[];
+    inclusions?: string[];
+    recommendedVehicleIds?: string[];
+    featured?: boolean;
+    hideFromMenu?: boolean;
+    sortOrder: number;
+  }
+) {
+  const now = Date.now();
+  const payload = {
+    slug: args.slug.trim().toLowerCase().replace(/\s+/g, "-"),
+    name: args.name,
+    description: args.description ?? null,
+    route: args.route ?? `/services/${args.slug}`,
+    menuLabel: args.menuLabel ?? args.name,
+    shortDescription: args.shortDescription ?? null,
+    teaser: args.teaser ?? null,
+    longDescription: args.longDescription ?? null,
+    iconKey: args.iconKey ?? null,
+    heroImage: args.heroImage ?? null,
+    idealFor: args.idealFor ?? [],
+    inclusions: args.inclusions ?? [],
+    recommendedVehicleIds: args.recommendedVehicleIds ?? [],
+    featured: args.featured ?? true,
+    hideFromMenu: args.hideFromMenu ?? false,
+    sortOrder: args.sortOrder,
+    updatedAt: now,
+  };
+
+  if (args.serviceId) {
+    const ref = doc(db, "services", args.serviceId);
+    const existing = await getDoc(ref);
+    if (!existing.exists()) throw new Error("Service not found.");
+    await updateDoc(ref, payload);
+    await addDoc(collection(db, "activityLogs"), {
+      actorUserId: viewerId,
+      action: "service.updated",
+      entityType: "services",
+      entityId: args.serviceId,
+      summary: `Updated service ${args.name}.`,
+      createdAt: now,
+    });
+    return { serviceId: args.serviceId };
+  }
+
+  const dupSnap = await getDocs(
+    query(collection(db, "services"), where("slug", "==", payload.slug))
+  );
+  if (!dupSnap.empty) throw new Error("A service with this slug already exists.");
+
+  const ref = await addDoc(collection(db, "services"), {
+    ...payload,
+    createdAt: now,
+  });
+  await addDoc(collection(db, "activityLogs"), {
+    actorUserId: viewerId,
+    action: "service.created",
+    entityType: "services",
+    entityId: ref.id,
+    summary: `Created service ${args.name}.`,
+    createdAt: now,
+  });
+  return { serviceId: ref.id };
+}
+
+// Destinations
+export type DestinationDoc = {
+  id: string;
+  slug: string;
+  name: string;
+  sortOrder: number;
+  [key: string]: unknown;
+};
+
+export async function listDestinations(): Promise<DestinationDoc[]> {
+  const snap = await getDocs(
+    query(collection(db, "destinations"), orderBy("sortOrder", "asc"))
+  );
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as DestinationDoc));
+}
+
+export async function upsertDestination(
+  viewerId: string,
+  args: {
+    destinationId?: string;
+    slug: string;
+    name: string;
+    tagline?: string;
+    shortDescription?: string;
+    longDescription?: string;
+    highlights?: string[];
+    bestVehicleId?: string;
+    serviceSlug?: string;
+    image?: string;
+    sortOrder: number;
+  }
+) {
+  const now = Date.now();
+  const payload = {
+    slug: args.slug.trim().toLowerCase().replace(/\s+/g, "-"),
+    name: args.name,
+    tagline: args.tagline ?? null,
+    shortDescription: args.shortDescription ?? null,
+    longDescription: args.longDescription ?? null,
+    highlights: args.highlights ?? [],
+    bestVehicleId: args.bestVehicleId ?? null,
+    serviceSlug: args.serviceSlug ?? null,
+    image: args.image ?? null,
+    sortOrder: args.sortOrder,
+    updatedAt: now,
+  };
+
+  if (args.destinationId) {
+    const ref = doc(db, "destinations", args.destinationId);
+    const existing = await getDoc(ref);
+    if (!existing.exists()) throw new Error("Destination not found.");
+    await updateDoc(ref, payload);
+    await addDoc(collection(db, "activityLogs"), {
+      actorUserId: viewerId,
+      action: "destination.updated",
+      entityType: "destinations",
+      entityId: args.destinationId,
+      summary: `Updated destination ${args.name}.`,
+      createdAt: now,
+    });
+    return { destinationId: args.destinationId };
+  }
+
+  const dupSnap = await getDocs(
+    query(collection(db, "destinations"), where("slug", "==", payload.slug))
+  );
+  if (!dupSnap.empty) throw new Error("A destination with this slug already exists.");
+
+  const ref = await addDoc(collection(db, "destinations"), {
+    ...payload,
+    route: `/destinations/${payload.slug}`,
+    createdAt: now,
+  });
+  await addDoc(collection(db, "activityLogs"), {
+    actorUserId: viewerId,
+    action: "destination.created",
+    entityType: "destinations",
+    entityId: ref.id,
+    summary: `Created destination ${args.name}.`,
+    createdAt: now,
+  });
+  return { destinationId: ref.id };
+}
+
+// Blog
+export type BlogPostDoc = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  sortOrder: number;
+  published?: boolean;
+  [key: string]: unknown;
+};
+
+export async function listBlogPosts(): Promise<BlogPostDoc[]> {
+  const snap = await getDocs(
+    query(collection(db, "blogPosts"), orderBy("sortOrder", "asc"))
+  );
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as BlogPostDoc));
+}
+
+export async function upsertBlogPost(
+  viewerId: string,
+  args: {
+    blogPostId?: string;
+    slug: string;
+    title: string;
+    excerpt: string;
+    content?: string;
+    image?: string;
+    category?: string;
+    date?: string;
+    readingTime?: string;
+    highlights?: string[];
+    sections?: { heading: string; body: string }[];
+    published: boolean;
+    sortOrder: number;
+  }
+) {
+  const now = Date.now();
+  const slug = args.slug.trim().toLowerCase().replace(/\s+/g, "-");
+  const payload = {
+    slug,
+    title: args.title,
+    excerpt: args.excerpt,
+    content: args.content ?? null,
+    image: args.image ?? null,
+    category: args.category ?? null,
+    date: args.date ?? null,
+    readingTime: args.readingTime ?? null,
+    highlights: args.highlights ?? [],
+    sections: args.sections ?? [],
+    published: args.published,
+    sortOrder: args.sortOrder,
+    updatedAt: now,
+  };
+
+  if (args.blogPostId) {
+    const ref = doc(db, "blogPosts", args.blogPostId);
+    const existing = await getDoc(ref);
+    if (!existing.exists()) throw new Error("Blog post not found.");
+    await updateDoc(ref, payload);
+    await addDoc(collection(db, "activityLogs"), {
+      actorUserId: viewerId,
+      action: "blogPost.updated",
+      entityType: "blogPosts",
+      entityId: args.blogPostId,
+      summary: `Updated blog post ${args.title}.`,
+      createdAt: now,
+    });
+    return { blogPostId: args.blogPostId };
+  }
+
+  const dupSnap = await getDocs(
+    query(collection(db, "blogPosts"), where("slug", "==", slug))
+  );
+  if (!dupSnap.empty) throw new Error("A blog post with this slug already exists.");
+
+  const ref = await addDoc(collection(db, "blogPosts"), {
+    ...payload,
+    createdAt: now,
+  });
+  await addDoc(collection(db, "activityLogs"), {
+    actorUserId: viewerId,
+    action: "blogPost.created",
+    entityType: "blogPosts",
+    entityId: ref.id,
+    summary: `Created blog post ${args.title}.`,
+    createdAt: now,
+  });
+  return { blogPostId: ref.id };
+}
+
+// Testimonials
+export type TestimonialDoc = {
+  id: string;
+  publicId: string;
+  author: string;
+  quote: string;
+  summary: string;
+  sortOrder: number;
+};
+
+export async function listTestimonials(): Promise<TestimonialDoc[]> {
+  const snap = await getDocs(
+    query(collection(db, "testimonials"), orderBy("sortOrder", "asc"))
+  );
+  return snap.docs.map((d) => {
+    const data = d.data();
+    return { id: d.id, publicId: data.publicId ?? d.id, ...data } as TestimonialDoc;
+  });
+}
+
+export async function upsertTestimonial(
+  viewerId: string,
+  args: {
+    testimonialId?: string;
+    publicId: string;
+    author: string;
+    quote: string;
+    summary: string;
+    sortOrder: number;
+  }
+) {
+  const now = Date.now();
+
+  if (args.testimonialId) {
+    const ref = doc(db, "testimonials", args.testimonialId);
+    const existing = await getDoc(ref);
+    if (!existing.exists()) throw new Error("Testimonial not found.");
+    await updateDoc(ref, {
+      publicId: args.publicId,
+      author: args.author,
+      quote: args.quote,
+      summary: args.summary,
+      sortOrder: args.sortOrder,
+      updatedAt: now,
+    });
+    await addDoc(collection(db, "activityLogs"), {
+      actorUserId: viewerId,
+      action: "testimonial.updated",
+      entityType: "testimonials",
+      entityId: args.testimonialId,
+      summary: `Updated testimonial from ${args.author}.`,
+      createdAt: now,
+    });
+    return { testimonialId: args.testimonialId };
+  }
+
+  const ref = await addDoc(collection(db, "testimonials"), {
+    publicId: args.publicId,
+    author: args.author,
+    quote: args.quote,
+    summary: args.summary,
+    sortOrder: args.sortOrder,
+    createdAt: now,
+    updatedAt: now,
+  });
+  await addDoc(collection(db, "activityLogs"), {
+    actorUserId: viewerId,
+    action: "testimonial.created",
+    entityType: "testimonials",
+    entityId: ref.id,
+    summary: `Created testimonial from ${args.author}.`,
+    createdAt: now,
+  });
+  return { testimonialId: ref.id };
+}
+
+// Site settings
+export type SiteSettingsDoc = {
+  companyInfo: Record<string, unknown>;
+  bookingLocations: string[];
+  serviceTypes: string[];
+  navLinks: Array<{ label: string; to: string; description?: string; children?: Array<{ label: string; to: string; description?: string }> }>;
+  quickLinks: Array<{ label: string; to: string; description?: string }>;
+  footerServiceLinks: Array<{ label: string; to: string; description?: string }>;
+  legalLinks: Array<{ label: string; to: string; description?: string }>;
+  leadershipMembers: Array<{ name: string; title: string; bio: string }>;
+  updatedAt: number;
+};
+
+export async function getSiteSettings(): Promise<SiteSettingsDoc | null> {
+  const ref = doc(db, "siteSettings", "primary");
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return null;
+  const data = snap.data();
+  const toNum = (v: unknown) =>
+    typeof v === "object" && v !== null && "toMillis" in v
+      ? (v as { toMillis: () => number }).toMillis()
+      : (v as number);
+  return {
+    ...data,
+    updatedAt: toNum(data.updatedAt) ?? 0,
+  } as SiteSettingsDoc;
+}
+
+export async function updateSiteSettings(
+  viewerId: string,
+  args: Partial<{
+    companyInfo: Record<string, unknown>;
+    bookingLocations: string[];
+    serviceTypes: string[];
+    navLinks: Array<{ label: string; to: string; description?: string; children?: Array<{ label: string; to: string; description?: string }> }>;
+    quickLinks: Array<{ label: string; to: string; description?: string }>;
+    footerServiceLinks: Array<{ label: string; to: string; description?: string }>;
+    legalLinks: Array<{ label: string; to: string; description?: string }>;
+    leadershipMembers: Array<{ name: string; title: string; bio: string }>;
+  }>
+) {
+  const now = Date.now();
+  const ref = doc(db, "siteSettings", "primary");
+  const existing = await getDoc(ref);
+  const current = existing.exists() ? (existing.data() as Record<string, unknown>) : { key: "primary" };
+
+  const merged = {
+    key: "primary",
+    companyInfo: args.companyInfo ?? current.companyInfo,
+    bookingLocations: args.bookingLocations ?? current.bookingLocations ?? [],
+    serviceTypes: args.serviceTypes ?? current.serviceTypes ?? [],
+    navLinks: args.navLinks ?? current.navLinks ?? [],
+    quickLinks: args.quickLinks ?? current.quickLinks ?? [],
+    footerServiceLinks: args.footerServiceLinks ?? current.footerServiceLinks ?? [],
+    legalLinks: args.legalLinks ?? current.legalLinks ?? [],
+    leadershipMembers: args.leadershipMembers ?? current.leadershipMembers ?? [],
+    createdAt: current.createdAt ?? now,
+    updatedAt: now,
+  };
+
+  await setDoc(ref, merged, { merge: true });
+
+  await addDoc(collection(db, "activityLogs"), {
+    actorUserId: viewerId,
+    action: "siteSettings.updated",
+    entityType: "siteSettings",
+    entityId: "primary",
+    summary: "Updated site settings.",
     createdAt: now,
   });
 }

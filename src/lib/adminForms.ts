@@ -77,3 +77,38 @@ export function stringifyLeadershipRows(values: Array<{ name: string; title: str
       .join("\n") ?? ""
   );
 }
+
+export type NavLinkRow = { label: string; to: string; description?: string; children?: Array<{ label: string; to: string; description?: string }> };
+
+export function parseNavLinkRows(value: string): NavLinkRow[] {
+  const lines = value.split("\n").map((r) => r.trim()).filter(Boolean);
+  const result: NavLinkRow[] = [];
+  let currentParent: NavLinkRow | null = null;
+
+  for (const line of lines) {
+    const [label = "", to = "", description = ""] = line.replace(/^>\s*/, "").split("|").map((s) => s.trim());
+    const isChild = line.startsWith(">");
+
+    if (isChild && currentParent) {
+      if (!currentParent.children) currentParent.children = [];
+      currentParent.children.push({ label, to, description: description || undefined });
+    } else {
+      currentParent = { label, to, description: description || undefined };
+      result.push(currentParent);
+    }
+  }
+  return result;
+}
+
+export function stringifyNavLinkRows(values: NavLinkRow[] | undefined): string {
+  if (!values?.length) return "";
+  return values
+    .map((item) => {
+      const main = [item.label, item.to, item.description ?? ""].join(" | ");
+      const children = (item.children ?? [])
+        .map((c) => "> " + [c.label, c.to, c.description ?? ""].join(" | "))
+        .join("\n");
+      return children ? main + "\n" + children : main;
+    })
+    .join("\n");
+}
