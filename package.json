@@ -4,17 +4,17 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "prebuild:functions": "node scripts/copy-seed-data.js",
     "dev": "vite",
-    "dev:backend": "convex dev",
-    "convex:codegen": "convex dev --once --typecheck disable",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "firebase:deploy": "firebase deploy",
+    "firebase:deploy:functions": "firebase deploy --only functions"
   },
   "dependencies": {
-    "@convex-dev/better-auth": "0.11.1",
-    "better-auth": "1.5.3",
-    "convex": "^1.32.0",
     "date-fns": "^4.1.0",
+    "firebase": "^11.0.0",
+    "react-firebase-hooks": "^6.0.0",
     "lucide-react": "^0.577.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
