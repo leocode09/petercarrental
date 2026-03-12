@@ -1,4 +1,4 @@
-import ConvexCredentials from "@convex-dev/auth/providers/ConvexCredentials";
+import { ConvexCredentials } from "@convex-dev/auth/providers/ConvexCredentials";
 import { convexAuth, createAccount, retrieveAccount } from "@convex-dev/auth/server";
 import { ConvexError } from "convex/values";
 import type { DataModel } from "./_generated/dataModel";
