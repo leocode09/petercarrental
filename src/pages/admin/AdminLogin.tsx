@@ -1,10 +1,10 @@
-import { useAuthActions } from "@convex-dev/auth/react";
 import { useConvexAuth, useQuery } from "convex/react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { api } from "../../../convex/_generated/api";
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
+import { authClient } from "../../lib/auth-client";
 import { inputClassName } from "../../lib/utils";
 import { usePublicSiteData } from "../../lib/publicData";
 
@@ -14,7 +14,6 @@ export default function AdminLogin() {
   const { companyInfo } = usePublicSiteData();
   const { isAuthenticated } = useConvexAuth();
   const authState = useQuery(api.adminUsers.authState, {});
-  const { signIn } = useAuthActions();
   const [email, setEmail] = useState("admin@petercarrental.rw");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -44,20 +43,25 @@ export default function AdminLogin() {
 
         <form
           className="mt-8 space-y-4"
-          onSubmit={(event) => {
+          onSubmit={async (event) => {
             event.preventDefault();
             setSubmitting(true);
             setErrorMessage("");
 
-            void signIn("admin-credentials", {
-              email,
-              password,
-              flow: "signIn",
-            })
-              .catch((error) => {
-                setErrorMessage(error instanceof Error ? error.message : "Unable to sign in.");
-              })
-              .finally(() => setSubmitting(false));
+            try {
+              const result = await authClient.signIn.email({
+                email,
+                password,
+              });
+
+              if (result.error) {
+                setErrorMessage(result.error.message || "Unable to sign in.");
+              }
+            } catch (error) {
+              setErrorMessage(error instanceof Error ? error.message : "Unable to sign in.");
+            } finally {
+              setSubmitting(false);
+            }
           }}
         >
           <label className="flex flex-col gap-2">

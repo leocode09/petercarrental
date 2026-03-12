@@ -10,9 +10,9 @@ import {
   WalletCards,
 } from "lucide-react";
 import { useQuery } from "convex/react";
-import { useAuthActions } from "@convex-dev/auth/react";
 import { NavLink, Outlet } from "react-router-dom";
 import { api } from "../../../convex/_generated/api";
+import { authClient } from "../../lib/auth-client";
 import { cn } from "../../lib/utils";
 import { usePublicSiteData } from "../../lib/publicData";
 import Button from "../ui/Button";
@@ -71,7 +71,6 @@ const navigationItems = [
 export default function AdminLayout() {
   const { companyInfo } = usePublicSiteData();
   const viewer = useQuery(api.adminUsers.currentAdmin, {});
-  const { signOut } = useAuthActions();
 
   const allowedItems = navigationItems.filter((item) => item.roles.includes((viewer?.role ?? "") as never));
 
@@ -119,7 +118,7 @@ export default function AdminLayout() {
             </Button>
             <button
               className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/10 px-4 py-3 text-sm font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/10"
-              onClick={() => void signOut()}
+              onClick={() => void authClient.signOut()}
               type="button"
             >
               <LogOut className="h-4 w-4" />
@@ -141,7 +140,7 @@ export default function AdminLayout() {
                 </Button>
                 <button
                   className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
-                  onClick={() => void signOut()}
+                  onClick={() => void authClient.signOut()}
                   type="button"
                 >
                   <LogOut className="h-4 w-4" />

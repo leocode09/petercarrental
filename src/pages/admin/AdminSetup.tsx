@@ -1,10 +1,10 @@
-import { useAuthActions } from "@convex-dev/auth/react";
 import { useQuery } from "convex/react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../../convex/_generated/api";
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
+import { authClient } from "../../lib/auth-client";
 import { usePublicSiteData } from "../../lib/publicData";
 import { inputClassName } from "../../lib/utils";
 
@@ -12,7 +12,6 @@ export default function AdminSetup() {
   const navigate = useNavigate();
   const { companyInfo } = usePublicSiteData();
   const authState = useQuery(api.adminUsers.authState, {});
-  const { signIn } = useAuthActions();
   const [name, setName] = useState("Peter Car Rental Admin");
   const [email, setEmail] = useState("admin@petercarrental.rw");
   const [password, setPassword] = useState("");
@@ -40,7 +39,7 @@ export default function AdminSetup() {
 
         <form
           className="mt-8 space-y-4"
-          onSubmit={(event) => {
+          onSubmit={async (event) => {
             event.preventDefault();
             setErrorMessage("");
 
@@ -51,17 +50,21 @@ export default function AdminSetup() {
 
             setSubmitting(true);
 
-            void signIn("admin-credentials", {
-              name,
-              email,
-              password,
-              flow: "signUp",
-            })
-              .then(() => navigate("/admin", { replace: true }))
-              .catch((error) => {
-                setErrorMessage(error instanceof Error ? error.message : "Unable to create the admin account.");
-              })
-              .finally(() => setSubmitting(false));
+            try {
+              const result = await authClient.signUp.email({
+                email,
+                name,
+                password,
+              });
+
+              if (result.error) {
+                setErrorMessage(result.error.message || "Unable to create the admin account.");
+              }
+            } catch (error) {
+              setErrorMessage(error instanceof Error ? error.message : "Unable to create the admin account.");
+            } finally {
+              setSubmitting(false);
+            }
           }}
         >
           <label className="flex flex-col gap-2">
