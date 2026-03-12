@@ -4,15 +4,11 @@ import {
   getDoc,
   getDocs,
   addDoc,
-  setDoc,
   updateDoc,
   query,
   orderBy,
   where,
-  serverTimestamp,
-  writeBatch,
 } from "firebase/firestore";
-import { useAuth } from "./auth-context";
 import { db } from "./firebase";
 import type { AvailabilityStatus, BookingStatus } from "./validators";
 

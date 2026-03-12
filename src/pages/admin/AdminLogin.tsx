@@ -25,9 +25,11 @@ export default function AdminLogin() {
     }
   }, [user, navigate, location.state]);
 
-  if (authState.hasAnyAdmin === false && !authState.loading) {
-    navigate("/admin/setup", { replace: true });
-  }
+  useEffect(() => {
+    if (authState.hasAnyAdmin === false && !authState.loading) {
+      navigate("/admin/setup", { replace: true });
+    }
+  }, [authState.hasAnyAdmin, authState.loading, navigate]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-100 px-6 py-10">
