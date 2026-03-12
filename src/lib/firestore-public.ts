@@ -214,36 +214,73 @@ function defaultCompanyInfo(): CompanyInfo {
 export function usePublicSiteData() {
   const [data, setData] = useState<PublicSiteData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const retry = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    setData(null);
+    setRetryCount((c) => c + 1);
+  }, []);
+
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
+    setLoading(true);
+    setError(null);
+
+    let graceTimer: ReturnType<typeof setTimeout> | undefined;
+
     const unsub = onSnapshot(
       doc(db, "siteSettings", siteSettingKey),
       async (snap) => {
         if (!snap.exists()) {
-          setData(null);
-          setLoading(false);
+          // Give the bootstrapper time to seed before giving up.
+          // The onSnapshot listener stays active, so if the document
+          // is created we'll get another callback automatically.
+          if (!graceTimer) {
+            graceTimer = setTimeout(() => {
+              setError(
+                "Site settings not found. The database may not be seeded yet — " +
+                "check that the seedPublicData Cloud Function is deployed."
+              );
+              setLoading(false);
+            }, 12_000);
+          }
           return;
         }
+        clearTimeout(graceTimer);
+        graceTimer = undefined;
         try {
           const content = await fetchSiteContent(snap.data());
           setData(content);
+          setError(null);
         } catch (err) {
           console.error("Failed to fetch site content", err);
           setData(null);
+          setError(
+            err instanceof Error ? err.message : "Failed to fetch site content"
+          );
         } finally {
           setLoading(false);
         }
       },
       (err) => {
+        clearTimeout(graceTimer);
         console.error("Firestore siteSettings listener error", err);
         setData(null);
+        setError(err.message ?? "Firestore connection error");
         setLoading(false);
       }
     );
-    return () => unsub();
-  }, []);
 
-  return { data, loading };
+    return () => {
+      clearTimeout(graceTimer);
+      unsub();
+    };
+  }, [retryCount]);
+
+  return { data, loading, error, retry };
 }
 
 export function getVehicleByQueryValue(

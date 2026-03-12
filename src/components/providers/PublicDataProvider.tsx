@@ -8,6 +8,8 @@ import {
 const PublicDataContext = createContext<{
   data: PublicSiteData | null;
   loading: boolean;
+  error: string | null;
+  retry: () => void;
 } | null>(null);
 
 export function usePublicData() {
@@ -19,10 +21,10 @@ export function usePublicData() {
 }
 
 export default function PublicDataProvider({ children }: { children: ReactNode }) {
-  const { data, loading } = usePublicSiteData();
+  const { data, loading, error, retry } = usePublicSiteData();
 
   return (
-    <PublicDataContext.Provider value={{ data, loading }}>
+    <PublicDataContext.Provider value={{ data, loading, error, retry }}>
       <FirebaseBootstrapper />
       {children}
     </PublicDataContext.Provider>

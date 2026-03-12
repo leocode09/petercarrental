@@ -6,7 +6,7 @@ import Header from "./Header";
 import TopBar from "./TopBar";
 
 export default function Layout() {
-  const { data, loading } = usePublicData();
+  const { data, loading, error, retry } = usePublicData();
 
   if (loading) {
     return (
@@ -19,8 +19,19 @@ export default function Layout() {
   if (!data) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white px-6">
-        <p className="text-center text-slate-600">Loading site content…</p>
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
+        <p className="text-center font-medium text-slate-800">
+          Unable to load site content
+        </p>
+        {error && (
+          <p className="max-w-md text-center text-sm text-slate-500">{error}</p>
+        )}
+        <button
+          className="mt-2 rounded-lg bg-orange-500 px-5 py-2 text-sm font-medium text-white transition hover:bg-orange-600"
+          onClick={retry}
+          type="button"
+        >
+          Retry
+        </button>
       </div>
     );
   }
