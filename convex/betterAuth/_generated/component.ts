@@ -1,6 +1,6 @@
 /* eslint-disable */
 /**
- * Generated `api` utility.
+ * Generated `ComponentApi` utility.
  *
  * THIS CODE IS AUTOMATICALLY GENERATED.
  *
@@ -8,80 +8,21 @@
  * @module
  */
 
-import type * as adminContent from "../adminContent.js";
-import type * as adminCustomers from "../adminCustomers.js";
-import type * as adminDashboard from "../adminDashboard.js";
-import type * as adminFleet from "../adminFleet.js";
-import type * as adminInbox from "../adminInbox.js";
-import type * as adminPricing from "../adminPricing.js";
-import type * as adminReports from "../adminReports.js";
-import type * as adminReservations from "../adminReservations.js";
-import type * as adminUsers from "../adminUsers.js";
-import type * as auth from "../auth.js";
-import type * as bookings from "../bookings.js";
-import type * as bootstrap from "../bootstrap.js";
-import type * as http from "../http.js";
-import type * as inbox from "../inbox.js";
-import type * as lib_auth from "../lib/auth.js";
-import type * as lib_bookings from "../lib/bookings.js";
-import type * as lib_validators from "../lib/validators.js";
-import type * as public_ from "../public.js";
-
-import type {
-  ApiFromModules,
-  FilterApi,
-  FunctionReference,
-} from "convex/server";
-
-declare const fullApi: ApiFromModules<{
-  adminContent: typeof adminContent;
-  adminCustomers: typeof adminCustomers;
-  adminDashboard: typeof adminDashboard;
-  adminFleet: typeof adminFleet;
-  adminInbox: typeof adminInbox;
-  adminPricing: typeof adminPricing;
-  adminReports: typeof adminReports;
-  adminReservations: typeof adminReservations;
-  adminUsers: typeof adminUsers;
-  auth: typeof auth;
-  bookings: typeof bookings;
-  bootstrap: typeof bootstrap;
-  http: typeof http;
-  inbox: typeof inbox;
-  "lib/auth": typeof lib_auth;
-  "lib/bookings": typeof lib_bookings;
-  "lib/validators": typeof lib_validators;
-  public: typeof public_;
-}>;
+import type { FunctionReference } from "convex/server";
 
 /**
- * A utility for referencing Convex functions in your app's public API.
+ * A utility for referencing a Convex component's exposed API.
  *
+ * Useful when expecting a parameter like `components.myComponent`.
  * Usage:
- * ```js
- * const myFunctionReference = api.myModule.myFunction;
+ * ```ts
+ * async function myFunction(ctx: QueryCtx, component: ComponentApi) {
+ *   return ctx.runQuery(component.someFile.someQuery, { ...args });
+ * }
  * ```
  */
-export declare const api: FilterApi<
-  typeof fullApi,
-  FunctionReference<any, "public">
->;
-
-/**
- * A utility for referencing Convex functions in your app's internal API.
- *
- * Usage:
- * ```js
- * const myFunctionReference = internal.myModule.myFunction;
- * ```
- */
-export declare const internal: FilterApi<
-  typeof fullApi,
-  FunctionReference<any, "internal">
->;
-
-export declare const components: {
-  betterAuth: {
+export type ComponentApi<Name extends string | undefined = string | undefined> =
+  {
     adapter: {
       create: FunctionReference<
         "mutation",
@@ -156,7 +97,8 @@ export declare const components: {
           onCreateHandle?: string;
           select?: Array<string>;
         },
-        any
+        any,
+        Name
       >;
       deleteMany: FunctionReference<
         "mutation",
@@ -348,7 +290,8 @@ export declare const components: {
             numItems: number;
           };
         },
-        any
+        any,
+        Name
       >;
       deleteOne: FunctionReference<
         "mutation",
@@ -532,7 +475,8 @@ export declare const components: {
               };
           onDeleteHandle?: string;
         },
-        any
+        any,
+        Name
       >;
       findMany: FunctionReference<
         "query",
@@ -576,7 +520,8 @@ export declare const components: {
               | null;
           }>;
         },
-        any
+        any,
+        Name
       >;
       findOne: FunctionReference<
         "query",
@@ -609,7 +554,8 @@ export declare const components: {
               | null;
           }>;
         },
-        any
+        any,
+        Name
       >;
       updateMany: FunctionReference<
         "mutation",
@@ -851,7 +797,8 @@ export declare const components: {
             numItems: number;
           };
         },
-        any
+        any,
+        Name
       >;
       updateOne: FunctionReference<
         "mutation",
@@ -1085,7 +1032,8 @@ export declare const components: {
               };
           onUpdateHandle?: string;
         },
-        any
+        any,
+        Name
       >;
     };
     users: {
@@ -1093,15 +1041,17 @@ export declare const components: {
         "query",
         "internal",
         { email: string },
-        any
+        any,
+        Name
       >;
       getUserById: FunctionReference<
         "query",
         "internal",
         { userId: string },
-        any
+        any,
+        Name
       >;
-      listUsers: FunctionReference<"query", "internal", {}, any>;
+      listUsers: FunctionReference<"query", "internal", {}, any, Name>;
       updateUserRole: FunctionReference<
         "mutation",
         "internal",
@@ -1109,8 +1059,8 @@ export declare const components: {
           role: "superAdmin" | "manager" | "operations" | "contentEditor";
           userId: string;
         },
-        any
+        any,
+        Name
       >;
     };
   };
-};
