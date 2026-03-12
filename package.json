@@ -12,6 +12,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@convex-dev/better-auth": "0.11.1",
+    "better-auth": "1.5.3",
     "convex": "^1.32.0",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.577.0",
