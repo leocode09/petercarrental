@@ -9,11 +9,8 @@ import {
   Users,
   WalletCards,
 } from "lucide-react";
-import { useMutation, useQuery } from "convex/react";
-import { useEffect } from "react";
 import { NavLink, Outlet } from "react-router-dom";
-import { api } from "../../../convex/_generated/api";
-import { authClient } from "../../lib/auth-client";
+import { useAuth } from "../../lib/auth-context";
 import { cn } from "../../lib/utils";
 import { usePublicSiteData } from "../../lib/publicData";
 import Button from "../ui/Button";
@@ -71,16 +68,11 @@ const navigationItems = [
 
 export default function AdminLayout() {
   const { companyInfo } = usePublicSiteData();
-  const viewer = useQuery(api.adminUsers.currentAdmin, {});
-  const bootstrapFirstAdminRole = useMutation(api.adminUsers.bootstrapFirstAdminRole);
+  const { adminUser: viewer, signOut } = useAuth();
 
-  useEffect(() => {
-    if (viewer?.authUserId && !viewer.role) {
-      void bootstrapFirstAdminRole();
-    }
-  }, [viewer?.authUserId, viewer?.role, bootstrapFirstAdminRole]);
-
-  const allowedItems = navigationItems.filter((item) => item.roles.includes((viewer?.role ?? "") as never));
+  const allowedItems = navigationItems.filter(
+    (item) => viewer?.role && item.roles.includes(viewer.role)
+  );
 
   return (
     <div className="min-h-screen bg-slate-100">
@@ -126,7 +118,7 @@ export default function AdminLayout() {
             </Button>
             <button
               className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/10 px-4 py-3 text-sm font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/10"
-              onClick={() => void authClient.signOut()}
+              onClick={() => void signOut()}
               type="button"
             >
               <LogOut className="h-4 w-4" />
@@ -148,7 +140,7 @@ export default function AdminLayout() {
                 </Button>
                 <button
                   className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
-                  onClick={() => void authClient.signOut()}
+                  onClick={() => void signOut()}
                   type="button"
                 >
                   <LogOut className="h-4 w-4" />

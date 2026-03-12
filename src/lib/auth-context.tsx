@@ -3,6 +3,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
@@ -103,7 +104,8 @@ export function useAuth() {
 }
 
 export function useCallable<TReq, TRes>(name: string) {
-  const functions = getFunctions();
-  const fn = httpsCallable<TReq, TRes>(functions, name);
-  return fn;
+  return useMemo(() => {
+    const functions = getFunctions();
+    return httpsCallable<TReq, TRes>(functions, name);
+  }, [name]);
 }

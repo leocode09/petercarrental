@@ -1,18 +1,23 @@
-import { useAction, useQuery } from "convex/react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { api } from "../../../convex/_generated/api";
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
-import { authClient } from "../../lib/auth-client";
+import { useAuth, useCallable } from "../../lib/auth-context";
+import { useAuthState } from "../../lib/useAuthState";
 import { usePublicSiteData } from "../../lib/publicData";
 import { inputClassName } from "../../lib/utils";
+
+type CreateFirstAdminResult = { data?: { userId: string } };
 
 export default function AdminSetup() {
   const navigate = useNavigate();
   const { companyInfo } = usePublicSiteData();
-  const authState = useQuery(api.adminUsers.authState, {});
-  const createFirstAdmin = useAction(api.adminUsers.createFirstAdmin);
+  const { signIn } = useAuth();
+  const authState = useAuthState();
+  const createFirstAdmin = useCallable<
+    { name: string; email: string; password: string },
+    CreateFirstAdminResult
+  >("createFirstAdmin");
   const [name, setName] = useState("Peter Car Rental Admin");
   const [email, setEmail] = useState("admin@petercarrental.rw");
   const [password, setPassword] = useState("");
@@ -21,10 +26,10 @@ export default function AdminSetup() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (authState?.hasAnyAdmin) {
+    if (authState.hasAnyAdmin && !authState.loading) {
       navigate(authState.viewer?.role ? "/admin" : "/admin/login", { replace: true });
     }
-  }, [authState, navigate]);
+  }, [authState.hasAnyAdmin, authState.viewer?.role, authState.loading, navigate]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-100 px-6 py-10">
@@ -53,21 +58,14 @@ export default function AdminSetup() {
 
             try {
               await createFirstAdmin({
-                email,
+                email: email.trim().toLowerCase(),
                 name,
                 password,
               });
 
-              const signInResult = await authClient.signIn.email({
-                email,
-                password,
-              });
+              await signIn(email.trim().toLowerCase(), password);
 
-              if (signInResult.error) {
-                setErrorMessage(signInResult.error.message || "Admin created, but automatic sign-in failed.");
-              } else {
-                navigate("/admin", { replace: true });
-              }
+              navigate("/admin", { replace: true });
             } catch (error) {
               setErrorMessage(error instanceof Error ? error.message : "Unable to create the admin account.");
             } finally {

@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
-import { getDoc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
+import { getFunctions, httpsCallable } from "firebase/functions";
 import { db } from "../../lib/firebase";
 import { siteSettingKey } from "../../lib/validators";
-import { seedPublicData } from "../../lib/firestore-seed";
 
 export default function FirebaseBootstrapper() {
   const attemptedRef = useRef(false);
@@ -16,7 +16,7 @@ export default function FirebaseBootstrapper() {
 
     async function checkAndSeed() {
       try {
-        const settingsRef = await getDoc(db.collection("siteSettings").doc(siteSettingKey));
+        const settingsRef = await getDoc(doc(db, "siteSettings", siteSettingKey));
         if (settingsRef.exists()) {
           return;
         }
@@ -24,7 +24,9 @@ export default function FirebaseBootstrapper() {
         attemptedRef.current = true;
         if (cancelled) return;
 
-        await seedPublicData();
+        const functions = getFunctions();
+        const seedFn = httpsCallable(functions, "seedPublicData");
+        await seedFn();
       } catch (error) {
         if (!cancelled) {
           console.error("Failed to seed Firestore content", error);

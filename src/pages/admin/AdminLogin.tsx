@@ -1,32 +1,31 @@
-import { useConvexAuth, useQuery } from "convex/react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { api } from "../../../convex/_generated/api";
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
-import { authClient } from "../../lib/auth-client";
-import { inputClassName } from "../../lib/utils";
+import { useAuth } from "../../lib/auth-context";
+import { useAuthState } from "../../lib/useAuthState";
 import { usePublicSiteData } from "../../lib/publicData";
+import { inputClassName } from "../../lib/utils";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
   const location = useLocation();
   const { companyInfo } = usePublicSiteData();
-  const { isAuthenticated } = useConvexAuth();
-  const authState = useQuery(api.adminUsers.authState, {});
+  const { signIn, user } = useAuth();
+  const authState = useAuthState();
   const [email, setEmail] = useState("admin@petercarrental.rw");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (user) {
       const nextPath = (location.state as { from?: string } | null)?.from || "/admin";
       navigate(nextPath, { replace: true });
     }
-  }, [isAuthenticated, navigate, location.state]);
+  }, [user, navigate, location.state]);
 
-  if (authState?.hasAnyAdmin === false) {
+  if (authState.hasAnyAdmin === false && !authState.loading) {
     navigate("/admin/setup", { replace: true });
   }
 
@@ -49,14 +48,7 @@ export default function AdminLogin() {
             setErrorMessage("");
 
             try {
-              const result = await authClient.signIn.email({
-                email,
-                password,
-              });
-
-              if (result.error) {
-                setErrorMessage(result.error.message || "Unable to sign in.");
-              }
+              await signIn(email, password);
             } catch (error) {
               setErrorMessage(error instanceof Error ? error.message : "Unable to sign in.");
             } finally {
@@ -101,7 +93,7 @@ export default function AdminLogin() {
           </div>
         </form>
 
-        {!authState?.hasAnyAdmin ? (
+        {authState.hasAnyAdmin === false && !authState.loading ? (
           <div className="mt-6 rounded-2xl border border-orange-100 bg-orange-50 p-4 text-sm text-slate-700">
             No admin account exists yet. Use the setup page to create the first super admin.
           </div>
