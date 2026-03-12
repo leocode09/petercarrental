@@ -110,10 +110,21 @@ export const authComponent = createClient<DataModel>(components.betterAuth, {
   },
 });
 
+const authSecret =
+  process.env.BETTER_AUTH_SECRET ||
+  (process.env.NODE_ENV !== "production"
+    ? "dev-placeholder-set-BETTER_AUTH_SECRET-in-convex-dashboard"
+    : undefined);
+if (!process.env.BETTER_AUTH_SECRET && process.env.NODE_ENV !== "production") {
+  console.warn(
+    "[Better Auth] BETTER_AUTH_SECRET is not set. Set it with: npx convex env set BETTER_AUTH_SECRET=$(openssl rand -base64 32)",
+  );
+}
+
 export const createAuth = (ctx: GenericCtx<DataModel>) => {
   return betterAuth({
     database: authComponent.adapter(ctx),
-    secret: process.env.BETTER_AUTH_SECRET,
+    secret: authSecret,
     trustedOrigins,
     emailAndPassword: {
       enabled: true,
