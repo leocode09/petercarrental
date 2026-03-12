@@ -1,15 +1,6 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
-import { onIdTokenChanged, signInWithCustomToken, signOut, type User } from "firebase/auth";
+import { createContext, useContext, useMemo, type ReactNode } from "react";
 import { httpsCallable } from "firebase/functions";
-import { auth, functions } from "./firebase";
+import { functions } from "./firebase";
 import type { UserRole } from "./validators";
 
 export type AdminUser = {
@@ -21,84 +12,45 @@ export type AdminUser = {
   role: UserRole | null;
 };
 
-type AuthState = {
-  user: User | null;
+const staticAdmin: AdminUser = {
+  _id: "admin",
+  authUserId: "admin",
+  email: "admin@petercarrental.rw",
+  name: "Admin",
+  role: "superAdmin",
+};
+
+type AuthContextValue = {
+  user: object | null;
   loading: boolean;
   role: UserRole | null;
   adminUser: AdminUser | null;
-};
-
-const initialState: AuthState = {
-  user: null,
-  loading: true,
-  role: null,
-  adminUser: null,
-};
-
-const AuthContext = createContext<AuthState & {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
-}>({
-  ...initialState,
+};
+
+const AuthContext = createContext<AuthContextValue>({
+  user: staticAdmin,
+  loading: false,
+  role: "superAdmin",
+  adminUser: staticAdmin,
   signIn: async () => {},
   signOut: async () => {},
-  isAdmin: false,
+  isAdmin: true,
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AuthState>(initialState);
-
-  useEffect(() => {
-    const unsubscribe = onIdTokenChanged(auth, async (user) => {
-      if (!user) {
-        setState({ user: null, loading: false, role: null, adminUser: null });
-        return;
-      }
-
-      const tokenResult = await user.getIdTokenResult();
-      const role = (tokenResult.claims.role as UserRole) ?? null;
-      const claims = tokenResult.claims as Record<string, unknown>;
-      const email = (claims.email as string) ?? user.email ?? null;
-      const name = (claims.name as string) ?? user.displayName ?? null;
-
-      setState({
-        user,
-        loading: false,
-        role,
-        adminUser: {
-          _id: user.uid,
-          authUserId: user.uid,
-          email,
-          image: user.photoURL ?? null,
-          name,
-          role,
-        },
-      });
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const signIn = useCallback(async (email: string, password: string) => {
-    const loginFn = httpsCallable<{ email: string; password: string }, { token: string }>(functions, "loginAdmin");
-    const res = await loginFn({ email: email.trim().toLowerCase(), password });
-    const token = res.data.token;
-    if (!token) throw new Error("No token returned");
-    await signInWithCustomToken(auth, token);
-  }, []);
-
-  const signOutUser = useCallback(async () => {
-    await signOut(auth);
-  }, []);
-
   return (
     <AuthContext.Provider
       value={{
-        ...state,
-        signIn,
-        signOut: signOutUser,
-        isAdmin: state.role != null,
+        user: staticAdmin,
+        loading: false,
+        role: "superAdmin",
+        adminUser: staticAdmin,
+        signIn: async () => {},
+        signOut: async () => {},
+        isAdmin: true,
       }}
     >
       {children}

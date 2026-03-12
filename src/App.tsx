@@ -30,12 +30,10 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminDestinations from "./pages/admin/AdminDestinations";
 import AdminFleet from "./pages/admin/AdminFleet";
 import AdminInbox from "./pages/admin/AdminInbox";
-import AdminLogin from "./pages/admin/AdminLogin";
 import AdminPricing from "./pages/admin/AdminPricing";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminReservations from "./pages/admin/AdminReservations";
 import AdminServices from "./pages/admin/AdminServices";
-import AdminSetup from "./pages/admin/AdminSetup";
 import AdminSiteSettings from "./pages/admin/AdminSiteSettings";
 import AdminTestimonials from "./pages/admin/AdminTestimonials";
 import AdminUsers from "./pages/admin/AdminUsers";
@@ -56,8 +54,6 @@ function AppRoutes() {
       <ScrollToTop />
       <Routes>
         <Route element={<AdminPortalProvider />} path="admin">
-          <Route element={<AdminLogin />} path="login" />
-          <Route element={<AdminSetup />} path="setup" />
           <Route element={<RequireAdminRoute />}>
             <Route element={<AdminLayout />}>
               <Route element={<AdminDashboard />} index />

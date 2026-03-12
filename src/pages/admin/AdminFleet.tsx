@@ -31,7 +31,7 @@ const emptyFleetForm = {
 };
 
 export default function AdminFleet() {
-  const { services, vehicles } = usePublicSiteData();
+  const { services = [], vehicles = [] } = usePublicSiteData();
   const { adminUser, loading: authLoading } = useAuth();
   const { data: fleet, refetch } = useFirestoreQuery(listFleet);
   const [form, setForm] = useState(emptyFleetForm);

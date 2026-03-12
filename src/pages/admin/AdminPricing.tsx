@@ -38,7 +38,7 @@ const emptyPromoForm = {
 export default function AdminPricing() {
   const { adminUser, loading: authLoading } = useAuth();
   const { data: pricing, refetch } = useFirestoreQuery(listPricing);
-  const { vehicles, serviceTypes } = usePublicSiteData();
+  const { vehicles = [], serviceTypes = [] } = usePublicSiteData();
   const vehicleCategories = getVehicleCategoriesFromList(vehicles);
   const [ruleForm, setRuleForm] = useState(emptyRuleForm);
   const [promoForm, setPromoForm] = useState(emptyPromoForm);

@@ -43,7 +43,7 @@ const emptyReservationForm = {
 export default function AdminReservations() {
   const { adminUser, loading: authLoading } = useAuth();
   const { data: bookings, refetch } = useFirestoreQuery(listBookings);
-  const { vehicles, bookingLocations, serviceTypes } = usePublicSiteData();
+  const { vehicles = [], bookingLocations = [], serviceTypes = [] } = usePublicSiteData();
   const vehicleCategories = getVehicleCategoriesFromList(vehicles);
   const [form, setForm] = useState(emptyReservationForm);
   const [saving, setSaving] = useState(false);

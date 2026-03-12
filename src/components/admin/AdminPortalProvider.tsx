@@ -1,7 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { Outlet } from "react-router-dom";
 import FirebaseBootstrapper from "../bootstrap/FirebaseBootstrapper";
-import { AuthProvider } from "../../lib/auth-context";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
 
@@ -103,11 +102,9 @@ export default function AdminPortalProvider() {
   }
 
   return (
-    <AuthProvider>
-      <AdminPortalErrorBoundary>
-        <FirebaseBootstrapper />
-        <Outlet />
-      </AdminPortalErrorBoundary>
-    </AuthProvider>
+    <AdminPortalErrorBoundary>
+      <FirebaseBootstrapper />
+      <Outlet />
+    </AdminPortalErrorBoundary>
   );
 }
