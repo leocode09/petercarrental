@@ -1,5 +1,5 @@
 import { useAuthActions } from "@convex-dev/auth/react";
-import { useQuery } from "convex/react";
+import { useConvexAuth, useQuery } from "convex/react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { api } from "../../../convex/_generated/api";
@@ -12,6 +12,7 @@ export default function AdminLogin() {
   const navigate = useNavigate();
   const location = useLocation();
   const { companyInfo } = usePublicSiteData();
+  const { isAuthenticated } = useConvexAuth();
   const authState = useQuery(api.adminUsers.authState, {});
   const { signIn } = useAuthActions();
   const [email, setEmail] = useState("admin@petercarrental.rw");
@@ -20,11 +21,11 @@ export default function AdminLogin() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (authState?.viewer?.role) {
+    if (isAuthenticated) {
       const nextPath = (location.state as { from?: string } | null)?.from || "/admin";
       navigate(nextPath, { replace: true });
     }
-  }, [authState, navigate, location.state]);
+  }, [isAuthenticated, navigate, location.state]);
 
   if (authState?.hasAnyAdmin === false) {
     navigate("/admin/setup", { replace: true });
