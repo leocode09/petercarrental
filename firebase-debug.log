@@ -17,3 +17,224 @@
 [debug] [2026-03-12T17:07:33.991Z] [tasks] Cloud Tasks Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
 [debug] [2026-03-12T17:07:33.991Z] late-assigned ports for functions and eventarc emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"functions":[{"address":"127.0.0.1","family":"IPv4","port":5001}],"eventarc":[{"address":"127.0.0.1","family":"IPv4","port":9299}],"tasks":[{"address":"127.0.0.1","family":"IPv4","port":9499}]},"metadata":{"message":"late-assigned ports for functions and eventarc emulators"}}
 [warn] !  functions: The following emulators are not running, calls to these services from the Functions emulator will affect production: apphosting, auth, firestore, database, hosting, pubsub, storage, dataconnect {"metadata":{"emulator":{"name":"functions"},"message":"The following emulators are not running, calls to these services from the Functions emulator will affect production: apphosting, auth, firestore, database, hosting, pubsub, storage, dataconnect"}}
+[debug] [2026-03-12T17:07:34.525Z] defaultcredentials: writing to file C:\Users\leoco\AppData\Roaming\firebase\dimeincltd_gmail_com_application_default_credentials.json
+[debug] [2026-03-12T17:07:34.529Z] Setting GAC to C:\Users\leoco\AppData\Roaming\firebase\dimeincltd_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\leoco\\AppData\\Roaming\\firebase\\dimeincltd_gmail_com_application_default_credentials.json"}}
+[debug] [2026-03-12T17:07:34.531Z] Checked if tokens are valid: true, expires at: 1773337561187
+[debug] [2026-03-12T17:07:34.532Z] Checked if tokens are valid: true, expires at: 1773337561187
+[debug] [2026-03-12T17:07:34.533Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/peter-car-rental/adminSdkConfig [none]
+[debug] [2026-03-12T17:07:35.552Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/peter-car-rental/adminSdkConfig 200
+[debug] [2026-03-12T17:07:35.552Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/peter-car-rental/adminSdkConfig {"projectId":"peter-car-rental","storageBucket":"peter-car-rental.firebasestorage.app"}
+[info] i  ui: downloading ui-v1.15.0.zip... {"metadata":{"emulator":{"name":"ui"},"message":"downloading ui-v1.15.0.zip..."}}
+[debug] [2026-03-12T17:07:35.586Z] >>> [apiv2][query] GET https://storage.googleapis.com/firebase-preview-drop/emulator/ui-v1.15.0.zip 
+[debug] [2026-03-12T17:07:36.322Z] <<< [apiv2][status] GET https://storage.googleapis.com/firebase-preview-drop/emulator/ui-v1.15.0.zip 200
+[debug] [2026-03-12T17:07:36.322Z] <<< [apiv2][body] GET https://storage.googleapis.com/firebase-preview-drop/emulator/ui-v1.15.0.zip [stream]
+[debug] [2026-03-12T17:07:38.098Z] Data is 3538469
+[debug] [2026-03-12T17:07:38.099Z] [unzip] Entry: client/ (compressed_size=0 bytes, uncompressed_size=0 bytes)
+[debug] [2026-03-12T17:07:38.099Z] [unzip] Processing entry: client\
+[debug] [2026-03-12T17:07:38.099Z] [unzip] mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\
+[debug] [2026-03-12T17:07:38.100Z] [unzip] Entry: client/favicon-16x16.png (compressed_size=293 bytes, uncompressed_size=293 bytes)
+[debug] [2026-03-12T17:07:38.100Z] [unzip] Processing entry: client\favicon-16x16.png
+[debug] [2026-03-12T17:07:38.100Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client
+[debug] [2026-03-12T17:07:38.101Z] [unzip] Writing file: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\favicon-16x16.png
+[debug] [2026-03-12T17:07:38.102Z] [unzip] Entry: client/safari-pinned-tab.svg (compressed_size=1433 bytes, uncompressed_size=2611 bytes)
+[debug] [2026-03-12T17:07:38.103Z] [unzip] Processing entry: client\safari-pinned-tab.svg
+[debug] [2026-03-12T17:07:38.103Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client
+[debug] [2026-03-12T17:07:38.103Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\safari-pinned-tab.svg
+[debug] [2026-03-12T17:07:38.109Z] [unzip] Entry: client/favicon.ico (compressed_size=2933 bytes, uncompressed_size=13294 bytes)
+[debug] [2026-03-12T17:07:38.109Z] [unzip] Processing entry: client\favicon.ico
+[debug] [2026-03-12T17:07:38.109Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client
+[debug] [2026-03-12T17:07:38.110Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\favicon.ico
+[debug] [2026-03-12T17:07:38.111Z] [unzip] Entry: client/index.html (compressed_size=1364 bytes, uncompressed_size=3071 bytes)
+[debug] [2026-03-12T17:07:38.112Z] [unzip] Processing entry: client\index.html
+[debug] [2026-03-12T17:07:38.112Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client
+[debug] [2026-03-12T17:07:38.112Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\index.html
+[debug] [2026-03-12T17:07:38.115Z] [unzip] Entry: client/android-chrome-192x192.png (compressed_size=2684 bytes, uncompressed_size=2684 bytes)
+[debug] [2026-03-12T17:07:38.115Z] [unzip] Processing entry: client\android-chrome-192x192.png
+[debug] [2026-03-12T17:07:38.115Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client
+[debug] [2026-03-12T17:07:38.116Z] [unzip] Writing file: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\android-chrome-192x192.png
+[debug] [2026-03-12T17:07:38.117Z] [unzip] Entry: client/apple-touch-icon.png (compressed_size=2123 bytes, uncompressed_size=2152 bytes)
+[debug] [2026-03-12T17:07:38.117Z] [unzip] Processing entry: client\apple-touch-icon.png
+[debug] [2026-03-12T17:07:38.117Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client
+[debug] [2026-03-12T17:07:38.118Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\apple-touch-icon.png
+[debug] [2026-03-12T17:07:38.119Z] [unzip] Entry: client/android-chrome-512x512.png (compressed_size=5369 bytes, uncompressed_size=5411 bytes)
+[debug] [2026-03-12T17:07:38.119Z] [unzip] Processing entry: client\android-chrome-512x512.png
+[debug] [2026-03-12T17:07:38.119Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client
+[debug] [2026-03-12T17:07:38.120Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\android-chrome-512x512.png
+[debug] [2026-03-12T17:07:38.121Z] [unzip] Entry: client/manifest.json (compressed_size=245 bytes, uncompressed_size=551 bytes)
+[debug] [2026-03-12T17:07:38.121Z] [unzip] Processing entry: client\manifest.json
+[debug] [2026-03-12T17:07:38.121Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client
+[debug] [2026-03-12T17:07:38.122Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\manifest.json
+[debug] [2026-03-12T17:07:38.124Z] [unzip] Entry: client/robots.txt (compressed_size=26 bytes, uncompressed_size=26 bytes)
+[debug] [2026-03-12T17:07:38.124Z] [unzip] Processing entry: client\robots.txt
+[debug] [2026-03-12T17:07:38.124Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client
+[debug] [2026-03-12T17:07:38.125Z] [unzip] Writing file: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\robots.txt
+[debug] [2026-03-12T17:07:38.126Z] [unzip] Entry: client/mstile-150x150.png (compressed_size=2034 bytes, uncompressed_size=2034 bytes)
+[debug] [2026-03-12T17:07:38.126Z] [unzip] Processing entry: client\mstile-150x150.png
+[debug] [2026-03-12T17:07:38.126Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client
+[debug] [2026-03-12T17:07:38.127Z] [unzip] Writing file: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\mstile-150x150.png
+[debug] [2026-03-12T17:07:38.128Z] [unzip] Entry: client/assets/ (compressed_size=0 bytes, uncompressed_size=0 bytes)
+[debug] [2026-03-12T17:07:38.128Z] [unzip] Processing entry: client\assets\
+[debug] [2026-03-12T17:07:38.128Z] [unzip] mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\
+[debug] [2026-03-12T17:07:38.129Z] [unzip] Entry: client/assets/index-BX-A56oj.js (compressed_size=582089 bytes, uncompressed_size=2092775 bytes)
+[debug] [2026-03-12T17:07:38.129Z] [unzip] Processing entry: client\assets\index-BX-A56oj.js
+[debug] [2026-03-12T17:07:38.129Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets
+[debug] [2026-03-12T17:07:38.130Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\index-BX-A56oj.js
+[debug] [2026-03-12T17:07:38.149Z] [unzip] Entry: client/assets/index-CjB9C900.css (compressed_size=35979 bytes, uncompressed_size=298654 bytes)
+[debug] [2026-03-12T17:07:38.150Z] [unzip] Processing entry: client\assets\index-CjB9C900.css
+[debug] [2026-03-12T17:07:38.150Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets
+[debug] [2026-03-12T17:07:38.150Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\index-CjB9C900.css
+[debug] [2026-03-12T17:07:38.154Z] [unzip] Entry: client/assets/index-BX-A56oj.js.map (compressed_size=2362482 bytes, uncompressed_size=10036679 bytes)
+[debug] [2026-03-12T17:07:38.154Z] [unzip] Processing entry: client\assets\index-BX-A56oj.js.map
+[debug] [2026-03-12T17:07:38.154Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets
+[debug] [2026-03-12T17:07:38.154Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\index-BX-A56oj.js.map
+[debug] [2026-03-12T17:07:38.227Z] [unzip] Entry: client/assets/extensions/ (compressed_size=0 bytes, uncompressed_size=0 bytes)
+[debug] [2026-03-12T17:07:38.227Z] [unzip] Processing entry: client\assets\extensions\
+[debug] [2026-03-12T17:07:38.227Z] [unzip] mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\extensions\
+[debug] [2026-03-12T17:07:38.228Z] [unzip] Entry: client/assets/extensions/default-extension.png (compressed_size=1646 bytes, uncompressed_size=1657 bytes)
+[debug] [2026-03-12T17:07:38.228Z] [unzip] Processing entry: client\assets\extensions\default-extension.png
+[debug] [2026-03-12T17:07:38.228Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\extensions
+[debug] [2026-03-12T17:07:38.228Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\extensions\default-extension.png
+[debug] [2026-03-12T17:07:38.231Z] [unzip] Entry: client/assets/img/ (compressed_size=0 bytes, uncompressed_size=0 bytes)
+[debug] [2026-03-12T17:07:38.231Z] [unzip] Processing entry: client\assets\img\
+[debug] [2026-03-12T17:07:38.231Z] [unzip] mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\img\
+[debug] [2026-03-12T17:07:38.231Z] [unzip] Entry: client/assets/img/database.png (compressed_size=29449 bytes, uncompressed_size=29988 bytes)
+[debug] [2026-03-12T17:07:38.231Z] [unzip] Processing entry: client\assets\img\database.png
+[debug] [2026-03-12T17:07:38.231Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\img
+[debug] [2026-03-12T17:07:38.232Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\img\database.png
+[debug] [2026-03-12T17:07:38.233Z] [unzip] Entry: client/assets/provider-icons/ (compressed_size=0 bytes, uncompressed_size=0 bytes)
+[debug] [2026-03-12T17:07:38.233Z] [unzip] Processing entry: client\assets\provider-icons\
+[debug] [2026-03-12T17:07:38.234Z] [unzip] mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons\
+[debug] [2026-03-12T17:07:38.234Z] [unzip] Entry: client/assets/provider-icons/auth_service_saml.svg (compressed_size=575 bytes, uncompressed_size=1226 bytes)
+[debug] [2026-03-12T17:07:38.234Z] [unzip] Processing entry: client\assets\provider-icons\auth_service_saml.svg
+[debug] [2026-03-12T17:07:38.234Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons
+[debug] [2026-03-12T17:07:38.235Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons\auth_service_saml.svg
+[debug] [2026-03-12T17:07:38.236Z] [unzip] Entry: client/assets/provider-icons/auth_service_phone.svg (compressed_size=261 bytes, uncompressed_size=414 bytes)
+[debug] [2026-03-12T17:07:38.236Z] [unzip] Processing entry: client\assets\provider-icons\auth_service_phone.svg
+[debug] [2026-03-12T17:07:38.236Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons
+[debug] [2026-03-12T17:07:38.237Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons\auth_service_phone.svg
+[debug] [2026-03-12T17:07:38.238Z] [unzip] Entry: client/assets/provider-icons/auth_service_facebook.svg (compressed_size=289 bytes, uncompressed_size=457 bytes)
+[debug] [2026-03-12T17:07:38.238Z] [unzip] Processing entry: client\assets\provider-icons\auth_service_facebook.svg
+[debug] [2026-03-12T17:07:38.238Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons
+[debug] [2026-03-12T17:07:38.238Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons\auth_service_facebook.svg
+[debug] [2026-03-12T17:07:38.241Z] [unzip] Entry: client/assets/provider-icons/auth_service_game_center.svg (compressed_size=991 bytes, uncompressed_size=3921 bytes)
+[debug] [2026-03-12T17:07:38.241Z] [unzip] Processing entry: client\assets\provider-icons\auth_service_game_center.svg
+[debug] [2026-03-12T17:07:38.241Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons
+[debug] [2026-03-12T17:07:38.242Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons\auth_service_game_center.svg
+[debug] [2026-03-12T17:07:38.243Z] [unzip] Entry: client/assets/provider-icons/auth_service_apple.svg (compressed_size=230 bytes, uncompressed_size=334 bytes)
+[debug] [2026-03-12T17:07:38.244Z] [unzip] Processing entry: client\assets\provider-icons\auth_service_apple.svg
+[debug] [2026-03-12T17:07:38.244Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons
+[debug] [2026-03-12T17:07:38.244Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons\auth_service_apple.svg
+[debug] [2026-03-12T17:07:38.246Z] [unzip] Entry: client/assets/provider-icons/auth_service_github.svg (compressed_size=466 bytes, uncompressed_size=838 bytes)
+[debug] [2026-03-12T17:07:38.246Z] [unzip] Processing entry: client\assets\provider-icons\auth_service_github.svg
+[debug] [2026-03-12T17:07:38.246Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons
+[debug] [2026-03-12T17:07:38.247Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons\auth_service_github.svg
+[debug] [2026-03-12T17:07:38.255Z] [unzip] Entry: client/assets/provider-icons/auth_service_mslive.svg (compressed_size=203 bytes, uncompressed_size=378 bytes)
+[debug] [2026-03-12T17:07:38.255Z] [unzip] Processing entry: client\assets\provider-icons\auth_service_mslive.svg
+[debug] [2026-03-12T17:07:38.255Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons
+[debug] [2026-03-12T17:07:38.255Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons\auth_service_mslive.svg
+[debug] [2026-03-12T17:07:38.258Z] [unzip] Entry: client/assets/provider-icons/auth_service_yahoo.svg (compressed_size=577 bytes, uncompressed_size=1182 bytes)
+[debug] [2026-03-12T17:07:38.258Z] [unzip] Processing entry: client\assets\provider-icons\auth_service_yahoo.svg
+[debug] [2026-03-12T17:07:38.258Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons
+[debug] [2026-03-12T17:07:38.259Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons\auth_service_yahoo.svg
+[debug] [2026-03-12T17:07:38.260Z] [unzip] Entry: client/assets/provider-icons/auth_service_twitter.svg (compressed_size=444 bytes, uncompressed_size=751 bytes)
+[debug] [2026-03-12T17:07:38.261Z] [unzip] Processing entry: client\assets\provider-icons\auth_service_twitter.svg
+[debug] [2026-03-12T17:07:38.261Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons
+[debug] [2026-03-12T17:07:38.261Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons\auth_service_twitter.svg
+[debug] [2026-03-12T17:07:38.263Z] [unzip] Entry: client/assets/provider-icons/auth_service_play_games.svg (compressed_size=565 bytes, uncompressed_size=1173 bytes)
+[debug] [2026-03-12T17:07:38.263Z] [unzip] Processing entry: client\assets\provider-icons\auth_service_play_games.svg
+[debug] [2026-03-12T17:07:38.263Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons
+[debug] [2026-03-12T17:07:38.264Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons\auth_service_play_games.svg
+[debug] [2026-03-12T17:07:38.265Z] [unzip] Entry: client/assets/provider-icons/auth_service_email.svg (compressed_size=228 bytes, uncompressed_size=326 bytes)
+[debug] [2026-03-12T17:07:38.266Z] [unzip] Processing entry: client\assets\provider-icons\auth_service_email.svg
+[debug] [2026-03-12T17:07:38.266Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons
+[debug] [2026-03-12T17:07:38.266Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons\auth_service_email.svg
+[debug] [2026-03-12T17:07:38.268Z] [unzip] Entry: client/assets/provider-icons/auth_service_google.svg (compressed_size=409 bytes, uncompressed_size=720 bytes)
+[debug] [2026-03-12T17:07:38.268Z] [unzip] Processing entry: client\assets\provider-icons\auth_service_google.svg
+[debug] [2026-03-12T17:07:38.268Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons
+[debug] [2026-03-12T17:07:38.269Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons\auth_service_google.svg
+[debug] [2026-03-12T17:07:38.279Z] [unzip] Entry: client/assets/provider-icons/auth_service_oidc.svg (compressed_size=414 bytes, uncompressed_size=858 bytes)
+[debug] [2026-03-12T17:07:38.279Z] [unzip] Processing entry: client\assets\provider-icons\auth_service_oidc.svg
+[debug] [2026-03-12T17:07:38.280Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons
+[debug] [2026-03-12T17:07:38.280Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\assets\provider-icons\auth_service_oidc.svg
+[debug] [2026-03-12T17:07:38.284Z] [unzip] Entry: client/browserconfig.xml (compressed_size=491 bytes, uncompressed_size=822 bytes)
+[debug] [2026-03-12T17:07:38.284Z] [unzip] Processing entry: client\browserconfig.xml
+[debug] [2026-03-12T17:07:38.284Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client
+[debug] [2026-03-12T17:07:38.285Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\browserconfig.xml
+[debug] [2026-03-12T17:07:38.287Z] [unzip] Entry: client/favicon-32x32.png (compressed_size=475 bytes, uncompressed_size=475 bytes)
+[debug] [2026-03-12T17:07:38.287Z] [unzip] Processing entry: client\favicon-32x32.png
+[debug] [2026-03-12T17:07:38.287Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client
+[debug] [2026-03-12T17:07:38.287Z] [unzip] Writing file: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\client\favicon-32x32.png
+[debug] [2026-03-12T17:07:38.289Z] [unzip] Entry: server/ (compressed_size=0 bytes, uncompressed_size=0 bytes)
+[debug] [2026-03-12T17:07:38.289Z] [unzip] Processing entry: server\
+[debug] [2026-03-12T17:07:38.289Z] [unzip] mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\server\
+[debug] [2026-03-12T17:07:38.290Z] [unzip] Entry: server/server.mjs.map (compressed_size=217845 bytes, uncompressed_size=944978 bytes)
+[debug] [2026-03-12T17:07:38.290Z] [unzip] Processing entry: server\server.mjs.map
+[debug] [2026-03-12T17:07:38.290Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\server
+[debug] [2026-03-12T17:07:38.291Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\server\server.mjs.map
+[debug] [2026-03-12T17:07:38.299Z] [unzip] Entry: server/server.mjs (compressed_size=276407 bytes, uncompressed_size=933701 bytes)
+[debug] [2026-03-12T17:07:38.299Z] [unzip] Processing entry: server\server.mjs
+[debug] [2026-03-12T17:07:38.299Z] [unzip] else mkdir: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\server
+[debug] [2026-03-12T17:07:38.299Z] [unzip] deflating: C:\Users\leoco\.cache\firebase\emulators\ui-v1.15.0\server\server.mjs
+[info] i  functions: Watching "C:\i\petercarrental\functions" for Cloud Functions... {"metadata":{"emulator":{"name":"functions"},"message":"Watching \"C:\\i\\petercarrental\\functions\" for Cloud Functions..."}}
+[debug] [2026-03-12T17:07:38.315Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] !  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-03-12T17:07:39.742Z] > [functions] package.json contents: {
+  "name": "petercarrental-functions",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "main": "lib/index.js",
+  "dependencies": {
+    "firebase-admin": "^12.0.0",
+    "firebase-functions": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  }
+}
+[debug] [2026-03-12T17:07:39.743Z] Building nodejs source
+[debug] [2026-03-12T17:07:39.743Z] Failed to find version of module node: reached end of search path C:\i\petercarrental\functions\node_modules
+[warn] !  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[debug] [2026-03-12T17:07:39.746Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-03-12T17:07:39.755Z] Found firebase-functions binary at 'C:\i\petercarrental\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8551
+
+[debug] [2026-03-12T17:07:40.426Z] Got response from /__/functions.yaml {"endpoints":{"createFirstAdmin":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"callableTrigger":{},"entryPoint":"createFirstAdmin"},"loginAdmin":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"callableTrigger":{},"entryPoint":"loginAdmin"},"checkHasAnyAdmin":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"callableTrigger":{},"entryPoint":"checkHasAnyAdmin"},"listAdminUsers":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"callableTrigger":{},"entryPoint":"listAdminUsers"},"seedPublicData":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"callableTrigger":{},"entryPoint":"seedPublicData"},"createAdminUser":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"callableTrigger":{},"entryPoint":"createAdminUser"},"setAdminRole":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"callableTrigger":{},"entryPoint":"setAdminRole"},"submitPublicBooking":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"callableTrigger":{},"entryPoint":"submitPublicBooking"},"lookupPublicBooking":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"callableTrigger":{},"entryPoint":"lookupPublicBooking"},"updatePublicBooking":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"callableTrigger":{},"entryPoint":"updatePublicBooking"},"submitContactLead":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"callableTrigger":{},"entryPoint":"submitContactLead"},"submitComplaintPublic":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"callableTrigger":{},"entryPoint":"submitComplaintPublic"},"subscribeNewsletterPublic":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"callableTrigger":{},"entryPoint":"subscribeNewsletterPublic"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{}}
+[info] +  functions: Loaded functions definitions from source: createFirstAdmin, loginAdmin, checkHasAnyAdmin, listAdminUsers, seedPublicData, createAdminUser, setAdminRole, submitPublicBooking, lookupPublicBooking, updatePublicBooking, submitContactLead, submitComplaintPublic, subscribeNewsletterPublic. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: createFirstAdmin, loginAdmin, checkHasAnyAdmin, listAdminUsers, seedPublicData, createAdminUser, setAdminRole, submitPublicBooking, lookupPublicBooking, updatePublicBooking, submitContactLead, submitComplaintPublic, subscribeNewsletterPublic."}}
+[info] +  functions[us-central1-createFirstAdmin]: http function initialized (http://127.0.0.1:5001/peter-car-rental/us-central1/createFirstAdmin). {"metadata":{"emulator":{"name":"functions"},"message":"http function initialized (http://127.0.0.1:5001/peter-car-rental/us-central1/createFirstAdmin)."}}
+[info] +  functions[us-central1-loginAdmin]: http function initialized (http://127.0.0.1:5001/peter-car-rental/us-central1/loginAdmin). {"metadata":{"emulator":{"name":"functions"},"message":"http function initialized (http://127.0.0.1:5001/peter-car-rental/us-central1/loginAdmin)."}}
+[info] +  functions[us-central1-checkHasAnyAdmin]: http function initialized (http://127.0.0.1:5001/peter-car-rental/us-central1/checkHasAnyAdmin). {"metadata":{"emulator":{"name":"functions"},"message":"http function initialized (http://127.0.0.1:5001/peter-car-rental/us-central1/checkHasAnyAdmin)."}}
+[info] +  functions[us-central1-listAdminUsers]: http function initialized (http://127.0.0.1:5001/peter-car-rental/us-central1/listAdminUsers). {"metadata":{"emulator":{"name":"functions"},"message":"http function initialized (http://127.0.0.1:5001/peter-car-rental/us-central1/listAdminUsers)."}}
+[info] +  functions[us-central1-seedPublicData]: http function initialized (http://127.0.0.1:5001/peter-car-rental/us-central1/seedPublicData). {"metadata":{"emulator":{"name":"functions"},"message":"http function initialized (http://127.0.0.1:5001/peter-car-rental/us-central1/seedPublicData)."}}
+[info] +  functions[us-central1-createAdminUser]: http function initialized (http://127.0.0.1:5001/peter-car-rental/us-central1/createAdminUser). {"metadata":{"emulator":{"name":"functions"},"message":"http function initialized (http://127.0.0.1:5001/peter-car-rental/us-central1/createAdminUser)."}}
+[info] +  functions[us-central1-setAdminRole]: http function initialized (http://127.0.0.1:5001/peter-car-rental/us-central1/setAdminRole). {"metadata":{"emulator":{"name":"functions"},"message":"http function initialized (http://127.0.0.1:5001/peter-car-rental/us-central1/setAdminRole)."}}
+[info] +  functions[us-central1-submitPublicBooking]: http function initialized (http://127.0.0.1:5001/peter-car-rental/us-central1/submitPublicBooking). {"metadata":{"emulator":{"name":"functions"},"message":"http function initialized (http://127.0.0.1:5001/peter-car-rental/us-central1/submitPublicBooking)."}}
+[info] +  functions[us-central1-lookupPublicBooking]: http function initialized (http://127.0.0.1:5001/peter-car-rental/us-central1/lookupPublicBooking). {"metadata":{"emulator":{"name":"functions"},"message":"http function initialized (http://127.0.0.1:5001/peter-car-rental/us-central1/lookupPublicBooking)."}}
+[info] +  functions[us-central1-updatePublicBooking]: http function initialized (http://127.0.0.1:5001/peter-car-rental/us-central1/updatePublicBooking). {"metadata":{"emulator":{"name":"functions"},"message":"http function initialized (http://127.0.0.1:5001/peter-car-rental/us-central1/updatePublicBooking)."}}
+[info] +  functions[us-central1-submitContactLead]: http function initialized (http://127.0.0.1:5001/peter-car-rental/us-central1/submitContactLead). {"metadata":{"emulator":{"name":"functions"},"message":"http function initialized (http://127.0.0.1:5001/peter-car-rental/us-central1/submitContactLead)."}}
+[info] +  functions[us-central1-submitComplaintPublic]: http function initialized (http://127.0.0.1:5001/peter-car-rental/us-central1/submitComplaintPublic). {"metadata":{"emulator":{"name":"functions"},"message":"http function initialized (http://127.0.0.1:5001/peter-car-rental/us-central1/submitComplaintPublic)."}}
+[info] +  functions[us-central1-subscribeNewsletterPublic]: http function initialized (http://127.0.0.1:5001/peter-car-rental/us-central1/subscribeNewsletterPublic). {"metadata":{"emulator":{"name":"functions"},"message":"http function initialized (http://127.0.0.1:5001/peter-car-rental/us-central1/subscribeNewsletterPublic)."}}
+[debug] [2026-03-12T17:07:44.491Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://127.0.0.1:4000/               │
+└─────────────────────────────────────────────────────────────┘
+
+┌───────────┬────────────────┬─────────────────────────────────┐
+│ Emulator  │ Host:Port      │ View in Emulator UI             │
+├───────────┼────────────────┼─────────────────────────────────┤
+│ Functions │ 127.0.0.1:5001 │ http://127.0.0.1:4000/functions │
+└───────────┴────────────────┴─────────────────────────────────┘
+  Emulator Hub host: 127.0.0.1 port: 4400
+  Other reserved ports: 4500
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 
