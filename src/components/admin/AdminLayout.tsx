@@ -5,7 +5,6 @@ import {
   Inbox,
   LayoutDashboard,
   LogOut,
-  Settings,
   Shield,
   Users,
   WalletCards,
@@ -48,12 +47,6 @@ const navigationItems = [
     label: "Pricing",
     icon: WalletCards,
     roles: ["superAdmin", "manager"],
-  },
-  {
-    to: "/admin/content",
-    label: "Content",
-    icon: Settings,
-    roles: ["superAdmin", "manager", "contentEditor"],
   },
   {
     to: "/admin/inbox",

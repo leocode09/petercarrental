@@ -1,5 +1,8 @@
 import { useEffect } from "react";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminPortalProvider from "./components/admin/AdminPortalProvider";
+import RequireAdminRoute from "./components/admin/RequireAdminRoute";
 import Layout from "./components/layout/Layout";
 import About from "./pages/About";
 import Blog from "./pages/Blog";
@@ -20,6 +23,16 @@ import NotFound from "./pages/NotFound";
 import Reviews from "./pages/Reviews";
 import ServiceDetail from "./pages/ServiceDetail";
 import Services from "./pages/Services";
+import AdminCustomers from "./pages/admin/AdminCustomers";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminFleet from "./pages/admin/AdminFleet";
+import AdminInbox from "./pages/admin/AdminInbox";
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminPricing from "./pages/admin/AdminPricing";
+import AdminReports from "./pages/admin/AdminReports";
+import AdminReservations from "./pages/admin/AdminReservations";
+import AdminSetup from "./pages/admin/AdminSetup";
+import AdminUsers from "./pages/admin/AdminUsers";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -36,6 +49,24 @@ function AppRoutes() {
     <>
       <ScrollToTop />
       <Routes>
+        <Route element={<AdminPortalProvider />} path="admin">
+          <Route element={<AdminLogin />} path="login" />
+          <Route element={<AdminSetup />} path="setup" />
+          <Route element={<RequireAdminRoute />}>
+            <Route element={<AdminLayout />}>
+              <Route element={<AdminDashboard />} index />
+              <Route element={<AdminFleet />} path="fleet" />
+              <Route element={<AdminReservations />} path="reservations" />
+              <Route element={<AdminCustomers />} path="customers" />
+              <Route element={<AdminPricing />} path="pricing" />
+              <Route element={<AdminInbox />} path="inbox" />
+              <Route element={<AdminUsers />} path="users" />
+              <Route element={<AdminReports />} path="reports" />
+            </Route>
+          </Route>
+          <Route element={<Navigate replace to="/admin" />} path="*" />
+        </Route>
+
         <Route element={<Layout />} path="/">
           <Route element={<Home />} index />
           <Route element={<Fleet />} path="fleet" />
