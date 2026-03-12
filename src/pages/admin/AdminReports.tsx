@@ -1,10 +1,10 @@
-import { useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
 import AdminPageShell from "../../components/admin/AdminPageShell";
 import Card from "../../components/ui/Card";
+import { getReportsSummary } from "../../lib/firestore-admin";
+import { useFirestoreQuery } from "../../lib/useFirestoreQuery";
 
 export default function AdminReports() {
-  const report = useQuery(api.adminReports.summary, {});
+  const { data: report } = useFirestoreQuery(getReportsSummary);
 
   if (!report) {
     return <div className="text-sm text-slate-500">Loading reports...</div>;

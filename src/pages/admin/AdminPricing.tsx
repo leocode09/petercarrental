@@ -1,9 +1,14 @@
-import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
-import { api } from "../../../convex/_generated/api";
 import AdminPageShell from "../../components/admin/AdminPageShell";
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
+import { useAuth } from "../../lib/auth-context";
+import {
+  listPricing,
+  upsertPricingRule,
+  upsertPromoCode,
+} from "../../lib/firestore-admin";
+import { useFirestoreQuery } from "../../lib/useFirestoreQuery";
 import { getVehicleCategoriesFromList, usePublicSiteData } from "../../lib/publicData";
 import { inputClassName } from "../../lib/utils";
 
@@ -31,13 +36,49 @@ const emptyPromoForm = {
 };
 
 export default function AdminPricing() {
-  const pricing = useQuery(api.adminPricing.list, {});
-  const upsertPricingRule = useMutation(api.adminPricing.upsertPricingRule);
-  const upsertPromoCode = useMutation(api.adminPricing.upsertPromoCode);
+  const { adminUser, loading: authLoading } = useAuth();
+  const { data: pricing, refetch } = useFirestoreQuery(listPricing);
   const { vehicles, serviceTypes } = usePublicSiteData();
   const vehicleCategories = getVehicleCategoriesFromList(vehicles);
   const [ruleForm, setRuleForm] = useState(emptyRuleForm);
   const [promoForm, setPromoForm] = useState(emptyPromoForm);
+
+  const handleRuleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminUser) return;
+    await upsertPricingRule(adminUser._id, {
+      pricingRuleId: ruleForm.pricingRuleId,
+      name: ruleForm.name,
+      category: ruleForm.category || undefined,
+      serviceType: ruleForm.serviceType || undefined,
+      startDate: ruleForm.startDate,
+      endDate: ruleForm.endDate,
+      rateMultiplier: Number(ruleForm.rateMultiplier),
+      active: ruleForm.active,
+    });
+    setRuleForm(emptyRuleForm);
+    await refetch();
+  };
+
+  const handlePromoSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminUser) return;
+    await upsertPromoCode(adminUser._id, {
+      promoCodeId: promoForm.promoCodeId,
+      code: promoForm.code,
+      description: promoForm.description,
+      discountType: promoForm.discountType,
+      amount: Number(promoForm.amount),
+      active: promoForm.active,
+      startsAt: promoForm.startsAt ? new Date(`${promoForm.startsAt}T00:00:00Z`).getTime() : undefined,
+      endsAt: promoForm.endsAt ? new Date(`${promoForm.endsAt}T23:59:59Z`).getTime() : undefined,
+      usageLimit: promoForm.usageLimit ? Number(promoForm.usageLimit) : undefined,
+    });
+    setPromoForm(emptyPromoForm);
+    await refetch();
+  };
+
+  if (authLoading) return null;
 
   return (
     <AdminPageShell
@@ -60,10 +101,10 @@ export default function AdminPricing() {
             {pricing?.pricingRules.map((rule) => (
               <button
                 className="flex w-full items-start justify-between rounded-2xl border border-slate-200 px-4 py-4 text-left transition hover:border-orange-300 hover:bg-orange-50/40"
-                key={rule._id}
+                key={rule.id}
                 onClick={() =>
                   setRuleForm({
-                    pricingRuleId: rule._id,
+                    pricingRuleId: rule.id,
                     name: rule.name,
                     category: rule.category ?? "",
                     serviceType: rule.serviceType ?? "",
@@ -88,22 +129,7 @@ export default function AdminPricing() {
             ))}
           </div>
 
-          <form
-            className="mt-6 grid gap-4 md:grid-cols-2"
-            onSubmit={(event) => {
-              event.preventDefault();
-              void upsertPricingRule({
-                pricingRuleId: ruleForm.pricingRuleId as never,
-                name: ruleForm.name,
-                category: ruleForm.category || undefined,
-                serviceType: ruleForm.serviceType || undefined,
-                startDate: ruleForm.startDate,
-                endDate: ruleForm.endDate,
-                rateMultiplier: Number(ruleForm.rateMultiplier),
-                active: ruleForm.active,
-              }).then(() => setRuleForm(emptyRuleForm));
-            }}
-          >
+          <form className="mt-6 grid gap-4 md:grid-cols-2" onSubmit={handleRuleSubmit}>
             <input className={inputClassName} onChange={(event) => setRuleForm((current) => ({ ...current, name: event.target.value }))} placeholder="Rule name" value={ruleForm.name} />
             <input className={inputClassName} onChange={(event) => setRuleForm((current) => ({ ...current, rateMultiplier: Number(event.target.value) }))} placeholder="Rate multiplier" step="0.01" type="number" value={ruleForm.rateMultiplier} />
             <select className={inputClassName} onChange={(event) => setRuleForm((current) => ({ ...current, category: event.target.value }))} value={ruleForm.category}>
@@ -116,9 +142,9 @@ export default function AdminPricing() {
             </select>
             <select className={inputClassName} onChange={(event) => setRuleForm((current) => ({ ...current, serviceType: event.target.value }))} value={ruleForm.serviceType}>
               <option value="">All service types</option>
-              {serviceTypes.map((serviceType) => (
-                <option key={serviceType} value={serviceType}>
-                  {serviceType}
+              {serviceTypes.map((st) => (
+                <option key={st} value={st}>
+                  {st}
                 </option>
               ))}
             </select>
@@ -152,10 +178,10 @@ export default function AdminPricing() {
             {pricing?.promoCodes.map((promo) => (
               <button
                 className="flex w-full items-start justify-between rounded-2xl border border-slate-200 px-4 py-4 text-left transition hover:border-orange-300 hover:bg-orange-50/40"
-                key={promo._id}
+                key={promo.id}
                 onClick={() =>
                   setPromoForm({
-                    promoCodeId: promo._id,
+                    promoCodeId: promo.id,
                     code: promo.code,
                     description: promo.description,
                     discountType: promo.discountType,
@@ -181,23 +207,7 @@ export default function AdminPricing() {
             ))}
           </div>
 
-          <form
-            className="mt-6 grid gap-4 md:grid-cols-2"
-            onSubmit={(event) => {
-              event.preventDefault();
-              void upsertPromoCode({
-                promoCodeId: promoForm.promoCodeId as never,
-                code: promoForm.code,
-                description: promoForm.description,
-                discountType: promoForm.discountType,
-                amount: Number(promoForm.amount),
-                active: promoForm.active,
-                startsAt: promoForm.startsAt ? new Date(`${promoForm.startsAt}T00:00:00Z`).getTime() : undefined,
-                endsAt: promoForm.endsAt ? new Date(`${promoForm.endsAt}T23:59:59Z`).getTime() : undefined,
-                usageLimit: promoForm.usageLimit ? Number(promoForm.usageLimit) : undefined,
-              }).then(() => setPromoForm(emptyPromoForm));
-            }}
-          >
+          <form className="mt-6 grid gap-4 md:grid-cols-2" onSubmit={handlePromoSubmit}>
             <input className={inputClassName} onChange={(event) => setPromoForm((current) => ({ ...current, code: event.target.value }))} placeholder="Promo code" value={promoForm.code} />
             <input className={inputClassName} onChange={(event) => setPromoForm((current) => ({ ...current, amount: Number(event.target.value) }))} placeholder="Amount" type="number" value={promoForm.amount} />
             <select

@@ -76,6 +76,31 @@ export const checkHasAnyAdmin = onCall<void>(async () => {
   return { hasAnyAdmin: !adminsSnap.empty };
 });
 
+/** Lists admin users. Requires caller to be superAdmin or manager. */
+export const listAdminUsers = onCall<void>(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "You must be signed in.");
+  }
+
+  const role = request.auth.token.role as string | undefined;
+  if (!["superAdmin", "manager"].includes(role ?? "")) {
+    throw new HttpsError("permission-denied", "You do not have permission to list admin users.");
+  }
+
+  const adminsSnap = await db.collection("admins").get();
+  const users = adminsSnap.docs.map((d) => {
+    const data = d.data();
+    return {
+      _id: d.id,
+      email: data.email,
+      name: data.name,
+      role: data.role,
+    };
+  });
+
+  return { users };
+});
+
 /** Seeds public site data when siteSettings/primary does not exist. */
 export const seedPublicData = onCall<void>(async () => {
   const settingsRef = db.collection("siteSettings").doc("primary");

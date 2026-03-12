@@ -612,6 +612,120 @@ export async function updateLeadStatus(
   });
 }
 
+// Dashboard overview
+export async function getDashboardOverview() {
+  const [bookingsSnap, vehiclesSnap, complaintsSnap, leadsSnap, activitySnap] = await Promise.all([
+    getDocs(collection(db, "bookings")),
+    getDocs(collection(db, "vehicles")),
+    getDocs(collection(db, "complaints")),
+    getDocs(collection(db, "contactLeads")),
+    getDocs(
+      query(collection(db, "activityLogs"), orderBy("createdAt", "desc"))
+    ),
+  ]);
+
+  const bookings = bookingsSnap.docs.map((d) => d.data() as { status: string; pickupDate: string; returnDate: string; selectedVehicleId?: string; reference: string; fullName: string; pickupTime: string; pickupLocation: string; dropoffLocation: string });
+  const vehicles = vehiclesSnap.docs.map((d) => d.data());
+  const complaints = complaintsSnap.docs.map((d) => d.data() as { status: string });
+  const leads = leadsSnap.docs.map((d) => d.data() as { status: string });
+  const activityLogs = activitySnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+  const activeBookings = bookings.filter((b) =>
+    ["new", "confirmed", "change_requested", "in_progress"].includes(b.status)
+  );
+  const unresolvedComplaints = complaints.filter((c) =>
+    ["new", "investigating"].includes(c.status)
+  );
+  const openLeads = leads.filter((l) => l.status !== "resolved");
+  const upcomingPickups = [...bookings]
+    .sort((a, b) => a.pickupDate.localeCompare(b.pickupDate))
+    .slice(0, 5);
+  const nextReturns = [...bookings]
+    .sort((a, b) => a.returnDate.localeCompare(b.returnDate))
+    .slice(0, 5);
+  const revenueSnapshot = bookings.reduce((total, b) => {
+    if (["cancelled", "refunded"].includes(b.status)) return total;
+    return total + ((b as { totalEstimate?: number }).totalEstimate ?? 0);
+  }, 0);
+  const utilizedVehicleIds = new Set(
+    activeBookings
+      .map((b) => b.selectedVehicleId)
+      .filter(Boolean)
+  );
+  const recentActivity = activityLogs.slice(0, 8);
+
+  return {
+    metrics: {
+      activeBookings: activeBookings.length,
+      upcomingPickups: upcomingPickups.length,
+      nextReturns: nextReturns.length,
+      fleetUtilizationRate:
+        vehicles.length === 0
+          ? 0
+          : Math.round((utilizedVehicleIds.size / vehicles.length) * 100),
+      unresolvedComplaints: unresolvedComplaints.length,
+      openLeads: openLeads.length,
+      revenueSnapshot,
+    },
+    upcomingPickups,
+    nextReturns,
+    recentActivity,
+  };
+}
+
+// Reports summary
+export async function getReportsSummary() {
+  const [bookingsSnap, vehiclesSnap, leadsSnap, complaintsSnap] = await Promise.all([
+    getDocs(collection(db, "bookings")),
+    getDocs(collection(db, "vehicles")),
+    getDocs(collection(db, "contactLeads")),
+    getDocs(collection(db, "complaints")),
+  ]);
+
+  const bookings = bookingsSnap.docs.map((d) => d.data());
+  const vehicles = vehiclesSnap.docs.map((d) => d.data() as { publicId: string; name: string });
+  const leads = leadsSnap.docs.map((d) => d.data() as { status: string });
+  const complaints = complaintsSnap.docs.map((d) => d.data() as { status: string });
+
+  const bookingsByStatus = Object.entries(
+    (bookings as { status: string }[]).reduce<Record<string, number>>((acc, b) => {
+      acc[b.status] = (acc[b.status] ?? 0) + 1;
+      return acc;
+    }, {})
+  ).map(([status, count]) => ({ status, count }));
+
+  const bookingsBySource = Object.entries(
+    (bookings as { source: string }[]).reduce<Record<string, number>>((acc, b) => {
+      acc[b.source] = (acc[b.source] ?? 0) + 1;
+      return acc;
+    }, {})
+  ).map(([source, count]) => ({ source, count }));
+
+  const bookingsByCategory = Object.entries(
+    (bookings as { vehicleCategory: string }[]).reduce<Record<string, number>>((acc, b) => {
+      acc[b.vehicleCategory] = (acc[b.vehicleCategory] ?? 0) + 1;
+      return acc;
+    }, {})
+  ).map(([category, count]) => ({ category, count }));
+
+  const vehiclePerformance = vehicles.map((v) => ({
+    vehicleId: v.publicId,
+    vehicleName: v.name,
+    bookings: (bookings as { selectedVehicleId?: string }[]).filter((b) => b.selectedVehicleId === v.publicId).length,
+  })).sort((a, b) => b.bookings - a.bookings);
+
+  return {
+    bookingsByStatus,
+    bookingsBySource,
+    bookingsByCategory,
+    vehiclePerformance,
+    leadCount: leads.length,
+    complaintCount: complaints.length,
+    resolvedLeadCount: leads.filter((l) => l.status === "resolved").length,
+    resolvedComplaintCount: complaints.filter((c) => ["resolved", "closed"].includes(c.status)).length,
+  };
+}
+
 export async function updateComplaintStatus(
   viewerId: string,
   complaintId: string,

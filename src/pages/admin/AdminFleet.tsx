@@ -1,12 +1,13 @@
-import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
-import { api } from "../../../convex/_generated/api";
 import AdminPageShell from "../../components/admin/AdminPageShell";
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
+import { useAuth } from "../../lib/auth-context";
+import { listFleet, upsertVehicle } from "../../lib/firestore-admin";
+import { useFirestoreQuery } from "../../lib/useFirestoreQuery";
 import { usePublicSiteData } from "../../lib/publicData";
-import { inputClassName, textareaClassName } from "../../lib/utils";
 import { parseLineList, stringifyLineList } from "../../lib/adminForms";
+import { inputClassName, textareaClassName } from "../../lib/utils";
 
 const emptyFleetForm = {
   vehicleId: undefined as string | undefined,
@@ -31,10 +32,44 @@ const emptyFleetForm = {
 
 export default function AdminFleet() {
   const { services, vehicles } = usePublicSiteData();
-  const fleet = useQuery(api.adminFleet.list, {});
-  const upsertVehicle = useMutation(api.adminFleet.upsert);
+  const { adminUser, loading: authLoading } = useAuth();
+  const { data: fleet, refetch } = useFirestoreQuery(listFleet);
   const [form, setForm] = useState(emptyFleetForm);
   const [saving, setSaving] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminUser) return;
+    setSaving(true);
+    try {
+      await upsertVehicle(adminUser._id, {
+        vehicleId: form.vehicleId,
+        publicId: form.publicId,
+        sortOrder: Number(form.sortOrder),
+        name: form.name,
+        category: form.category,
+        pricePerDay: Number(form.pricePerDay),
+        transmission: form.transmission,
+        seats: Number(form.seats),
+        luggage: Number(form.luggage),
+        drive: form.drive,
+        fuel: form.fuel,
+        description: form.description,
+        image: form.image,
+        featured: form.featured,
+        badge: form.badge || undefined,
+        availabilityStatus: form.availabilityStatus,
+        maintenanceNotes: form.maintenanceNotes || undefined,
+        serviceSlugs: parseLineList(form.serviceSlugsText),
+      });
+      setForm({ ...emptyFleetForm, sortOrder: vehicles.length });
+      await refetch();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (authLoading) return null;
 
   return (
     <AdminPageShell
@@ -61,10 +96,10 @@ export default function AdminFleet() {
             {fleet?.map((vehicle) => (
               <button
                 className="flex w-full items-start justify-between rounded-2xl border border-slate-200 px-4 py-4 text-left transition hover:border-orange-300 hover:bg-orange-50/40"
-                key={vehicle._id}
+                key={vehicle.id}
                 onClick={() =>
                   setForm({
-                    vehicleId: vehicle._id,
+                    vehicleId: vehicle.id,
                     publicId: vehicle.publicId,
                     sortOrder: vehicle.sortOrder,
                     name: vehicle.name,
@@ -100,36 +135,7 @@ export default function AdminFleet() {
 
         <Card className="p-6">
           <h2 className="text-xl font-black text-slate-950">{form.vehicleId ? "Edit vehicle" : "Create vehicle"}</h2>
-          <form
-            className="mt-6 grid gap-4"
-            onSubmit={(event) => {
-              event.preventDefault();
-              setSaving(true);
-
-              void upsertVehicle({
-                vehicleId: form.vehicleId as never,
-                publicId: form.publicId,
-                sortOrder: Number(form.sortOrder),
-                name: form.name,
-                category: form.category,
-                pricePerDay: Number(form.pricePerDay),
-                transmission: form.transmission,
-                seats: Number(form.seats),
-                luggage: Number(form.luggage),
-                drive: form.drive,
-                fuel: form.fuel,
-                description: form.description,
-                image: form.image,
-                featured: form.featured,
-                badge: form.badge || undefined,
-                availabilityStatus: form.availabilityStatus,
-                maintenanceNotes: form.maintenanceNotes || undefined,
-                serviceSlugs: parseLineList(form.serviceSlugsText),
-              })
-                .then(() => setForm({ ...emptyFleetForm, sortOrder: vehicles.length }))
-                .finally(() => setSaving(false));
-            }}
-          >
+          <form className="mt-6 grid gap-4" onSubmit={handleSubmit}>
             <div className="grid gap-4 md:grid-cols-2">
               <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, publicId: event.target.value }))} placeholder="Public ID" value={form.publicId} />
               <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} placeholder="Vehicle name" value={form.name} />
@@ -164,7 +170,7 @@ export default function AdminFleet() {
             <textarea
               className={textareaClassName}
               onChange={(event) => setForm((current) => ({ ...current, serviceSlugsText: event.target.value }))}
-              placeholder={`Recommended service slugs, one per line\n${services.map((service) => service.slug).join("\n")}`}
+              placeholder={`Recommended service slugs, one per line\n${services.map((s) => s.slug).join("\n")}`}
               value={form.serviceSlugsText}
             />
 

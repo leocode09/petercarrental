@@ -1,15 +1,16 @@
-import { useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
 import AdminMetricCard from "../../components/admin/AdminMetricCard";
 import AdminPageShell from "../../components/admin/AdminPageShell";
 import Card from "../../components/ui/Card";
+import { useAuth } from "../../lib/auth-context";
+import { getDashboardOverview } from "../../lib/firestore-admin";
+import { useFirestoreQuery } from "../../lib/useFirestoreQuery";
 import { formatCurrency } from "../../lib/utils";
 
 export default function AdminDashboard() {
-  const viewer = useQuery(api.adminUsers.currentAdmin, {});
-  const data = useQuery(api.adminDashboard.overview, viewer?.role ? {} : "skip");
+  const { adminUser, loading: authLoading } = useAuth();
+  const { data } = useFirestoreQuery(getDashboardOverview);
 
-  if (!viewer?.role || !data) {
+  if (authLoading || !adminUser?.role || !data) {
     return <div className="text-sm text-slate-500">Loading dashboard...</div>;
   }
 
@@ -32,7 +33,7 @@ export default function AdminDashboard() {
           <h2 className="text-xl font-black text-slate-950">Upcoming pickups</h2>
           <div className="mt-4 space-y-3">
             {data.upcomingPickups.map((booking) => (
-              <div className="rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-700" key={booking._id}>
+              <div className="rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-700" key={booking.reference}>
                 <div className="font-semibold text-slate-950">{booking.reference}</div>
                 <div className="mt-1">{booking.fullName}</div>
                 <div>{booking.pickupDate} at {booking.pickupTime}</div>
@@ -46,7 +47,7 @@ export default function AdminDashboard() {
           <h2 className="text-xl font-black text-slate-950">Upcoming returns</h2>
           <div className="mt-4 space-y-3">
             {data.nextReturns.map((booking) => (
-              <div className="rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-700" key={booking._id}>
+              <div className="rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-700" key={booking.reference}>
                 <div className="font-semibold text-slate-950">{booking.reference}</div>
                 <div className="mt-1">{booking.fullName}</div>
                 <div>Return {booking.returnDate}</div>
@@ -60,9 +61,9 @@ export default function AdminDashboard() {
           <h2 className="text-xl font-black text-slate-950">Recent activity</h2>
           <div className="mt-4 space-y-3">
             {data.recentActivity.map((item) => (
-              <div className="rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-700" key={item._id}>
-                <div className="font-semibold text-slate-950">{item.action}</div>
-                <div className="mt-1 leading-6">{item.summary}</div>
+              <div className="rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-700" key={(item as { id?: string }).id}>
+                <div className="font-semibold text-slate-950">{(item as { action?: string }).action}</div>
+                <div className="mt-1 leading-6">{(item as { summary?: string }).summary}</div>
               </div>
             ))}
           </div>

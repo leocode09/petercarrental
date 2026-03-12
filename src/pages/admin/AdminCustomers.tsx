@@ -1,9 +1,10 @@
-import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
-import { api } from "../../../convex/_generated/api";
 import AdminPageShell from "../../components/admin/AdminPageShell";
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
+import { useAuth } from "../../lib/auth-context";
+import { listCustomers, updateCustomer } from "../../lib/firestore-admin";
+import { useFirestoreQuery } from "../../lib/useFirestoreQuery";
 import { parseLineList, stringifyLineList } from "../../lib/adminForms";
 import { inputClassName, textareaClassName } from "../../lib/utils";
 
@@ -17,10 +18,31 @@ const emptyCustomerForm = {
 };
 
 export default function AdminCustomers() {
-  const customers = useQuery(api.adminCustomers.list, {});
-  const updateCustomer = useMutation(api.adminCustomers.update);
+  const { adminUser, loading: authLoading } = useAuth();
+  const { data: customers, refetch } = useFirestoreQuery(listCustomers);
   const [form, setForm] = useState(emptyCustomerForm);
   const [saving, setSaving] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.customerId || !adminUser) return;
+    setSaving(true);
+    try {
+      await updateCustomer(adminUser._id, {
+        customerId: form.customerId,
+        fullName: form.fullName,
+        phone: form.phone || undefined,
+        type: form.type,
+        tags: parseLineList(form.tagsText),
+        notes: form.notes || undefined,
+      });
+      await refetch();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (authLoading) return null;
 
   return (
     <AdminPageShell
@@ -34,10 +56,10 @@ export default function AdminCustomers() {
             {customers?.map((customer) => (
               <button
                 className="flex w-full items-start justify-between rounded-2xl border border-slate-200 px-4 py-4 text-left transition hover:border-orange-300 hover:bg-orange-50/40"
-                key={customer._id}
+                key={customer.id}
                 onClick={() =>
                   setForm({
-                    customerId: customer._id,
+                    customerId: customer.id,
                     fullName: customer.fullName,
                     phone: customer.phone ?? "",
                     type: customer.type,
@@ -62,25 +84,7 @@ export default function AdminCustomers() {
         <Card className="p-6">
           <h2 className="text-xl font-black text-slate-950">Customer detail</h2>
           <p className="mt-2 text-sm text-slate-600">Select a customer to update their tags, notes, and account type.</p>
-          <form
-            className="mt-6 space-y-4"
-            onSubmit={(event) => {
-              event.preventDefault();
-              if (!form.customerId) {
-                return;
-              }
-
-              setSaving(true);
-              void updateCustomer({
-                customerId: form.customerId as never,
-                fullName: form.fullName,
-                phone: form.phone || undefined,
-                type: form.type,
-                tags: parseLineList(form.tagsText),
-                notes: form.notes || undefined,
-              }).finally(() => setSaving(false));
-            }}
-          >
+          <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
             <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, fullName: event.target.value }))} placeholder="Customer name" value={form.fullName} />
             <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, phone: event.target.value }))} placeholder="Phone" value={form.phone} />
             <select

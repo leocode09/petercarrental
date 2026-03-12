@@ -1,9 +1,10 @@
-import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
-import { api } from "../../../convex/_generated/api";
 import AdminPageShell from "../../components/admin/AdminPageShell";
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
+import { useAuth } from "../../lib/auth-context";
+import { listBookings, upsertBooking } from "../../lib/firestore-admin";
+import { useFirestoreQuery } from "../../lib/useFirestoreQuery";
 import { getVehicleCategoriesFromList, usePublicSiteData } from "../../lib/publicData";
 import { inputClassName, textareaClassName } from "../../lib/utils";
 
@@ -40,12 +41,50 @@ const emptyReservationForm = {
 };
 
 export default function AdminReservations() {
-  const bookings = useQuery(api.adminReservations.list, {});
-  const upsertBooking = useMutation(api.adminReservations.upsert);
+  const { adminUser, loading: authLoading } = useAuth();
+  const { data: bookings, refetch } = useFirestoreQuery(listBookings);
   const { vehicles, bookingLocations, serviceTypes } = usePublicSiteData();
   const vehicleCategories = getVehicleCategoriesFromList(vehicles);
   const [form, setForm] = useState(emptyReservationForm);
   const [saving, setSaving] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminUser) return;
+    setSaving(true);
+    try {
+      const result = await upsertBooking(adminUser._id, {
+        bookingId: form.bookingId,
+        reference: form.reference || undefined,
+        fullName: form.fullName,
+        email: form.email,
+        phone: form.phone || undefined,
+        pickupLocation: form.pickupLocation,
+        dropoffLocation: form.dropoffLocation,
+        pickupDate: form.pickupDate,
+        returnDate: form.returnDate,
+        pickupTime: form.pickupTime,
+        vehicleCategory: form.vehicleCategory,
+        selectedVehicleId: form.selectedVehicleId || undefined,
+        serviceType: form.serviceType,
+        promoCode: form.promoCode || undefined,
+        promoCodeApplied: form.promoCodeApplied || undefined,
+        airportTransfer: form.airportTransfer,
+        notes: form.notes || undefined,
+        source: form.source,
+        status: form.status,
+        totalEstimate: Number(form.totalEstimate) || undefined,
+        pricingRuleLabel: form.pricingRuleLabel || undefined,
+        adminNotes: form.adminNotes || undefined,
+      });
+      setForm((current) => ({ ...current, bookingId: result.bookingId, reference: result.reference }));
+      await refetch();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (authLoading) return null;
 
   return (
     <AdminPageShell
@@ -68,10 +107,10 @@ export default function AdminReservations() {
             {bookings?.map((booking) => (
               <button
                 className="flex w-full items-start justify-between rounded-2xl border border-slate-200 px-4 py-4 text-left transition hover:border-orange-300 hover:bg-orange-50/40"
-                key={booking._id}
+                key={booking.id}
                 onClick={() =>
                   setForm({
-                    bookingId: booking._id,
+                    bookingId: booking.id,
                     reference: booking.reference,
                     fullName: booking.fullName,
                     email: booking.email,
@@ -111,46 +150,7 @@ export default function AdminReservations() {
 
         <Card className="p-6">
           <h2 className="text-xl font-black text-slate-950">{form.bookingId ? "Edit booking" : "Create booking"}</h2>
-          <form
-            className="mt-6 space-y-4"
-            onSubmit={(event) => {
-              event.preventDefault();
-              setSaving(true);
-
-              void upsertBooking({
-                bookingId: form.bookingId as never,
-                reference: form.reference || undefined,
-                fullName: form.fullName,
-                email: form.email,
-                phone: form.phone || undefined,
-                pickupLocation: form.pickupLocation,
-                dropoffLocation: form.dropoffLocation,
-                pickupDate: form.pickupDate,
-                returnDate: form.returnDate,
-                pickupTime: form.pickupTime,
-                vehicleCategory: form.vehicleCategory,
-                selectedVehicleId: form.selectedVehicleId || undefined,
-                serviceType: form.serviceType,
-                promoCode: form.promoCode || undefined,
-                promoCodeApplied: form.promoCodeApplied || undefined,
-                airportTransfer: form.airportTransfer,
-                notes: form.notes || undefined,
-                source: form.source,
-                status: form.status,
-                totalEstimate: Number(form.totalEstimate) || undefined,
-                pricingRuleLabel: form.pricingRuleLabel || undefined,
-                adminNotes: form.adminNotes || undefined,
-              })
-                .then((result) =>
-                  setForm((current) => ({
-                    ...current,
-                    bookingId: result.bookingId as never,
-                    reference: result.reference,
-                  })),
-                )
-                .finally(() => setSaving(false));
-            }}
-          >
+          <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
             <div className="grid gap-4 md:grid-cols-2">
               <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, reference: event.target.value }))} placeholder="Reference (optional)" value={form.reference} />
               <select className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, status: event.target.value as typeof current.status }))} value={form.status}>
@@ -189,9 +189,9 @@ export default function AdminReservations() {
               <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, returnDate: event.target.value }))} type="date" value={form.returnDate} />
               <input className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, pickupTime: event.target.value }))} type="time" value={form.pickupTime} />
               <select className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, serviceType: event.target.value }))} value={form.serviceType}>
-                {serviceTypes.map((serviceType) => (
-                  <option key={serviceType} value={serviceType}>
-                    {serviceType}
+                {serviceTypes.map((st) => (
+                  <option key={st} value={st}>
+                    {st}
                   </option>
                 ))}
               </select>
@@ -205,7 +205,7 @@ export default function AdminReservations() {
               <select className={inputClassName} onChange={(event) => setForm((current) => ({ ...current, selectedVehicleId: event.target.value }))} value={form.selectedVehicleId}>
                 <option value="">Any vehicle</option>
                 {vehicles.map((vehicle) => (
-                  <option key={vehicle._id ?? vehicle.id} value={vehicle.publicId ?? vehicle.id}>
+                  <option key={(vehicle as { id?: string }).id ?? (vehicle as { publicId?: string }).publicId} value={(vehicle as { publicId?: string }).publicId ?? (vehicle as { id?: string }).id}>
                     {vehicle.name}
                   </option>
                 ))}
