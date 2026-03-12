@@ -10,9 +10,22 @@ import {
   query,
   orderBy,
   where,
+  limit,
 } from "firebase/firestore";
 import { db } from "./firebase";
 import type { AvailabilityStatus, BookingStatus } from "./validators";
+
+/**
+ * Normalizes a Firestore value that may be either a plain number (Date.now())
+ * or a Firestore Timestamp object with a toMillis() method.
+ */
+function toEpochMs(v: unknown): number {
+  if (typeof v === "number") return v;
+  if (typeof v === "object" && v !== null && "toMillis" in v) {
+    return (v as { toMillis: () => number }).toMillis();
+  }
+  return 0;
+}
 
 function generateBookingReference() {
   const stamp = Date.now().toString(36).slice(-6).toUpperCase();
@@ -197,7 +210,7 @@ export async function listBookings(): Promise<BookingDoc[]> {
   );
   return snap.docs.map((d) => {
     const data = d.data();
-    return { id: d.id, ...data, updatedAt: (data.updatedAt as { toMillis?: () => number })?.toMillis?.() ?? data.updatedAt } as BookingDoc;
+    return { id: d.id, ...data, updatedAt: toEpochMs(data.updatedAt) } as BookingDoc;
   });
 }
 
@@ -456,7 +469,16 @@ export async function upsertPricingRule(
     const existing = await getDoc(ref);
     if (!existing.exists()) throw new Error("Pricing rule not found.");
 
-    await updateDoc(ref, { ...args, updatedAt: now });
+    await updateDoc(ref, {
+      name: args.name,
+      category: args.category ?? null,
+      serviceType: args.serviceType ?? null,
+      startDate: args.startDate,
+      endDate: args.endDate,
+      rateMultiplier: args.rateMultiplier,
+      active: args.active,
+      updatedAt: now,
+    });
     await addDoc(collection(db, "activityLogs"), {
       actorUserId: viewerId,
       action: "pricingRule.updated",
@@ -581,8 +603,6 @@ export async function listInbox(): Promise<{
     getDocs(query(collection(db, "newsletterSubscribers"), orderBy("createdAt", "desc"))),
   ]);
 
-  const toNum = (v: unknown) => (typeof v === "object" && v !== null && "toMillis" in v ? (v as { toMillis: () => number }).toMillis() : (v as number));
-
   return {
     leads: leadsSnap.docs.map((d) => ({ id: d.id, ...d.data() } as LeadDoc)),
     complaints: complaintsSnap.docs.map((d) => ({ id: d.id, ...d.data() } as ComplaintDoc)),
@@ -591,7 +611,7 @@ export async function listInbox(): Promise<{
       return {
         id: d.id,
         email: data.email,
-        updatedAt: toNum(data.updatedAt) ?? toNum(data.createdAt) ?? 0,
+        updatedAt: toEpochMs(data.updatedAt) || toEpochMs(data.createdAt),
       } as NewsletterDoc;
     }),
   };
@@ -622,7 +642,7 @@ export async function getDashboardOverview() {
     getDocs(collection(db, "complaints")),
     getDocs(collection(db, "contactLeads")),
     getDocs(
-      query(collection(db, "activityLogs"), orderBy("createdAt", "desc"))
+      query(collection(db, "activityLogs"), orderBy("createdAt", "desc"), limit(20))
     ),
   ]);
 
@@ -1122,13 +1142,9 @@ export async function getSiteSettings(): Promise<SiteSettingsDoc | null> {
   const snap = await getDoc(ref);
   if (!snap.exists()) return null;
   const data = snap.data();
-  const toNum = (v: unknown) =>
-    typeof v === "object" && v !== null && "toMillis" in v
-      ? (v as { toMillis: () => number }).toMillis()
-      : (v as number);
   return {
     ...data,
-    updatedAt: toNum(data.updatedAt) ?? 0,
+    updatedAt: toEpochMs(data.updatedAt),
   } as SiteSettingsDoc;
 }
 

@@ -388,10 +388,21 @@ export const setAdminRole = onCall<{
 
   const adminRef = db.collection("admins").doc(userId);
   const snap = await adminRef.get();
-  if (snap.exists) {
-    await adminRef.update({ role, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
-  } else {
+  if (!snap.exists) {
     throw new HttpsError("not-found", "Admin user not found.");
+  }
+
+  const data = snap.data()!;
+  await adminRef.update({ role, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+
+  try {
+    await auth.setCustomUserClaims(userId, {
+      role,
+      email: data.email as string,
+      name: data.name as string,
+    });
+  } catch {
+    // User may not have signed in yet; they'll get the correct role on next login
   }
 });
 
@@ -624,4 +635,95 @@ export const updatePublicBooking = onCall<
   });
 
   return { updated: true, reference };
+});
+
+// --- Public contact / newsletter (unauthenticated, server-validated) ---
+
+export const submitContactLead = onCall<{
+  name: string;
+  email: string;
+  message: string;
+}>(callableOptions, async (request) => {
+  const { name, email, message } = request.data ?? {};
+
+  const trimmedName = (name ?? "").trim();
+  const trimmedEmail = normalizeEmail(email ?? "");
+  const trimmedMessage = (message ?? "").trim();
+
+  if (!trimmedName || !trimmedEmail || !trimmedMessage) {
+    throw new HttpsError("invalid-argument", "Name, email, and message are required.");
+  }
+
+  const now = Date.now();
+  const ref = await db.collection("contactLeads").add({
+    name: trimmedName,
+    email: trimmedEmail,
+    message: trimmedMessage,
+    status: "new",
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  return { id: ref.id };
+});
+
+export const submitComplaintPublic = onCall<{
+  name: string;
+  contactInfo: string;
+  details: string;
+  bookingReference?: string;
+}>(callableOptions, async (request) => {
+  const { name, contactInfo, details, bookingReference } = request.data ?? {};
+
+  const trimmedName = (name ?? "").trim();
+  const trimmedContact = (contactInfo ?? "").trim();
+  const trimmedDetails = (details ?? "").trim();
+  const trimmedRef = (bookingReference ?? "").trim() || undefined;
+
+  if (!trimmedName || !trimmedContact || !trimmedDetails) {
+    throw new HttpsError("invalid-argument", "Name, contact info, and complaint details are required.");
+  }
+
+  const now = Date.now();
+  const ref = await db.collection("complaints").add({
+    name: trimmedName,
+    contactInfo: trimmedContact,
+    details: trimmedDetails,
+    ...(trimmedRef ? { bookingReference: trimmedRef } : {}),
+    status: "new",
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  return { id: ref.id };
+});
+
+export const subscribeNewsletterPublic = onCall<{
+  email: string;
+}>(callableOptions, async (request) => {
+  const { email } = request.data ?? {};
+  const normalized = normalizeEmail(email ?? "");
+
+  if (!normalized) {
+    throw new HttpsError("invalid-argument", "Email is required.");
+  }
+
+  const existing = await db
+    .collection("newsletterSubscribers")
+    .where("email", "==", normalized)
+    .limit(1)
+    .get();
+
+  if (!existing.empty) {
+    return { id: existing.docs[0].id, alreadySubscribed: true };
+  }
+
+  const now = Date.now();
+  const ref = await db.collection("newsletterSubscribers").add({
+    email: normalized,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  return { id: ref.id, alreadySubscribed: false };
 });

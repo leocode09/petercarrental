@@ -1,13 +1,12 @@
 import {
   collection,
   doc,
-  getDoc,
   getDocs,
   onSnapshot,
   orderBy,
   query,
 } from "firebase/firestore";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { db } from "./firebase";
 import { siteSettingKey } from "./validators";
 
@@ -136,7 +135,17 @@ export type PublicSiteData = {
   testimonials: PublicTestimonial[];
 };
 
-async function fetchSiteContent(settings: Record<string, unknown>): Promise<PublicSiteData> {
+type ContentCollections = {
+  vehicles: PublicVehicle[];
+  services: PublicService[];
+  destinations: PublicDestination[];
+  blogPosts: PublicBlogPost[];
+  testimonials: PublicTestimonial[];
+};
+
+const CONTENT_CACHE_TTL_MS = 30_000;
+
+async function fetchContentCollections(): Promise<ContentCollections> {
   const [vehiclesSnap, servicesSnap, destinationsSnap, blogSnap, testimonialsSnap] =
     await Promise.all([
       getDocs(query(collection(db, "vehicles"), orderBy("sortOrder", "asc"))),
@@ -151,18 +160,18 @@ async function fetchSiteContent(settings: Record<string, unknown>): Promise<Publ
     return { id: data.publicId ?? d.id, ...data };
   }) as PublicVehicle[];
 
-  const servicesData = servicesSnap.docs.map((d) => ({ id: d.id, ...d.data() })) as PublicService[];
-  const destinationsData = destinationsSnap.docs.map((d) => ({
+  const services = servicesSnap.docs.map((d) => ({ id: d.id, ...d.data() })) as PublicService[];
+  const destinations = destinationsSnap.docs.map((d) => ({
     id: d.id,
     ...d.data(),
   })) as PublicDestination[];
 
-  const blogPostsData = blogSnap.docs
-    .map((d) => ({ id: d.id, ...d.data() }))
-    .filter((p: { published?: boolean }) => p.published)
-    .sort((a: { sortOrder?: number }, b: { sortOrder?: number }) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)) as PublicBlogPost[];
+  const blogPosts = (blogSnap.docs
+    .map((d) => ({ id: d.id, ...d.data() }) as PublicBlogPost)
+    .filter((p) => p.published)
+    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)));
 
-  const testimonialsData = testimonialsSnap.docs.map((d) => {
+  const testimonials = testimonialsSnap.docs.map((d) => {
     const data = d.data() as { publicId?: string } & Record<string, unknown>;
     return {
       id: (data.publicId as string) ?? d.id,
@@ -171,6 +180,10 @@ async function fetchSiteContent(settings: Record<string, unknown>): Promise<Publ
     };
   }) as PublicTestimonial[];
 
+  return { vehicles, services, destinations, blogPosts, testimonials };
+}
+
+function buildSiteData(settings: Record<string, unknown>, content: ContentCollections): PublicSiteData {
   return {
     companyInfo: (settings.companyInfo as CompanyInfo) ?? defaultCompanyInfo(),
     bookingLocations: (settings.bookingLocations as string[]) ?? [],
@@ -180,11 +193,7 @@ async function fetchSiteContent(settings: Record<string, unknown>): Promise<Publ
     footerServiceLinks: (settings.footerServiceLinks as LinkItem[]) ?? [],
     legalLinks: (settings.legalLinks as LinkItem[]) ?? [],
     leadershipMembers: (settings.leadershipMembers as LeadershipMember[]) ?? [],
-    vehicles,
-    services: servicesData,
-    destinations: destinationsData,
-    blogPosts: blogPostsData,
-    testimonials: testimonialsData,
+    ...content,
   };
 }
 
@@ -215,36 +224,54 @@ export function usePublicSiteData() {
   const [data, setData] = useState<PublicSiteData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+
+  const contentCacheRef = useRef<ContentCollections | null>(null);
+  const contentFetchedAtRef = useRef(0);
 
   const retry = useCallback(() => {
+    contentCacheRef.current = null;
+    contentFetchedAtRef.current = 0;
     setLoading(true);
     setError(null);
     setData(null);
     setRetryCount((c) => c + 1);
   }, []);
 
-  const [retryCount, setRetryCount] = useState(0);
-
   useEffect(() => {
     setLoading(true);
     setError(null);
 
     let graceTimer: ReturnType<typeof setTimeout> | undefined;
+    let cancelled = false;
+
+    async function getContent(): Promise<ContentCollections> {
+      const now = Date.now();
+      if (contentCacheRef.current && (now - contentFetchedAtRef.current) < CONTENT_CACHE_TTL_MS) {
+        return contentCacheRef.current;
+      }
+      const content = await fetchContentCollections();
+      if (!cancelled) {
+        contentCacheRef.current = content;
+        contentFetchedAtRef.current = Date.now();
+      }
+      return content;
+    }
 
     const unsub = onSnapshot(
       doc(db, "siteSettings", siteSettingKey),
       async (snap) => {
+        if (cancelled) return;
         if (!snap.exists()) {
-          // Give the bootstrapper time to seed before giving up.
-          // The onSnapshot listener stays active, so if the document
-          // is created we'll get another callback automatically.
           if (!graceTimer) {
             graceTimer = setTimeout(() => {
-              setError(
-                "Site settings not found. The database may not be seeded yet — " +
-                "check that the seedPublicData Cloud Function is deployed."
-              );
-              setLoading(false);
+              if (!cancelled) {
+                setError(
+                  "Site settings not found. The database may not be seeded yet — " +
+                  "check that the seedPublicData Cloud Function is deployed."
+                );
+                setLoading(false);
+              }
             }, 12_000);
           }
           return;
@@ -252,29 +279,36 @@ export function usePublicSiteData() {
         clearTimeout(graceTimer);
         graceTimer = undefined;
         try {
-          const content = await fetchSiteContent(snap.data());
-          setData(content);
-          setError(null);
+          const content = await getContent();
+          if (!cancelled) {
+            setData(buildSiteData(snap.data(), content));
+            setError(null);
+          }
         } catch (err) {
-          console.error("Failed to fetch site content", err);
-          setData(null);
-          setError(
-            err instanceof Error ? err.message : "Failed to fetch site content"
-          );
+          if (!cancelled) {
+            console.error("Failed to fetch site content", err);
+            setData(null);
+            setError(
+              err instanceof Error ? err.message : "Failed to fetch site content"
+            );
+          }
         } finally {
-          setLoading(false);
+          if (!cancelled) setLoading(false);
         }
       },
       (err) => {
         clearTimeout(graceTimer);
-        console.error("Firestore siteSettings listener error", err);
-        setData(null);
-        setError(err.message ?? "Firestore connection error");
-        setLoading(false);
+        if (!cancelled) {
+          console.error("Firestore siteSettings listener error", err);
+          setData(null);
+          setError(err.message ?? "Firestore connection error");
+          setLoading(false);
+        }
       }
     );
 
     return () => {
+      cancelled = true;
       clearTimeout(graceTimer);
       unsub();
     };
