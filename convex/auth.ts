@@ -1,6 +1,7 @@
 import { ConvexCredentials } from "@convex-dev/auth/providers/ConvexCredentials";
 import { convexAuth, createAccount, retrieveAccount } from "@convex-dev/auth/server";
 import { ConvexError } from "convex/values";
+import { api } from "./_generated/api";
 import type { DataModel } from "./_generated/dataModel";
 
 const credentialsProvider = ConvexCredentials<DataModel>({
@@ -20,8 +21,8 @@ const credentialsProvider = ConvexCredentials<DataModel>({
     }
 
     if (flow === "signUp") {
-      const existingUsers = await ctx.db.query("users").collect();
-      if (existingUsers.length > 0) {
+      const { hasAnyAdmin } = await ctx.runQuery(api.adminUsers.authState, {});
+      if (hasAnyAdmin) {
         throw new ConvexError("The initial admin account has already been created.");
       }
 
