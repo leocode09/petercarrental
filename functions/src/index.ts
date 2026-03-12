@@ -359,3 +359,234 @@ export const setAdminRole = onCall<{
     throw new HttpsError("internal", message);
   }
 });
+
+// --- Public booking (unauthenticated) ---
+
+function generateBookingReference(): string {
+  const stamp = Date.now().toString(36).slice(-6).toUpperCase();
+  const random = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `PCR-${stamp}${random}`;
+}
+
+export const submitPublicBooking = onCall<
+  {
+    fullName: string;
+    email: string;
+    phone?: string;
+    pickupLocation: string;
+    dropoffLocation: string;
+    pickupDate: string;
+    returnDate: string;
+    pickupTime: string;
+    vehicleCategory: string;
+    selectedVehicleId?: string;
+    serviceType: string;
+    promoCode?: string;
+    airportTransfer: boolean;
+    notes?: string;
+  }
+>(callableOptions, async (request) => {
+  const data = request.data ?? {};
+  const {
+    fullName,
+    email,
+    phone,
+    pickupLocation,
+    dropoffLocation,
+    pickupDate,
+    returnDate,
+    pickupTime,
+    vehicleCategory,
+    selectedVehicleId,
+    serviceType,
+    promoCode,
+    airportTransfer,
+    notes,
+  } = data;
+
+  if (
+    !fullName ||
+    !email ||
+    !pickupLocation ||
+    !dropoffLocation ||
+    !pickupDate ||
+    !returnDate ||
+    !pickupTime ||
+    !vehicleCategory ||
+    !serviceType ||
+    typeof airportTransfer !== "boolean"
+  ) {
+    throw new HttpsError("invalid-argument", "Missing required booking fields.");
+  }
+
+  const normalizedEmail = normalizeEmail(email);
+  const now = Date.now();
+
+  let customerId: string;
+  const custSnap = await db.collection("customers").where("email", "==", normalizedEmail).limit(1).get();
+  if (!custSnap.empty) {
+    customerId = custSnap.docs[0].id;
+    await db.collection("customers").doc(customerId).update({
+      fullName: fullName.trim(),
+      phone: phone?.trim() || null,
+      updatedAt: now,
+    });
+  } else {
+    const custRef = await db.collection("customers").add({
+      email: normalizedEmail,
+      fullName: fullName.trim(),
+      phone: phone?.trim() || null,
+      type: "individual",
+      tags: [],
+      createdAt: now,
+      updatedAt: now,
+    });
+    customerId = custRef.id;
+  }
+
+  const reference = generateBookingReference();
+  const bookingRef = await db.collection("bookings").add({
+    reference,
+    customerId,
+    fullName: fullName.trim(),
+    email: normalizedEmail,
+    phone: phone?.trim() || null,
+    pickupLocation: pickupLocation.trim(),
+    dropoffLocation: dropoffLocation.trim(),
+    pickupDate,
+    returnDate,
+    pickupTime,
+    vehicleCategory,
+    selectedVehicleId: selectedVehicleId?.trim() || null,
+    serviceType,
+    promoCode: promoCode?.trim() || null,
+    promoCodeApplied: null,
+    airportTransfer,
+    notes: notes?.trim() || null,
+    source: "public",
+    status: "new",
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  return { bookingId: bookingRef.id, reference };
+});
+
+export const lookupPublicBooking = onCall<
+  { reference?: string; email?: string }
+>(callableOptions, async (request) => {
+  const { reference, email } = request.data ?? {};
+  const refNorm = reference?.trim().toUpperCase();
+  const emailNorm = email?.trim().toLowerCase();
+
+  if (!refNorm && !emailNorm) {
+    throw new HttpsError("invalid-argument", "Reference or email is required.");
+  }
+
+  let query: admin.firestore.Query = db.collection("bookings");
+  if (refNorm) {
+    query = query.where("reference", "==", refNorm);
+  }
+  if (emailNorm) {
+    query = query.where("email", "==", emailNorm);
+  }
+  const snap = await query.limit(2).get();
+
+  if (snap.empty) {
+    return { found: false, booking: null };
+  }
+
+  const doc = snap.docs[0];
+  const d = doc.data();
+  if (refNorm && (d.reference as string).toUpperCase() !== refNorm) {
+    return { found: false, booking: null };
+  }
+  if (emailNorm && (d.email as string).toLowerCase() !== emailNorm) {
+    return { found: false, booking: null };
+  }
+
+  return {
+    found: true,
+    booking: {
+      id: doc.id,
+      reference: d.reference,
+      fullName: d.fullName,
+      email: d.email,
+      pickupLocation: d.pickupLocation,
+      dropoffLocation: d.dropoffLocation,
+      pickupDate: d.pickupDate,
+      returnDate: d.returnDate,
+      pickupTime: d.pickupTime,
+      vehicleCategory: d.vehicleCategory,
+      selectedVehicleId: d.selectedVehicleId,
+      serviceType: d.serviceType,
+      airportTransfer: d.airportTransfer,
+      notes: d.notes,
+      status: d.status,
+      updatedAt: typeof d.updatedAt === "object" && d.updatedAt && "toMillis" in d.updatedAt
+        ? (d.updatedAt as { toMillis: () => number }).toMillis()
+        : d.updatedAt,
+    },
+  };
+});
+
+export const updatePublicBooking = onCall<
+  {
+    reference: string;
+    fullName: string;
+    email: string;
+    phone?: string;
+    pickupLocation: string;
+    dropoffLocation: string;
+    pickupDate: string;
+    returnDate: string;
+    pickupTime: string;
+    vehicleCategory: string;
+    selectedVehicleId?: string;
+    serviceType: string;
+    promoCode?: string;
+    airportTransfer: boolean;
+    notes?: string;
+  }
+>(callableOptions, async (request) => {
+  const data = request.data ?? {};
+  const reference = (data.reference as string)?.trim().toUpperCase();
+  if (!reference) {
+    throw new HttpsError("invalid-argument", "Reference is required for updates.");
+  }
+
+  const snap = await db.collection("bookings").where("reference", "==", reference).limit(1).get();
+  if (snap.empty) {
+    throw new HttpsError("not-found", "Booking not found.");
+  }
+
+  const docRef = snap.docs[0].ref;
+  const existing = snap.docs[0].data();
+  const existingEmail = (existing.email as string)?.toLowerCase();
+  const providedEmail = normalizeEmail((data.email as string) ?? "");
+  if (existingEmail !== providedEmail) {
+    throw new HttpsError("permission-denied", "Email does not match the booking.");
+  }
+
+  const now = Date.now();
+  await docRef.update({
+    fullName: (data.fullName as string)?.trim() ?? existing.fullName,
+    email: providedEmail,
+    phone: (data.phone as string)?.trim() || null,
+    pickupLocation: (data.pickupLocation as string)?.trim() ?? existing.pickupLocation,
+    dropoffLocation: (data.dropoffLocation as string)?.trim() ?? existing.dropoffLocation,
+    pickupDate: (data.pickupDate as string) ?? existing.pickupDate,
+    returnDate: (data.returnDate as string) ?? existing.returnDate,
+    pickupTime: (data.pickupTime as string) ?? existing.pickupTime,
+    vehicleCategory: (data.vehicleCategory as string) ?? existing.vehicleCategory,
+    selectedVehicleId: (data.selectedVehicleId as string)?.trim() || null,
+    serviceType: (data.serviceType as string) ?? existing.serviceType,
+    promoCode: (data.promoCode as string)?.trim() || null,
+    airportTransfer: typeof data.airportTransfer === "boolean" ? data.airportTransfer : existing.airportTransfer,
+    notes: (data.notes as string)?.trim() || null,
+    status: "change_requested",
+    updatedAt: now,
+  });
+
+  return { updated: true, reference };
+});

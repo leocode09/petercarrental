@@ -1,133 +1,195 @@
 import {
   collection,
-  getDocs,
-  query,
-  orderBy,
   doc,
   getDoc,
+  getDocs,
+  onSnapshot,
+  orderBy,
+  query,
 } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { db } from "./firebase";
-import { blogPosts } from "../data/blog";
-import { destinations } from "../data/destinations";
-import { leadershipMembers } from "../data/leadership";
-import {
-  companyInfo,
-  bookingLocations,
-  footerServiceLinks,
-  legalLinks,
-  navLinks,
-  quickLinks,
-  serviceTypes,
-} from "../data/site";
-import { services } from "../data/services";
-import { testimonials } from "../data/testimonials";
-import { vehicles } from "../data/vehicles";
 import { siteSettingKey } from "./validators";
 
-export const fallbackPublicData = {
-  companyInfo,
-  bookingLocations,
-  serviceTypes,
-  navLinks,
-  quickLinks,
-  footerServiceLinks,
-  legalLinks,
-  leadershipMembers,
-  vehicles: vehicles.map((v, i) => ({
-    id: v.id,
-    publicId: v.id,
-    sortOrder: i,
-    name: v.name,
-    category: v.category,
-    pricePerDay: v.pricePerDay,
-    transmission: v.transmission,
-    seats: v.seats,
-    luggage: v.luggage,
-    drive: v.drive,
-    fuel: v.fuel,
-    description: v.description,
-    image: v.image,
-    featured: v.featured,
-    badge: v.badge,
-  })),
-  services: services.map((s, i) => ({ ...s, sortOrder: i })),
-  destinations: destinations.map((d, i) => ({ ...d, sortOrder: i })),
-  blogPosts,
-  testimonials: testimonials.map((t, i) => ({
-    id: t.id,
-    publicId: t.id,
-    author: t.author,
-    quote: t.quote,
-    summary: t.summary,
-    sortOrder: i,
-  })),
+export type CompanyInfo = {
+  name: string;
+  defaultTitle: string;
+  shortDescription: string;
+  metaDescription: string;
+  phoneDisplay: string;
+  phoneNumber: string;
+  email: string;
+  whatsappNumber: string;
+  locationShort: string;
+  locationFull: string;
+  canonicalUrl: string;
+  liveUrl: string;
+  heroImage: string;
+  ogImage: string;
+  telHref: string;
+  mailtoHref: string;
+  whatsappHref: string;
+  whatsappShareHref: string;
 };
 
-export type PublicSiteData = typeof fallbackPublicData;
+export type LinkItem = {
+  label: string;
+  to: string;
+  description?: string;
+};
 
-async function fetchSiteContent(): Promise<PublicSiteData | null> {
-  const settingsSnap = await getDoc(doc(db, "siteSettings", siteSettingKey));
-  if (!settingsSnap.exists()) {
-    return null;
-  }
+export type NavLink = LinkItem & { children?: LinkItem[] };
 
-  const settings = settingsSnap.data();
+export type PublicVehicle = {
+  id: string;
+  publicId: string;
+  sortOrder: number;
+  name: string;
+  category: string;
+  pricePerDay: number;
+  transmission: string;
+  seats: number;
+  luggage: number;
+  drive: string;
+  fuel: string;
+  description: string;
+  image: string;
+  featured: boolean;
+  badge?: string;
+};
+
+export type PublicService = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  sortOrder: number;
+  [key: string]: unknown;
+};
+
+export type PublicDestination = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  sortOrder: number;
+  [key: string]: unknown;
+};
+
+export type PublicBlogPost = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  published?: boolean;
+  sortOrder: number;
+  [key: string]: unknown;
+};
+
+export type PublicTestimonial = {
+  id: string;
+  publicId: string;
+  author: string;
+  quote: string;
+  summary: string;
+  sortOrder: number;
+};
+
+export type LeadershipMember = {
+  name: string;
+  title: string;
+  bio: string;
+};
+
+export type PublicSiteData = {
+  companyInfo: CompanyInfo;
+  bookingLocations: string[];
+  serviceTypes: string[];
+  navLinks: NavLink[];
+  quickLinks: LinkItem[];
+  footerServiceLinks: LinkItem[];
+  legalLinks: LinkItem[];
+  leadershipMembers: LeadershipMember[];
+  vehicles: PublicVehicle[];
+  services: PublicService[];
+  destinations: PublicDestination[];
+  blogPosts: PublicBlogPost[];
+  testimonials: PublicTestimonial[];
+};
+
+async function fetchSiteContent(settings: Record<string, unknown>): Promise<PublicSiteData> {
   const [vehiclesSnap, servicesSnap, destinationsSnap, blogSnap, testimonialsSnap] =
     await Promise.all([
       getDocs(query(collection(db, "vehicles"), orderBy("sortOrder", "asc"))),
       getDocs(query(collection(db, "services"), orderBy("sortOrder", "asc"))),
       getDocs(query(collection(db, "destinations"), orderBy("sortOrder", "asc"))),
-      getDocs(
-        query(
-          collection(db, "blogPosts"),
-          orderBy("sortOrder", "asc")
-        )
-      ),
-      getDocs(
-        query(
-          collection(db, "testimonials"),
-          orderBy("sortOrder", "asc")
-        )
-      ),
+      getDocs(query(collection(db, "blogPosts"), orderBy("sortOrder", "asc"))),
+      getDocs(query(collection(db, "testimonials"), orderBy("sortOrder", "asc"))),
     ]);
 
   const vehicles = vehiclesSnap.docs.map((d) => {
     const data = d.data() as { publicId: string } & Record<string, unknown>;
-    return { id: data.publicId, ...data };
-  });
-  const servicesData = servicesSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    return { id: data.publicId ?? d.id, ...data };
+  }) as PublicVehicle[];
+
+  const servicesData = servicesSnap.docs.map((d) => ({ id: d.id, ...d.data() })) as PublicService[];
   const destinationsData = destinationsSnap.docs.map((d) => ({
     id: d.id,
     ...d.data(),
-  }));
+  })) as PublicDestination[];
+
   const blogPostsData = blogSnap.docs
     .map((d) => ({ id: d.id, ...d.data() }))
     .filter((p: { published?: boolean }) => p.published)
-    .sort((a: { sortOrder?: number }, b: { sortOrder?: number }) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+    .sort((a: { sortOrder?: number }, b: { sortOrder?: number }) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)) as PublicBlogPost[];
+
   const testimonialsData = testimonialsSnap.docs.map((d) => {
     const data = d.data() as { publicId?: string } & Record<string, unknown>;
     return {
-      id: data.publicId ?? d.id,
-      publicId: data.publicId ?? d.id,
+      id: (data.publicId as string) ?? d.id,
+      publicId: (data.publicId as string) ?? d.id,
       ...data,
     };
-  });
+  }) as PublicTestimonial[];
 
   return {
-    companyInfo: settings.companyInfo ?? fallbackPublicData.companyInfo,
-    bookingLocations: settings.bookingLocations ?? fallbackPublicData.bookingLocations,
-    serviceTypes: settings.serviceTypes ?? fallbackPublicData.serviceTypes,
-    navLinks: settings.navLinks ?? fallbackPublicData.navLinks,
-    quickLinks: settings.quickLinks ?? fallbackPublicData.quickLinks,
-    footerServiceLinks: settings.footerServiceLinks ?? fallbackPublicData.footerServiceLinks,
-    legalLinks: settings.legalLinks ?? fallbackPublicData.legalLinks,
-    leadershipMembers: settings.leadershipMembers ?? fallbackPublicData.leadershipMembers,
-    vehicles: vehicles as PublicSiteData["vehicles"],
-    services: servicesData as PublicSiteData["services"],
-    destinations: destinationsData as PublicSiteData["destinations"],
-    blogPosts: blogPostsData as PublicSiteData["blogPosts"],
-    testimonials: testimonialsData as PublicSiteData["testimonials"],
+    companyInfo: (settings.companyInfo as CompanyInfo) ?? defaultCompanyInfo(),
+    bookingLocations: (settings.bookingLocations as string[]) ?? [],
+    serviceTypes: (settings.serviceTypes as string[]) ?? [],
+    navLinks: (settings.navLinks as NavLink[]) ?? [],
+    quickLinks: (settings.quickLinks as LinkItem[]) ?? [],
+    footerServiceLinks: (settings.footerServiceLinks as LinkItem[]) ?? [],
+    legalLinks: (settings.legalLinks as LinkItem[]) ?? [],
+    leadershipMembers: (settings.leadershipMembers as LeadershipMember[]) ?? [],
+    vehicles,
+    services: servicesData,
+    destinations: destinationsData,
+    blogPosts: blogPostsData,
+    testimonials: testimonialsData,
+  };
+}
+
+function defaultCompanyInfo(): CompanyInfo {
+  return {
+    name: "Peter Car Rental",
+    defaultTitle: "Peter Car Rental | Premium Car Hire in Kigali, Rwanda",
+    shortDescription: "Rwanda's trusted premium car rental service.",
+    metaDescription: "Peter Car Rental offers premium car hire in Rwanda.",
+    phoneDisplay: "+250 788 237 438",
+    phoneNumber: "+250788237438",
+    email: "info@petercarrental.rw",
+    whatsappNumber: "250788237438",
+    locationShort: "Kigali, Rwanda",
+    locationFull: "Kigali, Kicukiro, Rwanda",
+    canonicalUrl: "https://petercarrental.rw",
+    liveUrl: "https://petercarrental.lovable.app",
+    heroImage: "",
+    ogImage: "",
+    telHref: "tel:+250788237438",
+    mailtoHref: "mailto:info@petercarrental.rw",
+    whatsappHref: "https://wa.me/250788237438",
+    whatsappShareHref: "https://wa.me/250788237438",
   };
 }
 
@@ -136,30 +198,74 @@ export function usePublicSiteData() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let cancelled = false;
-
-    fetchSiteContent()
-      .then((result) => {
-        if (!cancelled) {
-          setData(result);
+    const unsub = onSnapshot(
+      doc(db, "siteSettings", siteSettingKey),
+      async (snap) => {
+        if (!snap.exists()) {
+          setData(null);
+          setLoading(false);
+          return;
         }
-      })
-      .catch((err) => {
-        if (!cancelled) {
+        try {
+          const content = await fetchSiteContent(snap.data());
+          setData(content);
+        } catch (err) {
           console.error("Failed to fetch site content", err);
           setData(null);
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
+        } finally {
           setLoading(false);
         }
-      });
-
-    return () => {
-      cancelled = true;
-    };
+      },
+      (err) => {
+        console.error("Firestore siteSettings listener error", err);
+        setData(null);
+        setLoading(false);
+      }
+    );
+    return () => unsub();
   }, []);
 
-  return data ?? fallbackPublicData;
+  return { data, loading };
+}
+
+export function getVehicleByQueryValue(
+  vehicles: PublicVehicle[],
+  value?: string | null
+): PublicVehicle | undefined {
+  if (!value) return undefined;
+  const v = value.trim().toLowerCase();
+  return vehicles.find(
+    (vehicle) =>
+      vehicle.id.toLowerCase() === v || vehicle.publicId?.toLowerCase() === v
+  );
+}
+
+export function getVehicleCategories(vehicles: PublicVehicle[]): string[] {
+  const cats = new Set(vehicles.map((v) => v.category));
+  return Array.from(cats).sort();
+}
+
+export function getFeaturedVehicles(vehicles: PublicVehicle[]): PublicVehicle[] {
+  return vehicles.filter((v) => v.featured);
+}
+
+export function getServiceBySlug(
+  services: PublicService[],
+  slug: string
+): PublicService | undefined {
+  return services.find((s) => s.slug === slug);
+}
+
+export function getDestinationBySlug(
+  destinations: PublicDestination[],
+  slug: string
+): PublicDestination | undefined {
+  return destinations.find((d) => d.slug === slug);
+}
+
+export function getBlogPostBySlug(
+  blogPosts: PublicBlogPost[],
+  slug: string
+): PublicBlogPost | undefined {
+  return blogPosts.find((p) => p.slug === slug);
 }
