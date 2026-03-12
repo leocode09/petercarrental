@@ -1,3 +1,4 @@
+import * as crypto from "crypto";
 import * as admin from "firebase-admin";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 
@@ -8,6 +9,10 @@ const auth = admin.auth();
 
 type UserRole = "superAdmin" | "manager" | "operations" | "contentEditor";
 
+const PBKDF2_ITERATIONS = 310000;
+const SALT_BYTES = 32;
+const HASH_BYTES = 64;
+
 // Allow CORS from localhost and production for callable functions
 const callableOptions = { cors: true };
 
@@ -15,7 +20,35 @@ function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
-/** Creates the first super admin. No auth required; protected by "no existing admin" check. */
+function hashPassword(password: string, salt?: Buffer): { hash: string; salt: string } {
+  const saltBuf = salt ?? crypto.randomBytes(SALT_BYTES);
+  const hash = crypto.pbkdf2Sync(
+    password,
+    saltBuf,
+    PBKDF2_ITERATIONS,
+    HASH_BYTES,
+    "sha256"
+  );
+  return {
+    hash: hash.toString("base64"),
+    salt: saltBuf.toString("base64"),
+  };
+}
+
+function verifyPassword(password: string, saltBase64: string, hashBase64: string): boolean {
+  const salt = Buffer.from(saltBase64, "base64");
+  const expected = Buffer.from(hashBase64, "base64");
+  const actual = crypto.pbkdf2Sync(
+    password,
+    salt,
+    PBKDF2_ITERATIONS,
+    HASH_BYTES,
+    "sha256"
+  );
+  return crypto.timingSafeEqual(expected, actual);
+}
+
+/** Creates the first super admin. Firestore-only; no Firebase Auth. */
 export const createFirstAdmin = onCall<{
   name: string;
   email: string;
@@ -33,44 +66,60 @@ export const createFirstAdmin = onCall<{
 
   const normalizedEmail = normalizeEmail(email);
 
-  // Check if any admin exists (admins collection or users with role claim)
   const adminsSnap = await db.collection("admins").limit(1).get();
   if (!adminsSnap.empty) {
     throw new HttpsError("failed-precondition", "An admin account already exists.");
   }
 
-  // List users and check for role claim (Firebase Auth doesn't have a built-in "list by claim")
-  // We use admins collection as source of truth for "hasAnyAdmin"
-  // If admins is empty, we're good to create the first one
-
-  let user: admin.auth.UserRecord;
-
-  try {
-    user = await auth.createUser({
-      email: normalizedEmail,
-      password,
-      displayName: name,
-    });
-  } catch (err: unknown) {
-    if (err instanceof Error && err.message?.includes("already exists")) {
-      // User exists but may not be admin - grant superAdmin
-      const existing = await auth.getUserByEmail(normalizedEmail);
-      user = existing;
-    } else {
-      const message = err instanceof Error ? err.message : "Unable to create the admin account.";
-      throw new HttpsError("internal", message);
-    }
-  }
-
-  await auth.setCustomUserClaims(user.uid, { role: "superAdmin" });
-  await db.collection("admins").doc(user.uid).set({
+  const { hash, salt } = hashPassword(password);
+  const ref = await db.collection("admins").add({
     email: normalizedEmail,
     name,
     role: "superAdmin",
+    passwordHash: hash,
+    salt,
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
   });
 
-  return { userId: user.uid };
+  return { userId: ref.id };
+});
+
+/** Login with email/password. Verifies against Firestore and returns custom token. */
+export const loginAdmin = onCall<{ email: string; password: string }>(callableOptions, async (request) => {
+  const { email, password } = request.data ?? {};
+
+  if (!email || !password) {
+    throw new HttpsError("invalid-argument", "Email and password are required.");
+  }
+
+  const normalizedEmail = normalizeEmail(email);
+  const adminsSnap = await db.collection("admins").where("email", "==", normalizedEmail).limit(1).get();
+
+  if (adminsSnap.empty) {
+    throw new HttpsError("invalid-argument", "Invalid email or password.");
+  }
+
+  const doc = adminsSnap.docs[0];
+  const data = doc.data();
+  const passwordHash = data.passwordHash as string | undefined;
+  const salt = data.salt as string | undefined;
+
+  if (!passwordHash || !salt) {
+    throw new HttpsError("invalid-argument", "Invalid email or password.");
+  }
+
+  if (!verifyPassword(password, salt, passwordHash)) {
+    throw new HttpsError("invalid-argument", "Invalid email or password.");
+  }
+
+  const role = (data.role as UserRole) ?? "contentEditor";
+  const token = await auth.createCustomToken(doc.id, {
+    role,
+    email: normalizedEmail,
+    name: (data.name as string) ?? "",
+  });
+
+  return { token };
 });
 
 /** Returns whether any admin exists. Used to decide if setup page should be shown. */
@@ -260,7 +309,7 @@ export const seedPublicData = onCall<void>(callableOptions, async () => {
   return { seeded: true, reason: "seeded" };
 });
 
-/** Creates an admin user. Requires caller to be superAdmin or manager. */
+/** Creates an admin user. Requires caller to be superAdmin or manager. Firestore-only. */
 export const createAdminUser = onCall<{
   name: string;
   email: string;
@@ -291,33 +340,25 @@ export const createAdminUser = onCall<{
   }
 
   const normalizedEmail = normalizeEmail(email);
-
-  try {
-    const user = await auth.createUser({
-      email: normalizedEmail,
-      password,
-      displayName: name,
-    });
-
-    await auth.setCustomUserClaims(user.uid, { role });
-    await db.collection("admins").doc(user.uid).set({
-      email: normalizedEmail,
-      name,
-      role,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
-
-    return { userId: user.uid };
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Unable to create the admin account.";
-    if (message.toLowerCase().includes("already exists")) {
-      throw new HttpsError("already-exists", "An admin with this email already exists.");
-    }
-    throw new HttpsError("internal", message);
+  const existing = await db.collection("admins").where("email", "==", normalizedEmail).limit(1).get();
+  if (!existing.empty) {
+    throw new HttpsError("already-exists", "An admin with this email already exists.");
   }
+
+  const { hash, salt } = hashPassword(password);
+  const ref = await db.collection("admins").add({
+    email: normalizedEmail,
+    name,
+    role,
+    passwordHash: hash,
+    salt,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+
+  return { userId: ref.id };
 });
 
-/** Updates another user's role. superAdmin only. */
+/** Updates another user's role. superAdmin only. Firestore-only. */
 export const setAdminRole = onCall<{
   userId: string;
   role: UserRole;
@@ -345,18 +386,12 @@ export const setAdminRole = onCall<{
     throw new HttpsError("invalid-argument", "You cannot remove your own super admin access.");
   }
 
-  try {
-    await auth.setCustomUserClaims(userId, { role });
-    const adminRef = db.collection("admins").doc(userId);
-    const snap = await adminRef.get();
-    if (snap.exists) {
-      await adminRef.update({ role, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
-    } else {
-      await adminRef.set({ role, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
-    }
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Unable to update role.";
-    throw new HttpsError("internal", message);
+  const adminRef = db.collection("admins").doc(userId);
+  const snap = await adminRef.get();
+  if (snap.exists) {
+    await adminRef.update({ role, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+  } else {
+    throw new HttpsError("not-found", "Admin user not found.");
   }
 });
 

@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { onIdTokenChanged, signInWithEmailAndPassword, signOut, type User } from "firebase/auth";
+import { onIdTokenChanged, signInWithCustomToken, signOut, type User } from "firebase/auth";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { auth, default as app } from "./firebase";
 import type { UserRole } from "./validators";
@@ -58,6 +58,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const tokenResult = await user.getIdTokenResult();
       const role = (tokenResult.claims.role as UserRole) ?? null;
+      const claims = tokenResult.claims as Record<string, unknown>;
+      const email = (claims.email as string) ?? user.email ?? null;
+      const name = (claims.name as string) ?? user.displayName ?? null;
 
       setState({
         user,
@@ -66,9 +69,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         adminUser: {
           _id: user.uid,
           authUserId: user.uid,
-          email: user.email ?? null,
+          email,
           image: user.photoURL ?? null,
-          name: user.displayName ?? null,
+          name,
           role,
         },
       });
@@ -78,7 +81,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password);
+    const functions = getFunctions(app, "us-central1");
+    const loginFn = httpsCallable<{ email: string; password: string }, { data: { token: string } }>(functions, "loginAdmin");
+    const res = await loginFn({ email: email.trim().toLowerCase(), password });
+    const token = res.data?.token;
+    if (!token) throw new Error("No token returned");
+    await signInWithCustomToken(auth, token);
   }, []);
 
   const signOutUser = useCallback(async () => {
