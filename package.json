@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:backend": "convex dev --local",
-    "convex:codegen": "convex dev --local --once --typecheck disable",
+    "dev:backend": "convex dev",
+    "convex:codegen": "convex dev --once --typecheck disable",
     "build": "vite build",
     "preview": "vite preview"
   },
@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.13",
+    "@types/node": "^25.4.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.4",

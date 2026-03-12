@@ -1,4 +1,4 @@
-import { useQuery } from "convex/react";
+import { useAction, useQuery } from "convex/react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../../convex/_generated/api";
@@ -12,6 +12,7 @@ export default function AdminSetup() {
   const navigate = useNavigate();
   const { companyInfo } = usePublicSiteData();
   const authState = useQuery(api.adminUsers.authState, {});
+  const createFirstAdmin = useAction(api.adminUsers.createFirstAdmin);
   const [name, setName] = useState("Peter Car Rental Admin");
   const [email, setEmail] = useState("admin@petercarrental.rw");
   const [password, setPassword] = useState("");
@@ -51,14 +52,21 @@ export default function AdminSetup() {
             setSubmitting(true);
 
             try {
-              const result = await authClient.signUp.email({
+              await createFirstAdmin({
                 email,
                 name,
                 password,
               });
 
-              if (result.error) {
-                setErrorMessage(result.error.message || "Unable to create the admin account.");
+              const signInResult = await authClient.signIn.email({
+                email,
+                password,
+              });
+
+              if (signInResult.error) {
+                setErrorMessage(signInResult.error.message || "Admin created, but automatic sign-in failed.");
+              } else {
+                navigate("/admin", { replace: true });
               }
             } catch (error) {
               setErrorMessage(error instanceof Error ? error.message : "Unable to create the admin account.");

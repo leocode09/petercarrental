@@ -1,12 +1,23 @@
 import { ConvexError } from "convex/values";
+import { components } from "../_generated/api";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
-import type { Doc, Id } from "../_generated/dataModel";
 import { authComponent } from "../auth";
-import type { UserRole } from "./validators";
+import { userRoles, type UserRole } from "./validators";
 
 type ConvexFunctionCtx = QueryCtx | MutationCtx;
 
-export type AdminUserDoc = Doc<"users"> & { role?: UserRole };
+function isAdminRole(role: string | null | undefined): role is UserRole {
+  return userRoles.includes(role as UserRole);
+}
+
+export type AdminUserDoc = {
+  _id: string;
+  authUserId: string;
+  email?: string | null;
+  image?: string | null;
+  name?: string | null;
+  role?: UserRole | null;
+};
 
 export async function getViewer(ctx: ConvexFunctionCtx) {
   const authUser = await authComponent.safeGetAuthUser(ctx);
@@ -14,20 +25,26 @@ export async function getViewer(ctx: ConvexFunctionCtx) {
     return null;
   }
 
-  const userId = authUser.userId as Id<"users"> | null | undefined;
-  if (userId) {
-    const linkedUser = await ctx.db.get(userId);
-    if (linkedUser) {
-      return linkedUser as AdminUserDoc;
-    }
+  const betterAuthUser = await ctx.runQuery(components.betterAuth.users.getUserById, {
+    userId: authUser._id,
+  });
+
+  if (betterAuthUser) {
+    return {
+      _id: betterAuthUser._id,
+      authUserId: betterAuthUser._id,
+      email: betterAuthUser.email,
+      image: betterAuthUser.image,
+      name: betterAuthUser.name,
+      role: isAdminRole(betterAuthUser.role) ? betterAuthUser.role : null,
+    } satisfies AdminUserDoc;
   }
 
-  const linkedUser = await ctx.db
-    .query("users")
-    .withIndex("by_authUserId", (q) => q.eq("authUserId", authUser._id))
-    .unique();
-
-  return (linkedUser as AdminUserDoc | null) ?? null;
+  return {
+    ...authUser,
+    authUserId: authUser._id,
+    role: isAdminRole(authUser.role) ? authUser.role : null,
+  } satisfies AdminUserDoc;
 }
 
 export async function requireViewer(ctx: ConvexFunctionCtx) {
@@ -58,7 +75,7 @@ export async function logActivity(
     entityId,
     summary,
   }: {
-    actorUserId?: Id<"users">;
+    actorUserId?: string;
     action: string;
     entityType: string;
     entityId?: string;

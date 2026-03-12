@@ -1,16 +1,23 @@
+import { api, components } from "./_generated/api";
+import { action, mutation, query } from "./_generated/server";
 import { ConvexError, v } from "convex/values";
-import { api, internal } from "./_generated/api";
-import { action, internalMutation, mutation, query } from "./_generated/server";
 import { authComponent, createAuth } from "./auth";
 import { getViewer, logActivity, requireRole } from "./lib/auth";
 import { normalizeEmail } from "./lib/bookings";
-import { userRoleValidator } from "./lib/validators";
+import { userRoles, userRoleValidator, type UserRole } from "./lib/validators";
+
+function isAdminRole(role: string | null | undefined): role is UserRole {
+  return userRoles.includes(role as UserRole);
+}
 
 export const authState = query({
   args: {},
   handler: async (ctx) => {
     const user = await getViewer(ctx);
-    const hasAnyAdmin = (await ctx.db.query("users").collect()).some((candidate) => Boolean(candidate.authUserId && candidate.role));
+    const authUsers = await ctx.runQuery(components.betterAuth.users.listUsers, {});
+    const hasAnyAdmin = authUsers.some((candidate: { role?: string | null }) =>
+      isAdminRole(candidate.role),
+    );
 
     return {
       hasAnyAdmin,
@@ -30,18 +37,79 @@ export const bootstrapFirstAdminRole = mutation({
     if (viewer.role) {
       return; // Already has role
     }
-    if (!viewer.authUserId) {
-      throw new ConvexError("Only linked auth users can be bootstrapped.");
-    }
-    const allUsers = await ctx.db.query("users").collect();
-    const someoneHasRole = allUsers.some((u) => Boolean(u.authUserId && u.role));
+    const authUsers = await ctx.runQuery(components.betterAuth.users.listUsers, {});
+    const someoneHasRole = authUsers.some((user: { role?: string | null }) => isAdminRole(user.role));
     if (someoneHasRole) {
       throw new ConvexError("An admin with a role already exists. Use Users & Roles to assign yours.");
     }
-    await ctx.db.patch(viewer._id, {
+
+    await ctx.runMutation(components.betterAuth.users.updateUserRole, {
+      userId: viewer._id,
       role: "superAdmin",
-      updatedAt: Date.now(),
     });
+  },
+});
+
+export const createFirstAdmin = action({
+  args: {
+    name: v.string(),
+    email: v.string(),
+    password: v.string(),
+  },
+  handler: async (ctx, args): Promise<{ userId: string }> => {
+    if (args.password.length < 8) {
+      throw new ConvexError("Password must be at least 8 characters.");
+    }
+
+    const authUsers = await ctx.runQuery(components.betterAuth.users.listUsers, {});
+    const hasAnyAdmin = authUsers.some((user: { role?: string | null }) => isAdminRole(user.role));
+    if (hasAnyAdmin) {
+      throw new ConvexError("An admin account already exists.");
+    }
+
+    const email = normalizeEmail(args.email);
+    const existingUser = await ctx.runQuery(components.betterAuth.users.getUserByEmail, {
+      email,
+    });
+
+    if (existingUser) {
+      await ctx.runMutation(components.betterAuth.users.updateUserRole, {
+        userId: existingUser._id,
+        role: "superAdmin",
+      });
+
+      return { userId: existingUser._id };
+    }
+
+    const { auth } = await authComponent.getAuth(createAuth, ctx);
+
+    try {
+      await auth.api.signUpEmail({
+        body: {
+          email,
+          name: args.name,
+          password: args.password,
+        },
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to create the admin account.";
+      throw new ConvexError(message);
+    }
+
+    const createdUser = await ctx.runQuery(components.betterAuth.users.getUserByEmail, {
+      email,
+    });
+
+    if (!createdUser) {
+      throw new ConvexError("The created admin user could not be found in Better Auth.");
+    }
+
+    await ctx.runMutation(components.betterAuth.users.updateUserRole, {
+      userId: createdUser._id,
+      role: "superAdmin",
+    });
+
+    return { userId: createdUser._id };
   },
 });
 
@@ -56,20 +124,20 @@ export const list = query({
   args: {},
   handler: async (ctx) => {
     await requireRole(ctx, ["superAdmin", "manager"]);
-    const users = (await ctx.db.query("users").collect()).filter((user) => Boolean(user.authUserId));
-
-    return users.sort((left, right) => (left.createdAt ?? 0) - (right.createdAt ?? 0));
+    return await ctx.runQuery(components.betterAuth.users.listUsers, {});
   },
 });
 
 export const updateRole = mutation({
   args: {
-    userId: v.id("users"),
+    userId: v.string(),
     role: userRoleValidator,
   },
   handler: async (ctx, args) => {
     const viewer = await requireRole(ctx, ["superAdmin"]);
-    const user = await ctx.db.get(args.userId);
+    const user = await ctx.runQuery(components.betterAuth.users.getUserById, {
+      userId: args.userId,
+    });
 
     if (!user) {
       throw new ConvexError("User not found.");
@@ -79,9 +147,9 @@ export const updateRole = mutation({
       throw new ConvexError("You cannot remove your own super admin access.");
     }
 
-    await ctx.db.patch(user._id, {
+    await ctx.runMutation(components.betterAuth.users.updateUserRole, {
+      userId: user._id,
       role: args.role,
-      updatedAt: Date.now(),
     });
 
     await logActivity(ctx, {
@@ -94,34 +162,10 @@ export const updateRole = mutation({
   },
 });
 
-export const setRoleByAuthUserId = internalMutation({
-  args: {
-    authUserId: v.string(),
-    role: userRoleValidator,
-  },
-  handler: async (ctx, args) => {
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_authUserId", (q) => q.eq("authUserId", args.authUserId))
-      .unique();
-
-    if (!user) {
-      throw new ConvexError("The created admin user could not be linked to the app.");
-    }
-
-    await ctx.db.patch(user._id, {
-      role: args.role,
-      updatedAt: Date.now(),
-    });
-
-    return user._id;
-  },
-});
-
 export const recordUserCreation = mutation({
   args: {
-    actorUserId: v.optional(v.id("users")),
-    createdUserId: v.id("users"),
+    actorUserId: v.optional(v.string()),
+    createdUserId: v.string(),
     email: v.string(),
     role: userRoleValidator,
   },
@@ -143,7 +187,7 @@ export const createAdminUser = action({
     password: v.string(),
     role: userRoleValidator,
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<{ userId: string }> => {
     const viewer = await ctx.runQuery(api.adminUsers.currentAdmin, {});
     if (!viewer?.role || !["superAdmin", "manager"].includes(viewer.role)) {
       throw new ConvexError("You do not have permission to create admin users.");
@@ -154,24 +198,23 @@ export const createAdminUser = action({
     }
 
     const email = normalizeEmail(args.email);
-    const existingUsers = await ctx.runQuery(api.adminUsers.list, {});
-    const existingUser = existingUsers.find((user) => user.email?.toLowerCase() === email);
+    const existingUser = await ctx.runQuery(components.betterAuth.users.getUserByEmail, {
+      email,
+    });
     if (existingUser) {
       throw new ConvexError("An admin with this email already exists.");
     }
 
     const { auth } = await authComponent.getAuth(createAuth, ctx);
 
-    let authUserId: string;
     try {
-      const created = await auth.api.signUpEmail({
+      await auth.api.signUpEmail({
         body: {
           email,
           name: args.name,
           password: args.password,
         },
       });
-      authUserId = created.user.id;
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unable to create the admin account.";
       if (message.toLowerCase().includes("already exists")) {
@@ -180,20 +223,28 @@ export const createAdminUser = action({
       throw new ConvexError(message);
     }
 
-    const userId = await ctx.runMutation(internal.adminUsers.setRoleByAuthUserId, {
-      authUserId,
+    const createdUser = await ctx.runQuery(components.betterAuth.users.getUserByEmail, {
+      email,
+    });
+
+    if (!createdUser) {
+      throw new ConvexError("The created admin user could not be found in Better Auth.");
+    }
+
+    await ctx.runMutation(components.betterAuth.users.updateUserRole, {
+      userId: createdUser._id,
       role: args.role,
     });
 
     await ctx.runMutation(api.adminUsers.recordUserCreation, {
       actorUserId: viewer._id,
-      createdUserId: userId,
+      createdUserId: createdUser._id,
       email,
       role: args.role,
     });
 
     return {
-      userId,
+      userId: createdUser._id,
     };
   },
 });

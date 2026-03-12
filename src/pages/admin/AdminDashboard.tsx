@@ -6,9 +6,10 @@ import Card from "../../components/ui/Card";
 import { formatCurrency } from "../../lib/utils";
 
 export default function AdminDashboard() {
-  const data = useQuery(api.adminDashboard.overview, {});
+  const viewer = useQuery(api.adminUsers.currentAdmin, {});
+  const data = useQuery(api.adminDashboard.overview, viewer?.role ? {} : "skip");
 
-  if (!data) {
+  if (!viewer?.role || !data) {
     return <div className="text-sm text-slate-500">Loading dashboard...</div>;
   }
 

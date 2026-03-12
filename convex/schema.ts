@@ -17,21 +17,6 @@ import {
 } from "./lib/validators";
 
 export default defineSchema({
-  users: defineTable({
-    authUserId: v.optional(v.string()),
-    name: v.optional(v.string()),
-    email: v.optional(v.string()),
-    emailVerificationTime: v.optional(v.number()),
-    image: v.optional(v.string()),
-    isAnonymous: v.optional(v.boolean()),
-    role: v.optional(userRoleValidator),
-    createdAt: v.optional(v.number()),
-    updatedAt: v.optional(v.number()),
-  })
-    .index("by_authUserId", ["authUserId"])
-    .index("email", ["email"])
-    .index("role", ["role"]),
-
   siteSettings: defineTable({
     key: v.string(),
     companyInfo: companyInfoValidator,
@@ -252,7 +237,7 @@ export default defineSchema({
   }).index("by_email", ["email"]),
 
   activityLogs: defineTable({
-    actorUserId: v.optional(v.id("users")),
+    actorUserId: v.optional(v.string()),
     action: v.string(),
     entityType: v.string(),
     entityId: v.optional(v.string()),
