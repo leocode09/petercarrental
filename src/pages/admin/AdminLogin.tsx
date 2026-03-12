@@ -21,9 +21,10 @@ export default function AdminLogin() {
 
   useEffect(() => {
     if (authState?.viewer?.role) {
-      navigate("/admin", { replace: true });
+      const nextPath = (location.state as { from?: string } | null)?.from || "/admin";
+      navigate(nextPath, { replace: true });
     }
-  }, [authState, navigate]);
+  }, [authState, navigate, location.state]);
 
   if (authState?.hasAnyAdmin === false) {
     navigate("/admin/setup", { replace: true });
@@ -52,10 +53,6 @@ export default function AdminLogin() {
               password,
               flow: "signIn",
             })
-              .then(() => {
-                const nextPath = (location.state as { from?: string } | null)?.from || "/admin";
-                navigate(nextPath, { replace: true });
-              })
               .catch((error) => {
                 setErrorMessage(error instanceof Error ? error.message : "Unable to sign in.");
               })
