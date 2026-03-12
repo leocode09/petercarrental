@@ -1,17 +1,16 @@
-import { createAccount, getAuthUserId } from "@convex-dev/auth/server";
 import { ConvexError, v } from "convex/values";
-import { api } from "./_generated/api";
-import { action, mutation, query } from "./_generated/server";
-import { logActivity, requireRole } from "./lib/auth";
+import { api, internal } from "./_generated/api";
+import { action, internalMutation, mutation, query } from "./_generated/server";
+import { authComponent, createAuth } from "./auth";
+import { getViewer, logActivity, requireRole } from "./lib/auth";
 import { normalizeEmail } from "./lib/bookings";
 import { userRoleValidator } from "./lib/validators";
 
 export const authState = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    const user = userId ? await ctx.db.get(userId) : null;
-    const hasAnyAdmin = (await ctx.db.query("users").collect()).length > 0;
+    const user = await getViewer(ctx);
+    const hasAnyAdmin = (await ctx.db.query("users").collect()).some((candidate) => Boolean(candidate.authUserId && candidate.role));
 
     return {
       hasAnyAdmin,
@@ -23,12 +22,7 @@ export const authState = query({
 export const currentAdmin = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      return null;
-    }
-
-    return await ctx.db.get(userId);
+    return await getViewer(ctx);
   },
 });
 
@@ -36,7 +30,7 @@ export const list = query({
   args: {},
   handler: async (ctx) => {
     await requireRole(ctx, ["superAdmin", "manager"]);
-    const users = await ctx.db.query("users").collect();
+    const users = (await ctx.db.query("users").collect()).filter((user) => Boolean(user.authUserId));
 
     return users.sort((left, right) => (left.createdAt ?? 0) - (right.createdAt ?? 0));
   },
@@ -71,6 +65,30 @@ export const updateRole = mutation({
       entityId: user._id,
       summary: `Updated ${user.email ?? user.name ?? "admin user"} to role ${args.role}.`,
     });
+  },
+});
+
+export const setRoleByAuthUserId = internalMutation({
+  args: {
+    authUserId: v.string(),
+    role: userRoleValidator,
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_authUserId", (q) => q.eq("authUserId", args.authUserId))
+      .unique();
+
+    if (!user) {
+      throw new ConvexError("The created admin user could not be linked to the app.");
+    }
+
+    await ctx.db.patch(user._id, {
+      role: args.role,
+      updatedAt: Date.now(),
+    });
+
+    return user._id;
   },
 });
 
@@ -116,31 +134,40 @@ export const createAdminUser = action({
       throw new ConvexError("An admin with this email already exists.");
     }
 
-    const { user } = await createAccount(ctx, {
-      provider: "admin-credentials",
-      account: {
-        id: email,
-        secret: args.password,
-      },
-      profile: {
-        email,
-        name: args.name,
-        role: args.role,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      },
-      shouldLinkViaEmail: true,
+    const { auth } = await authComponent.getAuth(createAuth, ctx);
+
+    let authUserId: string;
+    try {
+      const created = await auth.api.signUpEmail({
+        body: {
+          email,
+          name: args.name,
+          password: args.password,
+        },
+      });
+      authUserId = created.user.id;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to create the admin account.";
+      if (message.toLowerCase().includes("already exists")) {
+        throw new ConvexError("An admin with this email already exists.");
+      }
+      throw new ConvexError(message);
+    }
+
+    const userId = await ctx.runMutation(internal.adminUsers.setRoleByAuthUserId, {
+      authUserId,
+      role: args.role,
     });
 
     await ctx.runMutation(api.adminUsers.recordUserCreation, {
       actorUserId: viewer._id,
-      createdUserId: user._id,
+      createdUserId: userId,
       email,
       role: args.role,
     });
 
     return {
-      userId: user._id,
+      userId,
     };
   },
 });

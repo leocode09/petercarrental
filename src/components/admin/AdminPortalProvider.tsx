@@ -1,8 +1,9 @@
-import { ConvexAuthProvider } from "@convex-dev/auth/react";
+import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react";
 import { ConvexReactClient } from "convex/react";
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { Outlet } from "react-router-dom";
 import ConvexBootstrapper from "../bootstrap/ConvexBootstrapper";
+import { authClient } from "../../lib/auth-client";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
 
@@ -128,11 +129,11 @@ export default function AdminPortalProvider() {
   }
 
   return (
-    <ConvexAuthProvider client={convex}>
+    <ConvexBetterAuthProvider authClient={authClient} client={convex}>
       <AdminPortalErrorBoundary>
         <ConvexBootstrapper />
         <Outlet />
       </AdminPortalErrorBoundary>
-    </ConvexAuthProvider>
+    </ConvexBetterAuthProvider>
   );
 }

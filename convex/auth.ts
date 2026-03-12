@@ -1,75 +1,120 @@
-import { ConvexCredentials } from "@convex-dev/auth/providers/ConvexCredentials";
-import { convexAuth, createAccount, retrieveAccount } from "@convex-dev/auth/server";
-import { ConvexError } from "convex/values";
-import { Scrypt } from "lucia";
-import { api } from "./_generated/api";
-import type { DataModel } from "./_generated/dataModel";
+import { createClient, type AuthFunctions, type GenericCtx } from "@convex-dev/better-auth";
+import { convex, crossDomain } from "@convex-dev/better-auth/plugins";
+import { betterAuth } from "better-auth/minimal";
+import { components, internal } from "./_generated/api";
+import type { DataModel, Id } from "./_generated/dataModel";
+import authConfig from "./auth.config";
+import { normalizeEmail } from "./lib/bookings";
 
-const credentialsProvider = ConvexCredentials<DataModel>({
-  id: "admin-credentials",
-  crypto: {
-    async hashSecret(password: string) {
-      return await new Scrypt().hash(password);
-    },
-    async verifySecret(password: string, hash: string) {
-      return await new Scrypt().verify(hash, password);
-    },
+const siteUrl = process.env.SITE_URL ?? "http://127.0.0.1:4173";
+const authFunctions: AuthFunctions = internal.auth;
+
+async function syncAppUserFromAuthUser(
+  ctx: GenericCtx<DataModel>,
+  authUser: {
+    _id: string;
+    email: string;
+    name: string;
   },
-  authorize: async (credentials, ctx) => {
-    const email = String(credentials.email ?? "").trim().toLowerCase();
-    const password = String(credentials.password ?? "");
-    const flow = credentials.flow === "signUp" ? "signUp" : "signIn";
-    const name = String(credentials.name ?? "").trim();
+) {
+  const email = normalizeEmail(authUser.email);
+  const existingLinkedUser = await ctx.db
+    .query("users")
+    .withIndex("by_authUserId", (q) => q.eq("authUserId", authUser._id))
+    .unique();
 
-    if (!email) {
-      throw new ConvexError("Email is required.");
-    }
-
-    if (password.length < 8) {
-      throw new ConvexError("Password must be at least 8 characters.");
-    }
-
-    if (flow === "signUp") {
-      const { hasAnyAdmin } = await ctx.runQuery(api.adminUsers.authState, {});
-      if (hasAnyAdmin) {
-        throw new ConvexError("The initial admin account has already been created.");
-      }
-
-      const { user } = await createAccount(ctx, {
-        provider: "admin-credentials",
-        account: {
-          id: email,
-          secret: password,
-        },
-        profile: {
-          email,
-          name: name || "Peter Car Rental Admin",
-          role: "superAdmin",
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-        },
-        shouldLinkViaEmail: true,
-      });
-
-      return { userId: user._id };
-    }
-
-    const result = await retrieveAccount(ctx, {
-      provider: "admin-credentials",
-      account: {
-        id: email,
-        secret: password,
-      },
+  if (existingLinkedUser) {
+    await ctx.db.patch(existingLinkedUser._id, {
+      email,
+      name: authUser.name,
+      updatedAt: Date.now(),
     });
+    await authComponent.setUserId(ctx, authUser._id, existingLinkedUser._id);
+    return existingLinkedUser._id;
+  }
 
-    if (!result) {
-      throw new ConvexError("Invalid email or password.");
-    }
+  const matchingUsers = await ctx.db
+    .query("users")
+    .withIndex("email", (q) => q.eq("email", email))
+    .collect();
+  const legacyUser = matchingUsers.find((user) => !user.authUserId);
+  const hasLinkedAdmin = (await ctx.db.query("users").collect()).some((user) => Boolean(user.authUserId && user.role));
+  const role = legacyUser?.role ?? (hasLinkedAdmin ? undefined : "superAdmin");
 
-    return { userId: result.user._id };
+  let userId: Id<"users">;
+  if (legacyUser) {
+    await ctx.db.patch(legacyUser._id, {
+      authUserId: authUser._id,
+      email,
+      name: authUser.name,
+      role: legacyUser.role ?? role,
+      updatedAt: Date.now(),
+    });
+    userId = legacyUser._id;
+  } else {
+    userId = await ctx.db.insert("users", {
+      authUserId: authUser._id,
+      email,
+      name: authUser.name,
+      role,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+  }
+
+  await authComponent.setUserId(ctx, authUser._id, userId);
+  return userId;
+}
+
+export const authComponent = createClient<DataModel>(components.betterAuth, {
+  authFunctions,
+  triggers: {
+    user: {
+      onCreate: async (ctx, doc) => {
+        await syncAppUserFromAuthUser(ctx, {
+          _id: doc._id,
+          email: doc.email,
+          name: doc.name,
+        });
+      },
+      onUpdate: async (ctx, newDoc) => {
+        await syncAppUserFromAuthUser(ctx, {
+          _id: newDoc._id,
+          email: newDoc.email,
+          name: newDoc.name,
+        });
+      },
+      onDelete: async (ctx, doc) => {
+        const existingLinkedUser = await ctx.db
+          .query("users")
+          .withIndex("by_authUserId", (q) => q.eq("authUserId", doc._id))
+          .unique();
+
+        if (!existingLinkedUser) {
+          return;
+        }
+
+        await ctx.db.patch(existingLinkedUser._id, {
+          authUserId: undefined,
+          updatedAt: Date.now(),
+        });
+      },
+    },
   },
 });
 
-export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
-  providers: [credentialsProvider],
-});
+export const createAuth = (ctx: GenericCtx<DataModel>) => {
+  return betterAuth({
+    database: authComponent.adapter(ctx),
+    secret: process.env.BETTER_AUTH_SECRET,
+    trustedOrigins: [siteUrl],
+    emailAndPassword: {
+      enabled: true,
+      requireEmailVerification: false,
+    },
+    plugins: [crossDomain({ siteUrl }), convex({ authConfig })],
+  });
+};
+
+export const { getAuthUser } = authComponent.clientApi();
+export const { onCreate, onUpdate, onDelete } = authComponent.triggersApi();
