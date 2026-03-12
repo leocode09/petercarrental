@@ -7,6 +7,7 @@
     "dev": "vite",
     "dev:backend": "convex dev --local",
     "convex:codegen": "convex dev --local --once --typecheck disable",
+    "auth:generate-keys": "node scripts/generateAuthKeys.mjs",
     "build": "vite build",
     "preview": "vite preview"
   },
