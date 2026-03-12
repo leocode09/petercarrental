@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updatePublicBooking = exports.lookupPublicBooking = exports.submitPublicBooking = exports.setAdminRole = exports.createAdminUser = exports.seedPublicData = exports.listAdminUsers = exports.checkHasAnyAdmin = exports.loginAdmin = exports.createFirstAdmin = void 0;
+exports.subscribeNewsletterPublic = exports.submitComplaintPublic = exports.submitContactLead = exports.updatePublicBooking = exports.lookupPublicBooking = exports.submitPublicBooking = exports.setAdminRole = exports.createAdminUser = exports.seedPublicData = exports.listAdminUsers = exports.checkHasAnyAdmin = exports.loginAdmin = exports.createFirstAdmin = void 0;
 const crypto = require("crypto");
 const admin = require("firebase-admin");
 const https_1 = require("firebase-functions/v2/https");
@@ -306,11 +306,20 @@ exports.setAdminRole = (0, https_1.onCall)(callableOptions, async (request) => {
     }
     const adminRef = db.collection("admins").doc(userId);
     const snap = await adminRef.get();
-    if (snap.exists) {
-        await adminRef.update({ role, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
-    }
-    else {
+    if (!snap.exists) {
         throw new https_1.HttpsError("not-found", "Admin user not found.");
+    }
+    const data = snap.data();
+    await adminRef.update({ role, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
+    try {
+        await auth.setCustomUserClaims(userId, {
+            role,
+            email: data.email,
+            name: data.name,
+        });
+    }
+    catch {
+        // User may not have signed in yet; they'll get the correct role on next login
     }
 });
 // --- Public booking (unauthenticated) ---
@@ -471,5 +480,68 @@ exports.updatePublicBooking = (0, https_1.onCall)(callableOptions, async (reques
         updatedAt: now,
     });
     return { updated: true, reference };
+});
+// --- Public contact / newsletter (unauthenticated, server-validated) ---
+exports.submitContactLead = (0, https_1.onCall)(callableOptions, async (request) => {
+    const { name, email, message } = request.data ?? {};
+    const trimmedName = (name ?? "").trim();
+    const trimmedEmail = normalizeEmail(email ?? "");
+    const trimmedMessage = (message ?? "").trim();
+    if (!trimmedName || !trimmedEmail || !trimmedMessage) {
+        throw new https_1.HttpsError("invalid-argument", "Name, email, and message are required.");
+    }
+    const now = Date.now();
+    const ref = await db.collection("contactLeads").add({
+        name: trimmedName,
+        email: trimmedEmail,
+        message: trimmedMessage,
+        status: "new",
+        createdAt: now,
+        updatedAt: now,
+    });
+    return { id: ref.id };
+});
+exports.submitComplaintPublic = (0, https_1.onCall)(callableOptions, async (request) => {
+    const { name, contactInfo, details, bookingReference } = request.data ?? {};
+    const trimmedName = (name ?? "").trim();
+    const trimmedContact = (contactInfo ?? "").trim();
+    const trimmedDetails = (details ?? "").trim();
+    const trimmedRef = (bookingReference ?? "").trim() || undefined;
+    if (!trimmedName || !trimmedContact || !trimmedDetails) {
+        throw new https_1.HttpsError("invalid-argument", "Name, contact info, and complaint details are required.");
+    }
+    const now = Date.now();
+    const ref = await db.collection("complaints").add({
+        name: trimmedName,
+        contactInfo: trimmedContact,
+        details: trimmedDetails,
+        ...(trimmedRef ? { bookingReference: trimmedRef } : {}),
+        status: "new",
+        createdAt: now,
+        updatedAt: now,
+    });
+    return { id: ref.id };
+});
+exports.subscribeNewsletterPublic = (0, https_1.onCall)(callableOptions, async (request) => {
+    const { email } = request.data ?? {};
+    const normalized = normalizeEmail(email ?? "");
+    if (!normalized) {
+        throw new https_1.HttpsError("invalid-argument", "Email is required.");
+    }
+    const existing = await db
+        .collection("newsletterSubscribers")
+        .where("email", "==", normalized)
+        .limit(1)
+        .get();
+    if (!existing.empty) {
+        return { id: existing.docs[0].id, alreadySubscribed: true };
+    }
+    const now = Date.now();
+    const ref = await db.collection("newsletterSubscribers").add({
+        email: normalized,
+        createdAt: now,
+        updatedAt: now,
+    });
+    return { id: ref.id, alreadySubscribed: false };
 });
 //# sourceMappingURL=index.js.map

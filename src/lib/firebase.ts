@@ -19,9 +19,13 @@ export const db = getFirestore(app);
 export const functions = getFunctions(app, "us-central1");
 
 if (import.meta.env.DEV && import.meta.env.VITE_USE_FIREBASE_EMULATORS === "true") {
-  connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
-  connectFirestoreEmulator(db, "127.0.0.1", 8080);
   connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+  if (import.meta.env.VITE_EMULATE_AUTH === "true") {
+    connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
+  }
+  if (import.meta.env.VITE_EMULATE_FIRESTORE === "true") {
+    connectFirestoreEmulator(db, "127.0.0.1", 8080);
+  }
 }
 
 export default app;

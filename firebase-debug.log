@@ -1,0 +1,19 @@
+[debug] [2026-03-12T17:07:32.101Z] ----------------------------------------------------------------------
+[debug] [2026-03-12T17:07:32.103Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\leoco\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js emulators:start --only functions
+[debug] [2026-03-12T17:07:32.104Z] CLI Version:   15.4.0
+[debug] [2026-03-12T17:07:32.104Z] Platform:      win32
+[debug] [2026-03-12T17:07:32.104Z] Node Version:  v24.12.0
+[debug] [2026-03-12T17:07:32.104Z] Time:          Thu Mar 12 2026 19:07:32 GMT+0200 (Central Africa Time)
+[debug] [2026-03-12T17:07:32.104Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-03-12T17:07:33.964Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-03-12T17:07:33.964Z] > authorizing via signed-in user (dimeincltd@gmail.com)
+[info] i  emulators: Starting emulators: functions {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: functions"}}
+[debug] [2026-03-12T17:07:33.972Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-03-12T17:07:33.973Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2026-03-12T17:07:33.978Z] Write emulator hub locator at C:\Users\leoco\AppData\Local\Temp\hub-peter-car-rental.json
+[debug] [2026-03-12T17:07:33.991Z] [functions] Functions Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-03-12T17:07:33.991Z] [eventarc] Eventarc Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-03-12T17:07:33.991Z] [tasks] Cloud Tasks Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-03-12T17:07:33.991Z] late-assigned ports for functions and eventarc emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"functions":[{"address":"127.0.0.1","family":"IPv4","port":5001}],"eventarc":[{"address":"127.0.0.1","family":"IPv4","port":9299}],"tasks":[{"address":"127.0.0.1","family":"IPv4","port":9499}]},"metadata":{"message":"late-assigned ports for functions and eventarc emulators"}}
+[warn] !  functions: The following emulators are not running, calls to these services from the Functions emulator will affect production: apphosting, auth, firestore, database, hosting, pubsub, storage, dataconnect {"metadata":{"emulator":{"name":"functions"},"message":"The following emulators are not running, calls to these services from the Functions emulator will affect production: apphosting, auth, firestore, database, hosting, pubsub, storage, dataconnect"}}
