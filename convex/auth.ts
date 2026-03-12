@@ -1,11 +1,20 @@
 import { ConvexCredentials } from "@convex-dev/auth/providers/ConvexCredentials";
 import { convexAuth, createAccount, retrieveAccount } from "@convex-dev/auth/server";
 import { ConvexError } from "convex/values";
+import { Scrypt } from "lucia";
 import { api } from "./_generated/api";
 import type { DataModel } from "./_generated/dataModel";
 
 const credentialsProvider = ConvexCredentials<DataModel>({
   id: "admin-credentials",
+  crypto: {
+    async hashSecret(password: string) {
+      return await new Scrypt().hash(password);
+    },
+    async verifySecret(password: string, hash: string) {
+      return await new Scrypt().verify(hash, password);
+    },
+  },
   authorize: async (credentials, ctx) => {
     const email = String(credentials.email ?? "").trim().toLowerCase();
     const password = String(credentials.password ?? "");
