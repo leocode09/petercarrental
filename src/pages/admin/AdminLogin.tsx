@@ -36,7 +36,7 @@ export default function AdminLogin() {
       <Card className="w-full max-w-lg p-8">
         <div className="space-y-3">
           <p className="text-sm font-bold uppercase tracking-[0.18em] text-orange-500">Admin Sign In</p>
-          <h1 className="text-3xl font-black tracking-[-0.03em] text-slate-950">{companyInfo.name} operations portal</h1>
+          <h1 className="text-3xl font-black tracking-[-0.03em] text-slate-950">{companyInfo?.name ?? "Peter Car Rental"} operations portal</h1>
           <p className="text-sm leading-6 text-slate-600">
             Sign in to manage bookings, fleet availability, pricing, content, inbox workflows, and reporting.
           </p>

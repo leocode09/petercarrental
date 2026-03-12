@@ -38,7 +38,7 @@ export default function AdminSetup() {
           <p className="text-sm font-bold uppercase tracking-[0.18em] text-orange-500">Initial Setup</p>
           <h1 className="text-3xl font-black tracking-[-0.03em] text-slate-950">Create the first super admin</h1>
           <p className="text-sm leading-6 text-slate-600">
-            This one-time step secures the {companyInfo.name} admin portal and unlocks the full fleet, bookings,
+            This one-time step secures the {companyInfo?.name ?? "Peter Car Rental"} admin portal and unlocks the full fleet, bookings,
             content, pricing, inbox, and reporting workflow.
           </p>
         </div>

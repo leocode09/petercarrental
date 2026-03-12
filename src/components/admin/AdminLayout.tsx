@@ -118,7 +118,7 @@ export default function AdminLayout() {
               P
             </div>
             <div>
-              <div className="text-xl font-black text-white">{companyInfo.name}</div>
+              <div className="text-xl font-black text-white">{companyInfo?.name ?? "Peter Car Rental"}</div>
               <div className="text-[11px] font-semibold uppercase tracking-[0.34em] text-slate-400">Admin Portal</div>
             </div>
           </div>
