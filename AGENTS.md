@@ -3,8 +3,8 @@
 - Public site content is served from Firestore; `FirebaseBootstrapper` seeds initial data via the client SDK using an `isFirstSeed()` security rule (no Blaze plan required for seeding).
 - Public booking and manage-booking flows are frontend-only and WhatsApp-driven. Contact lead, complaint, and newsletter submissions go through Cloud Functions with server-side validation.
 - Git remote origin is https://github.com/leocode09/petercarrental.git.
-- Admin portal is at /admin/login; first-time setup at /admin/setup creates the initial super admin.
-- Auth and database use Firebase. Admin credentials are stored in Firestore `admins` (hashed); sign-in via `loginAdmin` Cloud Function returns a custom token. Required env vars (in .env.local):
+- Admin portal is at /admin with auth removed (static superAdmin, no login/setup routes).
+- Auth and database use Firebase. Required env vars (in .env.local):
   - VITE_FIREBASE_API_KEY
   - VITE_FIREBASE_AUTH_DOMAIN
   - VITE_FIREBASE_PROJECT_ID
@@ -15,8 +15,11 @@
   - VITE_SITE_URL – frontend origin, e.g. http://127.0.0.1:4173
   - VITE_USE_FIREBASE_EMULATORS – set to "true" to connect the Functions emulator (port 5001) for local dev without the Blaze plan.
 - Firebase Hosting is configured in `firebase.json` (`dist/` with SPA rewrites). Deployed at https://peter-car-rental.web.app.
+- Also deployed to Vercel at petercarrental.dime.rw.
 - `firestore.indexes.json` should only contain composite indexes; Firestore creates single-field indexes automatically.
 - In PowerShell, quote comma-separated `--only` lists for the Firebase CLI (e.g. `firebase deploy --only "hosting,firestore"`).
+- Uses Tailwind v4; custom base/component CSS must go in `@layer base` / `@layer components` to avoid overriding utility classes.
+- Form labels use a consistent pattern: `<label>` wrapping `<span className="text-sm font-semibold text-slate-700">`.
 
 - Firebase setup:
   1. Create a Firestore database.
