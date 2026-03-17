@@ -8,36 +8,39 @@ import TopBar from "./TopBar";
 export default function Layout() {
   const { data, loading, error, retry } = usePublicData();
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-white">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
-      </div>
-    );
-  }
-
-  if (!data) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white px-6">
-        <p className="text-center font-medium text-slate-800">
-          Unable to load site content
-        </p>
-        {error && (
-          <p className="max-w-md text-center text-sm text-slate-500">{error}</p>
-        )}
-        <button
-          className="mt-2 rounded-lg bg-orange-500 px-5 py-2 text-sm font-medium text-white transition hover:bg-orange-600"
-          onClick={retry}
-          type="button"
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-white text-slate-900">
+      {(loading || error) && (
+        <div className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
+          <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-2">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-slate-800">
+                {error ? "Site content unavailable" : "Loading site content…"}
+              </p>
+              {error && (
+                <p className="truncate text-xs text-slate-500">{error}</p>
+              )}
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              {loading && (
+                <div
+                  aria-label="Loading"
+                  className="h-4 w-4 animate-spin rounded-full border-2 border-orange-500 border-t-transparent"
+                />
+              )}
+              {(error || !loading) && (
+                <button
+                  className="rounded-md bg-orange-500 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-orange-600"
+                  onClick={retry}
+                  type="button"
+                >
+                  Retry
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       <TopBar />
       <Header />
       <main className="overflow-x-clip">

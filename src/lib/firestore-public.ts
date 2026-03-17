@@ -144,6 +144,13 @@ type ContentCollections = {
 };
 
 const CONTENT_CACHE_TTL_MS = 30_000;
+const EMPTY_CONTENT: ContentCollections = {
+  vehicles: [],
+  services: [],
+  destinations: [],
+  blogPosts: [],
+  testimonials: [],
+};
 
 async function fetchContentCollections(): Promise<ContentCollections> {
   const [vehiclesSnap, servicesSnap, destinationsSnap, blogSnap, testimonialsSnap] =
@@ -221,7 +228,9 @@ function defaultCompanyInfo(): CompanyInfo {
 }
 
 export function usePublicSiteData() {
-  const [data, setData] = useState<PublicSiteData | null>(null);
+  const [data, setData] = useState<PublicSiteData>(() =>
+    buildSiteData({}, EMPTY_CONTENT)
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
@@ -234,7 +243,7 @@ export function usePublicSiteData() {
     contentFetchedAtRef.current = 0;
     setLoading(true);
     setError(null);
-    setData(null);
+    setData(buildSiteData({}, EMPTY_CONTENT));
     setRetryCount((c) => c + 1);
   }, []);
 
@@ -287,7 +296,6 @@ export function usePublicSiteData() {
         } catch (err) {
           if (!cancelled) {
             console.error("Failed to fetch site content", err);
-            setData(null);
             setError(
               err instanceof Error ? err.message : "Failed to fetch site content"
             );
@@ -300,7 +308,6 @@ export function usePublicSiteData() {
         clearTimeout(graceTimer);
         if (!cancelled) {
           console.error("Firestore siteSettings listener error", err);
-          setData(null);
           setError(err.message ?? "Firestore connection error");
           setLoading(false);
         }
